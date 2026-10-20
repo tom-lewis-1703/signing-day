@@ -6,17 +6,23 @@ Shortened on Oct 20, 2026 (sixth session). The old long version, with every tuni
 
 ## Where we are and what's next
 
-**Last chat (Oct 20, sixth session):** shortened this plan around a plain-language "How the tool works"; reviewed every layer of the code (findings below, no calculation errors); fixed review #3 (misspelled `userTeam` now stops the save opening) and #4 (settings fill in missing nested values); added the one-task-per-chat workflow (`/next`, `/handoff`). **Next: task 1, the save writer.**
+**Last chat (Oct 20, seventh session):** task 1, the save writer, done and proven in-game.
+- `lib/roster-edits.mjs` commits a transfer, un-signs a recruit and cuts a player; redoing the Liberty edits gives the proven save record for record (12 records).
+- A commit to a school not on his in-game list replaces his last school, then moves it to #1 with the top influence + 10 (Tom OK'd both). Tom's check of `test_saves/DYNASTY-WRITERTEST` at Preseason: Wayshawn Parker (on his list), Nate Sheppard and Brandon Finney Jr. (off his list) on Missouri; un-signed Clement Watson, Victor Paulino, Derrick Ali and cut Brett Le Blanc gone.
+- The save check (review #5) re-reads every field the edits wrote and refuses the save if any other record changed (tested: a stray change was caught, the original stayed untouched).
+- Tom's new rule in `CLAUDE.md`: fast and loose but not sloppy (minimal tests, batch in-game checks into one launch).
+
+**Next: task 2, weekly commits.**
 
 **Goal right now (Tom, sixth session):** one complete test run of a whole offseason on copies, Players Leaving → Preseason, with Tom checking in-game. Be token-efficient: Claude runs the bare minimum tests that prove each piece works; Tom tests the rest in-game. Quality stays the same.
 
-**Built:** reading the save, safe saving, draft lock (writes), next-season depth chart, team score, player score, Top 10 preview, Signing Day plan (recruit cleanup + placing every uncommitted transfer + cuts; preview only). The only thing the app writes today is the draft lock.
+**Built:** reading the save, safe saving, draft lock (writes), next-season depth chart, team score, player score, Top 10 preview, Signing Day plan (recruit cleanup + placing every uncommitted transfer + cuts; preview only). The app writes the draft lock; the save writer (commit, un-sign, cut) is built but no screen or stage uses it yet.
 
 ### Task list (one chat each, top first)
 
 Start a chat with `/next` (takes the top task that isn't done); end it with `/handoff`. Agreed with Tom Oct 20, sixth session.
 
-1. **Save writer** (`lib/roster-edits.mjs`): commit a transfer, un-sign a recruit, cut a player (all three proven in-game, see "Edits proven in-game"). After saving, re-read every changed record and confirm each edit is there; today's save check only compares stage and player count, which is enough for the draft lock only (review #5). **Pieces 1–2 done (seventh session):** the writer redoes the Liberty edits record for record; the save check re-reads every written field and refuses the save if any other record changed. **Piece 3 built:** a commit to a school not on his list replaces his last school (Tom OK'd); test copy `test_saves/DYNASTY-WRITERTEST` holds every unproven edit at Missouri. **Left:** Tom advances it to Preseason and checks it in-game. Weekly commits are written as the game does (HardCommitted, not on the board; unproven).
+1. ~~**Save writer**~~ **Done (seventh session).** `lib/roster-edits.mjs` + the stronger save check; proven in-game at Liberty and Missouri. Weekly commits are written as the game writes its own (HardCommitted, 1 offer, not on the board, school #1); not yet proven, Week 1 of the full run tests it.
 2. **Weekly commits** (design below, "Weekly commits"). Writes to the save. First fix the recruiting-board read (review #1), then print how the game's offers line up with our Top 10s (replaces the separate "measure offers and influence" step).
 3. **"Cut player moved to another school" write** (review #2): the Signing Day plan moves 137 cut real players to other schools, but our proven commit edit works on a transfer's recruit row, which a returning player probably doesn't have. Check the save; if there's no clean way, bring Tom options (e.g. only cut a real player when he has somewhere to go, or cut recruits only).
 4. **Signing Day write**: write the existing Signing Day plan to the save.
@@ -37,7 +43,7 @@ Every layer was read line by line. No calculation errors in the rules; speed is 
 
 ### Notes for the full run
 
-**Week 1 of Tom's run doubles as the write test:** the tool commits with the direct edit (proven at Signing Day); Claude checks the save reopens and the changed records are right; Tom advances one week. If the commits hold, carry on. If not, switch to the other method (raise an offering school's `ProspectInfluenceTotal` to the player's `CommitScore` so the game commits him) with one setting and redo Week 1 from the copy.
+**Week 1 of Tom's run doubles as the write test:** the tool commits with the weekly edit (HardCommitted, off the board; the Signing Day form is proven); Claude checks the save reopens and the changed records are right; Tom advances one week. If the commits hold, carry on. If not, switch to the other method (raise an offering school's `ProspectInfluenceTotal` to the player's `CommitScore` so the game commits him) with one setting and redo Week 1 from the copy.
 
 **Skipped for this first run (Tom):** writing Top 10s into the game during the weeks; Pass A (reviewing the game's own commits at Signing Day); mixing offers/influence into interest (measured only).
 
@@ -116,6 +122,7 @@ Everything after the draft lock is built from the same four blocks. They run in 
 | Un-sign a recruit | Joshua Fisher WR 53 | Deleted by the game at rollover |
 | Cut a player (release) | Jayden Whaley FS 65 | Deleted by the game at rollover |
 | Commit a transfer | Matyus McLain RE 74 | On Liberty's roster at Preseason |
+| Commit to a school not on his list (seventh session, Missouri) | Nate Sheppard HB 93, Brandon Finney Jr. CB 91 | On Missouri's roster at Preseason |
 
 Exactly the 12 planned records changed. How each is written: `CLAUDE.md` → "Signing Day edits proven in-game".
 
