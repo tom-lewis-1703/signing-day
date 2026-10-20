@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("ttt", {
   chooseSave: () => ipcRenderer.invoke("ttt:choose-save"),
   open: filePath => ipcRenderer.invoke("ttt:open", filePath),
+  lastSave: () => ipcRenderer.invoke("ttt:last-save"),
   save: () => ipcRenderer.invoke("ttt:save"),
   draftLockPreview: () => ipcRenderer.invoke("ttt:draft-lock-preview"),
   draftLockApply: () => ipcRenderer.invoke("ttt:draft-lock-apply"),

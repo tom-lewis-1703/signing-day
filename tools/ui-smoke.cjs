@@ -1,9 +1,9 @@
 // UI smoke test: starts the real app, opens a save through the window and drives it,
 // then writes a screenshot plus the page text.
 //   runtime\electron\electron.exe tools\ui-smoke.cjs [options] <save file> <output .png>
-// Options: --draft-lock (Preview -> Apply), --save, --league,
-//          --player=<portal player name prefix> (Portal Players tab: his Top 10 preview),
-//          --depth=<Team name> (with --player or --role: his role at that team)
+// Options: --draft-lock (Preview -> Apply), --save, --league (Signing Day view),
+//          --player=<portal player name prefix> (Portal view: his Top 10 preview),
+//          --depth=<Team name> (Teams view: that depth chart; with --player his role there)
 const { app } = require("electron");
 const fs = require("fs");
 
@@ -14,7 +14,7 @@ const steps = { draftLock: !!opt("draft-lock"), save: !!opt("save"), depth: opt(
 require("../electron-main.cjs");
 
 app.on("browser-window-created", (_e, win) => {
-  win.setSize(1400, 1000);
+  win.setSize(1600, 1000);
   win.webContents.once("did-finish-load", async () => {
     const out = shotPath.replace(/\.png$/i, ".txt");
     try {
@@ -24,35 +24,28 @@ app.on("browser-window-created", (_e, win) => {
         const logText = () => document.getElementById("log").innerText;
         if (!await openPath(${JSON.stringify(savePath)})) return "OPEN ERROR: " + logText();
         if (steps.draftLock) {
-          document.getElementById("actionBtn").click();
+          document.getElementById("dlPreview").click();
           await wait(() => /preview:/.test(logText()));
-          document.getElementById("applyBtn").click();
+          document.getElementById("dlApply").click();
           await wait(() => /Draft Lock applied|failed/.test(logText()));
         }
         if (steps.save) {
           document.getElementById("saveBtn").click();
           await wait(() => /Saved|Save failed/.test(logText()));
         }
-        if (steps.league) {
-          showTab("league");
-          await wait(() => document.getElementById("leagueTable").rows.length > 1);
-        }
+        if (steps.league) await showView("signing");
         if (steps.player) {
-          showTab("players");
-          await loadPortal();
-          const inp = document.getElementById("portalInput");
-          inp.value = [...document.getElementById("portalList").options].map(o => o.value).find(v => v.startsWith(steps.player)) || "";
-          await showFit();
+          await showView("portal");
+          const p = S.portal.players.find(x => x.name.startsWith(steps.player));
+          if (p) await pickPlayer(p);
         }
         if (steps.depth) {
-          showTab("depth");
-          await loadDepth();
-          const sel = document.getElementById("teamSelect");
-          sel.value = [...sel.options].find(o => o.textContent === steps.depth).value;
-          await renderTeam();
+          await showView("teams");
+          const t = S.teams.find(x => x.team === steps.depth);
+          if (t) await showTeam(t.teamIndex);
         }
         window.scrollTo(0, 0);
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 1000));
         return document.body.innerText;
       })()`);
       const image = await win.webContents.capturePage();
