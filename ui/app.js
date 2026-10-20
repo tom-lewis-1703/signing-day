@@ -216,16 +216,16 @@ async function showFit() {
   if (idx === undefined) return;
   const w = await call("destinations", idx);
   if (!w) return;
-  $("fitSummary").textContent = `${w.player} · ${w.position} ${w.overall} (max ${w.max}, ${w.dev}) · next year ${w.year} · dealbreaker ${w.dealbreaker === "none" && w.originalDealbreaker ? `none (Playing Time dropped: below his position average)` : w.dealbreaker}${w.dealbreaker !== "none" && w.dealbreakerBar ? ` (needs ${w.dealbreakerBar})` : ""} · home ${w.homeState} · floor ${w.floor} · ${w.eligible} teams pass both sides`;
+  $("fitSummary").textContent = `${w.player} · ${w.position} ${w.overall} (max ${w.max}, ${w.dev}) · next year ${w.year} · dealbreaker ${w.dealbreaker === "none" && w.originalDealbreaker ? `none (Playing Time dropped: below his position average)` : w.dealbreaker}${w.dealbreaker !== "none" && w.dealbreakerBar ? ` (needs ${w.dealbreakerBar})` : ""} · pitch ${w.pitch}${w.secondaries?.length ? ` (also cares about ${w.secondaries.join(", ")})` : ""} · home ${w.homeState} · floor ${w.floor} · ${w.eligible} teams pass both sides`;
   // Top 25 (first 10 = Top 10 preview), plus his old team if it ranks lower.
   const rows = w.teams.map((t, i) => ({ ...t, place: i + 1 })).filter(t => t.place <= 25 || t.oldTeam);
-  fillTable($("fitTable"), ["#", "Team", "Prestige", "Dealbreaker grade", "Combined", "Player score", "Team score", "His role there", "Need in room", "Notes"],
-    rows.map(t => [t.place <= w.top10.length ? `${t.place} ★` : t.place, t.team, t.prestigeLevel, t.dealbreakerGrade ?? "–", t.combined, t.playerScore, t.score,
+  fillTable($("fitTable"), ["#", "Team", "Prestige", "Dealbreaker grade", "Pitch grades", "Combined", "Player score", "Team score", "His role there", "Need in room", "Notes"],
+    rows.map(t => [t.place <= w.top10.length ? `${t.place} ★` : t.place, t.team, t.prestigeLevel, t.dealbreakerGrade ?? "–", (t.pitchGrades || []).join(" / ") || "–", t.combined, t.playerScore, t.score,
       `${t.stopgap ? `Backup (stopgap: their usual starter ≈${t.targetLevel})` : `${t.role} (#${t.rank})`}${t.pathToStart ? " · path to start" : ""}`,
       `${t.need === "Drop-off" ? `Drop-off ${t.dropOff}` : t.need === "Weak" ? `Weak (${t.weakness} below)` : t.need === "Upgrade" ? `Upgrade +${t.upgrade} (counts +${t.weightedUpgrade})` : t.need} (×${t.needMult})`,
-      [t.userTeam ? "your team" : "", t.perk ? `coach perk ${t.perk}${t.portalKing ? " (full: top 2 if in his list)" : " (+" + t.perk + ")"}` : "", t.meets ? "" : `fails dealbreaker (${t.dealbreakerGrade ?? "no"})`, t.allowed ? "" : "below prestige floor", t.wantsHim ? "" : "team not interested", t.levelOk ? "" : "ceiling too low",
+      [t.userTeam ? "your team" : "", t.joinedByPerk ? `joined his list by coach perk (ranked #${w.userRank})` : t.userTeam && t.perkReach ? `coach perk (can join from #${w.userReach})` : "", t.meets ? "" : `fails dealbreaker (${t.dealbreakerGrade ?? "no"})`, t.allowed ? "" : "below prestige floor", t.wantsHim ? "" : "team not interested", t.levelOk ? "" : "ceiling too low",
         t.parts.home ? "home state" : "", t.oldTeam ? "his old team" : "", t.serviceAcademy ? "service academy" : ""].filter(Boolean).join(", ")]),
-    [2, 4, 5, 6],
+    [2, 5, 6, 7],
     async i => { $("teamSelect").value = rows[i].teamIndex; await renderTeam(); });
 }
 

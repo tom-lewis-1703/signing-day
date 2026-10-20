@@ -214,11 +214,18 @@
       "Junior": 0.5,
       "Senior": 0.7
     },
+    "playingTimeByRating": [
+      {
+        "minOverall": 80,
+        "factor": 0.5
+      }
+    ],
     "rest": {
-      "dealbreaker": 0.5,
-      "prestige": 0.3,
+      "dealbreaker": 0.4,
+      "secondary": 0.1,
+      "prestige": 0.25,
       "teamStrength": 0.1,
-      "home": 0.1
+      "home": 0.05
     },
     "jitter": 3,
     "prestigeFloor": [
@@ -250,7 +257,8 @@
       }
     ],
     "perk": {
-      "full": 10
+      "full": 10,
+      "userReach": 18
     },
     "playingTimeDrop": {
       "seniorMargin": 4

@@ -1,0 +1,23 @@
+{
+  "_note": "Ideal recruiting pitches (Player.IdealRecruitingPitch), in the save's enum order, with the in-game name and its three categories (from Tom, Oct 20, 2026). A player's dealbreaker is always one of the three; the other two are his secondary categories. Gym Rat: Tom listed Athletic Facilities, Championship Contender, Playing Time, but its players' dealbreakers in the save are only Pro Potential and Brand Exposure, so Tom chose Athletic Facilities, Brand Exposure, Pro Potential (to confirm in-game).",
+  "CollegeExperience": { "name": "College Experience", "categories": ["AcademicPrestige", "CampusLifestyle", "StadiumAtmosphere"] },
+  "TeamPlayer": { "name": "Team Player", "categories": ["CoachStability", "PlayingStyle", "ProximityToHome"] },
+  "CampusPersonality": { "name": "Campus Personality", "categories": ["PlayingTime", "PlayingStyle", "CampusLifestyle"] },
+  "ItsGameTime": { "name": "Gamer", "categories": ["ConferencePrestige", "PlayingStyle", "ProPotential"] },
+  "Prestigious": { "name": "Standard Bearer", "categories": ["CoachPrestige", "ConferencePrestige", "PlayingStyle"] },
+  "StudentOfTheGame": { "name": "Student of the Game", "categories": ["AcademicPrestige", "CoachPrestige", "ProximityToHome"] },
+  "HometownHero": { "name": "Hometown Hero", "categories": ["ChampionshipContender", "ProgramTradition", "ProximityToHome"] },
+  "ProveYourself": { "name": "Status Seeker", "categories": ["BrandExposure", "CoachPrestige", "ConferencePrestige"] },
+  "TheClutch": { "name": "The Clutch", "categories": ["CoachStability", "PlayingStyle", "PlayingTime"] },
+  "TVTime": { "name": "Primetime Player", "categories": ["BrandExposure", "ChampionshipContender", "PlayingTime"] },
+  "CoachsFavorite": { "name": "Coach Connection", "categories": ["AthleticFacilities", "CoachPrestige", "ProximityToHome"] },
+  "Aspirational": { "name": "Aspirational Goals", "categories": ["ChampionshipContender", "CoachPrestige", "ConferencePrestige"] },
+  "ToTheHouse": { "name": "House Call", "categories": ["BrandExposure", "ChampionshipContender", "CoachPrestige"] },
+  "FootballInfluencer": { "name": "Football Influencer", "categories": ["BrandExposure", "PlayingTime", "ProPotential"] },
+  "TimeToGetToWork": { "name": "Clocked In", "categories": ["PlayingStyle", "PlayingTime", "ProPotential"] },
+  "Starter": { "name": "Star Search", "categories": ["BrandExposure", "PlayingTime", "ProximityToHome"] },
+  "Grassroots": { "name": "Grassroots Traditionalist", "categories": ["ProgramTradition", "ProximityToHome", "StadiumAtmosphere"] },
+  "ConferenceSpotlight": { "name": "Conference Legend", "categories": ["ChampionshipContender", "ConferencePrestige", "ProximityToHome"] },
+  "SundayBound": { "name": "Sunday Player", "categories": ["ChampionshipContender", "ConferencePrestige", "ProPotential"] },
+  "WorkHorse": { "name": "Gym Rat", "categories": ["AthleticFacilities", "BrandExposure", "ProPotential"] }
+}

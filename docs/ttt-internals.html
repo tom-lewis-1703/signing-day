@@ -188,12 +188,13 @@ td a.code { text-decoration: none; }
           <tr><td><a class="code" href="#T9">T9</a></td><td>Position importance (QB, OT, EDGE)</td><td>fit.positionWeight</td></tr>
           <tr><td><a class="code" href="#T10">T10</a></td><td>Starter level: real starter or stopgap (vs prestige level)</td><td>fit.starterLevel</td></tr>
           <tr><td><a class="code" href="#P1">P1</a></td><td>Dealbreaker grade and pass/fail bar; Playing Time dropped below position average</td><td>playerSide.dealbreakerBar, .playingTimeDrop</td></tr>
-          <tr><td><a class="code" href="#P2">P2</a></td><td>Player score: year weight, rest split, jitter</td><td>playerSide.yearWeight, .rest, .jitter</td></tr>
+          <tr><td><a class="code" href="#P2">P2</a></td><td>Player score: year weight (halved for 80+), rest split, jitter</td><td>playerSide.yearWeight, .playingTimeByRating, .rest, .jitter</td></tr>
           <tr><td><a class="code" href="#P3">P3</a></td><td>Prestige floor and fallback</td><td>playerSide.prestigeFloor, .spotOrNeed</td></tr>
+          <tr><td><a class="code" href="#P4">P4</a></td><td>Ideal pitch: his two secondary categories</td><td>playerSide.rest.secondary, lib/data/pitches.json</td></tr>
           <tr><td><a class="code" href="#K1">K1</a></td><td>Combined score</td><td>playerSide.playerWeight</td></tr>
           <tr><td><a class="code" href="#K2">K2</a></td><td>Eligibility (dealbreaker, team wants him, floor)</td><td>—</td></tr>
-          <tr><td><a class="code" href="#K3">K3</a></td><td>Order and coach perks</td><td>playerSide.perk.full</td></tr>
-          <tr><td><a class="code" href="#K4">K4</a></td><td>Kansas rule</td><td>userTeam</td></tr>
+          <tr><td><a class="code" href="#K3">K3</a></td><td>Order and coach perks (your team only)</td><td>playerSide.perk.full, .userReach</td></tr>
+          <tr><td><a class="code" href="#K4">K4</a></td><td>Your-team rule (Kansas in this dynasty)</td><td>userTeam</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -205,7 +206,7 @@ td a.code { text-decoration: none; }
       <div class="tbl"><table>
         <thead><tr><th>Table</th><th>What it gives us</th></tr></thead>
         <tbody>
-          <tr><td>Player</td><td>Name, team, previous team, position, OVR, year, redshirt, dev trait, archetype, dealbreaker, home state, skill caps, every rating</td></tr>
+          <tr><td>Player</td><td>Name, team, previous team, position, OVR, year, redshirt, dev trait, archetype, dealbreaker, ideal recruiting pitch, home state, skill caps, every rating</td></tr>
           <tr><td>Team</td><td>Name, offense and defense scheme, prestige (0–10), Signing Day board, links to school grades and coach perks</td></tr>
           <tr><td>Recruit</td><td>Recruit class (high school, JUCO, transfer), recruit stage, link to his Top 10</td></tr>
           <tr><td>Top 10 lists</td><td>Each recruit's 10 schools and influence (high-school recruits and transfers use different tables; the tool follows each link)</td></tr>
@@ -414,7 +415,7 @@ Need multiplier = max(room need, upgrade, succession); ×0.25 only if the room i
       <div class="tbl"><table>
         <thead><tr><th>Dealbreaker (Week 1 transfers)</th><th>Measured by</th><th>Passes when</th></tr></thead>
         <tbody>
-          <tr><td>Championship Contender (439)</td><td>School's Contender grade</td><td rowspan="5">Grade reaches his bar: <b>B−</b> if he's 85+ OVR, <b>C</b> at 78–84, <b>D+</b> under 78. The coach's threshold perk lowers the bar one step per point.</td></tr>
+          <tr><td>Championship Contender (439)</td><td>School's Contender grade</td><td rowspan="5">Grade reaches his bar: <b>B−</b> if he's 85+ OVR, <b>C</b> at 78–84, <b>D+</b> under 78. Your coach's threshold perk lowers the bar one step per point at your school; AI schools' perks don't count.</td></tr>
           <tr><td>Playing Style (418)</td><td>School's Playing Style grade for his archetype</td></tr>
           <tr><td>Pro Potential (398)</td><td>School's Pro Potential grade for his position group</td></tr>
           <tr><td>Brand Exposure (354)</td><td>School's Brand Exposure grade</td></tr>
@@ -433,8 +434,13 @@ prestige        = school prestige × 10, but only if he'd start, rotate or has a
 team strength   = average OVR of the school's projected starters, scaled 0–100 across the league
 home            = 100 if the school is in his home state, else 0
 
-rest            = 0.50 × dealbreaker value + 0.30 × prestige + 0.10 × team strength + 0.10 × home
+                  80+ OVR: w is halved (Fr 0.10, So 0.175, Jr 0.25, final year 0.35)
+pitch 1, 2      = school's value on the two other categories of his ideal pitch (P4)
+
+rest            = 0.40 × dealbreaker value + 0.10 × pitch 1 + 0.10 × pitch 2
+                + 0.25 × prestige + 0.10 × team strength + 0.05 × home
 player score    = w × playing time + (1 − w) × rest + jitter (fixed per player, school, season; within ±3)</pre>
+      <p><b>Why w is halved for 80+ (Oct 20, 2026, your option C):</b> good players were picking low-prestige schools only because they'd start everywhere. Week 1: 80–84 players with a prestige ≤3 #1 went from 37 to 12 (with P4 and the K3 change); the five 80–84 Playing Time outliers (Samuel Singleton Jr. → James Madison, Kevin Riley → Sam Houston…) are gone; Singleton's #1 is now Duke (prestige 6).</p>
 
       <h3 id="P3"><span class="code">P3</span>Prestige floor (85+ OVR only)</h3>
       <div class="tbl"><table>
@@ -446,36 +452,67 @@ player score    = w × playing time + (1 − w) × rest + jitter (fixed per play
         </tbody>
       </table></div>
       <p>His old school is always allowed. The game itself sent 8 transfers back to their old school at Signing Day.</p>
+
+      <h3 id="P4"><span class="code">P4</span>Ideal pitch: his two secondary categories</h3>
+      <p>Every player has an ideal recruiting pitch (<code>IdealRecruitingPitch</code>), and each pitch covers three categories. His dealbreaker is always one of them; the other two are things he cares about that aren't dealbreakers. They add to his player score (10% each of the rest, P2) using the same school grades as P1; Playing Time = his role there, Proximity = home state. They never block a school.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>In-game pitch</th><th>Save name</th><th>Categories</th></tr></thead>
+        <tbody>
+          <tr><td>College Experience</td><td>CollegeExperience</td><td>Academic Prestige, Campus Lifestyle, Stadium Atmosphere</td></tr>
+          <tr><td>Team Player</td><td>TeamPlayer</td><td>Coach Stability, Playing Style, Proximity</td></tr>
+          <tr><td>Campus Personality</td><td>CampusPersonality</td><td>Playing Time, Playing Style, Campus Lifestyle</td></tr>
+          <tr><td>Gamer</td><td>ItsGameTime</td><td>Conference Prestige, Playing Style, Pro Potential</td></tr>
+          <tr><td>Standard Bearer</td><td>Prestigious</td><td>Coach Prestige, Conference Prestige, Playing Style</td></tr>
+          <tr><td>Student of the Game</td><td>StudentOfTheGame</td><td>Academic Prestige, Coach Prestige, Proximity</td></tr>
+          <tr><td>Hometown Hero</td><td>HometownHero</td><td>Championship Contender, Program Tradition, Proximity</td></tr>
+          <tr><td>Status Seeker</td><td>ProveYourself</td><td>Brand Exposure, Coach Prestige, Conference Prestige</td></tr>
+          <tr><td>The Clutch</td><td>TheClutch</td><td>Coach Stability, Playing Style, Playing Time</td></tr>
+          <tr><td>Primetime Player</td><td>TVTime</td><td>Brand Exposure, Championship Contender, Playing Time</td></tr>
+          <tr><td>Coach Connection</td><td>CoachsFavorite</td><td>Athletic Facilities, Coach Prestige, Proximity</td></tr>
+          <tr><td>Aspirational Goals</td><td>Aspirational</td><td>Championship Contender, Coach Prestige, Conference Prestige</td></tr>
+          <tr><td>House Call</td><td>ToTheHouse</td><td>Brand Exposure, Championship Contender, Coach Prestige</td></tr>
+          <tr><td>Football Influencer</td><td>FootballInfluencer</td><td>Brand Exposure, Playing Time, Pro Potential</td></tr>
+          <tr><td>Clocked In</td><td>TimeToGetToWork</td><td>Playing Style, Playing Time, Pro Potential</td></tr>
+          <tr><td>Star Search</td><td>Starter</td><td>Brand Exposure, Playing Time, Proximity</td></tr>
+          <tr><td>Grassroots Traditionalist</td><td>Grassroots</td><td>Program Tradition, Proximity, Stadium Atmosphere</td></tr>
+          <tr><td>Conference Legend</td><td>ConferenceSpotlight</td><td>Championship Contender, Conference Prestige, Proximity</td></tr>
+          <tr><td>Sunday Player</td><td>SundayBound</td><td>Championship Contender, Conference Prestige, Pro Potential</td></tr>
+          <tr><td>Gym Rat</td><td>WorkHorse</td><td>Athletic Facilities, Brand Exposure, Pro Potential <i>(to confirm in-game)</i></td></tr>
+        </tbody>
+      </table></div>
+      <p><b>Checked against the save:</b> your list is in the save's own order, and for 19 of 20 pitches every player's dealbreaker is one of its three categories. Gym Rat's 579 players only have Pro Potential or Brand Exposure as dealbreakers, so it uses Athletic Facilities, Brand Exposure, Pro Potential until you confirm.</p>
+      <p><b>Examples (Week 1):</b> Caleb Hawkins (Standard Bearer: Playing Style + Coach Prestige, Conference Prestige): Tennessee moves up to 2nd. Austin Mack (Primetime Player: Playing Time + Brand Exposure, Championship Contender): Indiana and Michigan now ahead of UCLA. Braeden Wisloski (Conference Legend: Contender + Conference Prestige, home): Pittsburgh, in his home state, moves up to 2nd. Pitches change about 1 in 4 #1 picks but don't spread them out: teams with many open spots still win most close calls (step 6 balancing).</p>
     </section>
 
     <section id="top10">
       <div class="sec-head"><span class="sec-num">9</span><h2>Building the Top 10</h2><span class="where">lib/destinations.mjs · step 4b</span></div>
       <h3 id="K1"><span class="code">K1</span>Combined score</h3>
       <pre class="formula">combined = 0.5 × player score + 0.5 × (team score ÷ 2)       team score ÷ 2 puts it on 0–100
-Kansas:   combined = player score                              you decide your own needs</pre>
+your team: combined = player score                            you decide your own needs</pre>
       <h3 id="K2"><span class="code">K2</span>A school is eligible for his list when all three hold</h3>
       <ol class="steps">
         <li>It meets his <b>dealbreaker</b> (P1).</li>
-        <li>The <b>team wants him</b>: team score above 0. Kansas always counts.</li>
-        <li>It passes his <b>prestige floor</b>, or it's his old school. Kansas always counts.</li>
+        <li>The <b>team wants him</b>: team score above 0. Your team always counts.</li>
+        <li>It passes his <b>prestige floor</b>, or it's his old school. Your team always counts.</li>
       </ol>
-      <h3 id="K3"><span class="code">K3</span>Order and coach perks</h3>
+      <h3 id="K3"><span class="code">K3</span>Order and coach perks (your team only)</h3>
       <ol class="steps">
         <li>Eligible schools first, then by combined score, then by upgrade, then by name. The first 10 are his Top 10.</li>
-        <li><b>Coach transfer perk</b> (order QB, RB/FB, WR/TE, OL, DL, LB, DB, K/P, as you confirmed). A school with 10 or more at his group moves to #2 of his Top 10 if it's already in the list (it stays #1 if it's there). A smaller value (for example 4) adds that many points to its combined score.</li>
+        <li><b>Only your coach's perks count</b> (changed Oct 20, 2026). AI schools' transfer and threshold perks are ignored.</li>
+        <li><b>Your transfer perk</b> (order QB, RB/FB, WR/TE, OL, DL, LB, DB, K/P): with 10 or more at his group, your team also joins his list when it ranks 11th–18th among his eligible schools. It goes in at #10 (the school at #10 drops out). It doesn't move your team up a list it's already on.</li>
       </ol>
       <div class="tbl"><table>
         <thead><tr><th>Kansas perk in these saves</th><th class="n">QB</th><th class="n">RB/FB</th><th class="n">WR/TE</th><th class="n">OL</th><th class="n">DL</th><th class="n">LB</th><th class="n">DB</th><th class="n">K/P</th></tr></thead>
         <tbody><tr><td>Transfer interest</td><td class="n">10</td><td class="n">0</td><td class="n">4</td><td class="n">10</td><td class="n">10</td><td class="n">10</td><td class="n">12</td><td class="n">10</td></tr></tbody>
       </table></div>
-      <p>The tool reads these from whatever save is open, so it uses your current values once they're unlocked. Across the league, 32 schools have a full QB perk and 32 a full WR/TE perk.</p>
-      <h3 id="K4"><span class="code">K4</span>Kansas rule</h3>
-      <p>Kansas skips the team side and the prestige floor: it's eligible whenever it meets his dealbreaker, and it's ranked by his player score plus your perk. <b>On Week 1:</b> in 225 of 1,891 Top 10s (11.9%); in the top 2 for 105 of them; median slot 3.</p>
+      <p>The tool reads these from whatever save is open, so it uses your current values once they're unlocked (you have every group now). In these test saves Kansas lacks the RB/FB and WR/TE perks, so HB, FB, WR and TE players don't get the extra reach here.</p>
+      <h3 id="K4"><span class="code">K4</span>Your-team rule (Kansas in this dynasty)</h3>
+      <p>Your team is whatever <code>userTeam</code> in settings says; the tool works for any dynasty. Your team skips the team side and the prestige floor: it's eligible whenever it meets his dealbreaker, and it's ranked by his player score. <b>On Week 1:</b> in 330 of 1,891 Top 10s (17.5%), 128 of them through your perk (e.g., Brandon Finney Jr. CB 91, Jehiem Oatis DT 90, Quincy Rhodes Jr. LE 90); top 2 in 25. <b>Signing Day:</b> 249 of 1,310 (19.0%), 76 through the perk.</p>
     </section>
 
     <section id="example">
       <div class="sec-head"><span class="sec-num">10</span><h2>Worked example: Caleb Hawkins at Illinois</h2><span class="where">Week 1 save</span></div>
-      <p>Hawkins: HB 93, max 96, sophomore next season, from Oklahoma State, home Oklahoma, dealbreaker Playing Style, archetype Elusive Back. Illinois: Multiple offense (1 HB starter), prestige 6.</p>
+      <p>Hawkins: HB 93, max 96, sophomore next season, from Oklahoma State, home Oklahoma, dealbreaker Playing Style, pitch Standard Bearer (also cares about Coach Prestige and Conference Prestige), archetype Elusive Back. Illinois: Multiple offense (1 HB starter), prestige 6.</p>
       <div class="two">
         <div>
           <h3>Team side</h3>
@@ -491,22 +528,23 @@ Kansas:   combined = player score                              you decide your o
         <div>
           <h3>Player side</h3>
           <div class="calc">
-            <div class="row"><span>Year weight (sophomore next season)</span><span>0.35</span></div>
+            <div class="row"><span>Year weight (sophomore next season 0.35, halved: he's 80+)</span><span>0.175</span></div>
             <div class="row"><span>Playing time (Starter)</span><span>100</span></div>
             <div class="row"><span>Dealbreaker: Illinois Playing Style grade for Elusive Backs = A (needs B−, he's 93)</span><span>92 · pass</span></div>
+            <div class="row"><span>Pitch: Illinois Coach Prestige B, Conference Prestige A+</span><span>67, 100</span></div>
             <div class="row"><span>Prestige 6, he'd start</span><span>60</span></div>
             <div class="row"><span>Team strength: starters average 74.3 (league 69.1–86.6)</span><span>30</span></div>
             <div class="row"><span>Home: Illinois isn't in Oklahoma</span><span>0</span></div>
-            <div class="row"><span>rest = 0.5×92 + 0.3×60 + 0.1×30 + 0.1×0</span><span>67</span></div>
-            <div class="row"><span>0.35×100 + 0.65×67 = 78.55, plus jitter ≈ +1.5</span><span>80</span></div>
+            <div class="row"><span>rest = 0.4×92 + 0.1×67 + 0.1×100 + 0.25×60 + 0.1×30 + 0.05×0</span><span>71.5</span></div>
+            <div class="row"><span>0.175×100 + 0.825×71.5 = 76.5, plus jitter ≈ +1.5</span><span>78</span></div>
           </div>
         </div>
       </div>
       <div class="calc">
         <div class="row"><span>Prestige floor: 93 OVR prefers prestige 6+, and 6+ schools have a spot for him. Illinois is 6</span><span>pass</span></div>
-        <div class="row total"><span>Combined = 0.5 × 80 + 0.5 × (200 ÷ 2)</span><span>90 → #1 in his list</span></div>
+        <div class="row total"><span>Combined = 0.5 × 78 + 0.5 × (200 ÷ 2)</span><span>89 → #1 in his list</span></div>
       </div>
-      <p>His full Top 10 now: Illinois, Auburn, Virginia, Duke, Arizona, USC, Tennessee, Iowa, Miami, UCLA. Auburn, Arizona, USC and Tennessee rose after T7, because he'd be a big upgrade over their starters. Oklahoma State fails his dealbreaker (Playing Style C+, he needs B−).</p>
+      <p>His full Top 10 now: Illinois, Tennessee, Duke, Virginia, USC, Arizona, Miami, Iowa, Alabama, Arizona State. Tennessee (Coach Prestige A−, Conference Prestige A+) rose to 2nd through his pitch (P4). Kansas ranks 13th; in these saves Kansas has no RB/FB perk, so it doesn't join (with the perk it would come in at #10). Oklahoma State fails his dealbreaker (Playing Style C+, he needs B−).</p>
     </section>
 
     <section id="settings">
@@ -515,7 +553,7 @@ Kansas:   combined = player score                              you decide your o
       <div class="tbl"><table>
         <thead><tr><th>Setting</th><th>Value</th><th>Rule</th></tr></thead>
         <tbody>
-          <tr><td>Your team</td><td>Kansas</td><td>L1, K4</td></tr>
+          <tr><td>Your team</td><td>Kansas (any team works)</td><td>L1, K4</td></tr>
           <tr><td>Starters by scheme</td><td>Tables in section 5</td><td>D2</td></tr>
           <tr><td>Rotation players</td><td>1 at HB, WR, TE, EDGE, DT, LB, CB, S; 1 OL swing</td><td>D3</td></tr>
           <tr><td>Role scores</td><td>Starter 100, Rotation 60, Backup 30, Buried 0</td><td>T1, P2</td></tr>
@@ -528,14 +566,14 @@ Kansas:   combined = player score                              you decide your o
           <tr><td>Succession</td><td>Fr/So with a path or starting; ×2</td><td>T8</td></tr>
           <tr><td>Position importance</td><td>QB ×1.25, OT ×1.1, EDGE ×1.1</td><td>T9</td></tr>
           <tr><td>Starter level</td><td>Within 5 OVR of the prestige level's usual starter, else stopgap (Backup)</td><td>T10</td></tr>
-          <tr><td>Year weights</td><td>Fr 0.20, So 0.35, Jr 0.50, final year 0.70</td><td>P2</td></tr>
-          <tr><td>Rest split</td><td>Dealbreaker 50%, prestige 30%, strength 10%, home 10%</td><td>P2</td></tr>
+          <tr><td>Year weights</td><td>Fr 0.20, So 0.35, Jr 0.50, final year 0.70; halved for 80+ OVR</td><td>P2</td></tr>
+          <tr><td>Rest split</td><td>Dealbreaker 40%, pitch categories 10% + 10%, prestige 25%, strength 10%, home 5%</td><td>P2, P4</td></tr>
           <tr><td>Jitter</td><td>±3</td><td>P2</td></tr>
           <tr><td>Dealbreaker bar</td><td>85+ B−, 78–84 C, under 78 D+</td><td>P1</td></tr>
           <tr><td>Playing Time drop</td><td>Below position average starter (seniors: average − 4) → no dealbreaker</td><td>P1</td></tr>
           <tr><td>Prestige floor</td><td>90+: 6+ → 4+; 85–89: 4+ → 2+; spot = team score 100+</td><td>P3</td></tr>
           <tr><td>Combine</td><td>50% player, 50% team</td><td>K1</td></tr>
-          <tr><td>Full perk</td><td>10 or more</td><td>K3</td></tr>
+          <tr><td>Full perk (your team)</td><td>10 or more; joins his list from as low as 18th (in at #10)</td><td>K3</td></tr>
           <tr><td>Position caps (Signing Day)</td><td>QB 5, HB 6, FB 1, WR 11, TE 5, OT 8, OG 8, C 4, EDGE 8, DT 8, LB 12, CB 9, S 8, K 2, P 2 = 97</td><td>Step 5 (not built yet)</td></tr>
         </tbody>
       </table></div>
@@ -557,7 +595,7 @@ Kansas:   combined = player score                              you decide your o
     <section id="open">
       <div class="sec-head"><span class="sec-num">13</span><h2>Not built yet, and known limits</h2></div>
       <ul>
-        <li><b>#1 picks bunch up.</b> Utah is #1 for 230 players and BYU for 176. Spreading #1 picks by open starter slots is part of the Week 1 generator (step 6), and Signing Day needs it too.</li>
+        <li><b>#1 picks bunch up.</b> Week 1: BYU is #1 for 130 players, UNLV 120, Utah 93. Spreading #1 picks by open starter slots is part of the Week 1 generator (step 6), and Signing Day needs it too.</li>
         <li><b>Roles use current OVR,</b> not next season's progression.</li>
         <li><b>Strict position rooms.</b> A 3-4 team's extra DTs show as Buried; they don't count at EDGE.</li>
         <li><b>Home pull is same-state only;</b> only 1 transfer has Proximity to Home as his dealbreaker.</li>

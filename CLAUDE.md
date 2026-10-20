@@ -1,6 +1,6 @@
 # Tom's Transfer Tools — handoff for new sessions
 
-Personal CFB 27 dynasty utility for Tom (plays Kansas). **Read `PLAN.md` first**: its "Current status and next step" section says where the build is and what to do next. Its "How we'll work" section is mandatory.
+Personal CFB 27 dynasty utility for Tom (works for any dynasty; his current one is Kansas). **Read `PLAN.md` first**: its "Current status and next step" section says where the build is and what to do next. Its "How we'll work" section is mandatory.
 
 This repository is the app folder, `C:\Users\tomle\Documents\TomsTransferTools` on Tom's PC, pushed to a **private** GitHub repo so cloud sessions can work on it. Keep it private: `lib/data/ratings-model.json` is Maxi's data, personal use only.
 
@@ -10,7 +10,7 @@ This repository is the app folder, `C:\Users\tomle\Documents\TomsTransferTools` 
 - Never write to the test saves in `test_saves/` (or `test_copies\` on Tom's PC) or to any real save. Copy a save to a scratch or `test_runs/` folder first. Opening a save is read-only; only Save writes.
 - Use as little old-tool code as possible (TrapsTransferTool was badly built). Priorities: peak performance and usability. Verify anything reused against real saves.
 - Only the worst of the worst real players may ever be left unplaced/deleted. Real players always come before generated recruits.
-- Kansas (TeamIndex 37) is exempt from all automated changes.
+- The user team (`settings.json` → `userTeam`; Kansas, TeamIndex 37, in the current dynasty) is exempt from all automated changes. Never hard-code Kansas; read the setting.
 
 ## Local vs. cloud sessions
 
@@ -27,7 +27,11 @@ Cloud sessions: commit to a branch and push; Tom pulls and checks locally. Don't
 
 Tom refers to rules by code (e.g. "T3" = weak-starter need, "T10" = starter level, "P2" = player score). The code list, formulas, real-player examples and the setting behind each code are in `docs/ttt-internals.html`, published at https://claude.ai/artifact/4kbXJoCjikjx8PL56jqb98 (Tom's private artifact). When a rule changes: change the code, rerun on a fresh test copy with real players, update `docs/ttt-internals.html`, republish it to the same URL (Artifact tool with `url`; from a cloud session, if publishing isn't possible, just update the file and tell Tom), and update `PLAN.md`.
 
+The first publish of `docs/ttt-internals.html` in a new session is refused and returns a diff against the live page. If that diff only shows your own edits, publish again unchanged; otherwise merge the live lines in first.
+
 How Tom tunes: he describes a problem with a real player (often a screenshot of the app), you propose 2–4 concrete options with numbers from the save, he picks; then show before/after on named players and league-wide counts (empty Top 10s, #1-pick spread, Top 10 prestige by rating band).
+
+To get numbers for options before changing code: write a scratch script (in the scratchpad, not the repo) that opens a `Session` on a fresh copy, changes `session.settings` in memory (it's read on every call) or re-sorts the returned `teams` rows, and calls `session.destinations(p.index)` for each uncommitted transfer. Report the same league counts as `tools/step4b-report.mjs --league`.
 
 ## Locations
 
@@ -47,7 +51,7 @@ How Tom tunes: he describes a problem with a real player (often a screenshot of 
 - `lib/depth-chart.mjs` — step 3 projection: rooms, roles, path to start, needs (starters lost/replaced/open, this season's starter OVRs), `roleAtTeam`.
 - `lib/ratings-model.mjs` + `lib/data/ratings-model.json` — overall formula and max overall (Maxi's method). Data extracted by `tools/extract-ratings-model.mjs` (needs Maxi's tool, PC only); personal use only.
 - `lib/fit.mjs` — step 4 team side (T1–T10): role at a team (fast, verified equal to `roleAtTeam`), stopgap vs prestige starter level (T10), room need = max(drop-off, weakness) or Stacked, per-player upgrade (level-weighted) and succession, position importance, level check; `fitAt`, `whoWantsHim`. Returns `baseScore` (used inside one player's list) and `score` (× position importance, for comparing across positions). Tuning in `settings.json` → `fit`.
-- `lib/destinations.mjs` — step 4b player side (P1–P3, K1–K4): dealbreaker = the game's school grade, pass/fail by OVR (Playing Time dropped below position average); player score; prestige floor; home state; coach perks (full → #2, partial → +points); combined Top 10 preview (`destinations`). Kansas skips team side and floor. School states in `lib/data/team-states.json`; tuning in `settings.json` → `playerSide`.
+- `lib/destinations.mjs` — step 4b player side (P1–P4, K1–K4): dealbreaker = the game's school grade, pass/fail by OVR (Playing Time dropped below position average); player score (playing-time weight halved for 80+; the two other categories of his ideal pitch, from `lib/data/pitches.json`); prestige floor; home state; coach perks for the user team only (full transfer perk → joins his list from as low as 18th, at #10); combined Top 10 preview (`destinations`). The user team (`settings.userTeam`, any dynasty; Kansas now) skips team side and floor. School states in `lib/data/team-states.json`; tuning in `settings.json` → `playerSide`.
 - `lib/session.mjs` — app session used by the window and the CLI tools (open, draft lock, depth chart, Top 10 preview, save).
 - `lib/safe-save.mjs` — backup to `TTT Backups\` beside the save → write temp → reopen and verify stage + player count → replace.
 - `lib/settings.mjs` + `settings.json` — every tuning value (user team, starters by scheme, role cutoffs, `fit`, `playerSide`). `settings.json` overrides defaults at the top level only, so when adding a nested value, add it to both.
@@ -59,12 +63,12 @@ How Tom tunes: he describes a problem with a real player (often a screenshot of 
 - HS recruits and transfers point at **different** ProspectTargetSchool tables; follow the reference (the old tool's bug).
 - Players who left keep their old team in `PrevTeamIndex` (transfers from Week 1, graduates from Week 2). `TeamIndex` 255 = no team.
 - Signing Day: transfer destination = team whose `CommittedPlayers` board holds him, else Top School #1 when `RecruitStage` is Signed/HardCommitted.
-- Player side: `RecruitingDealbreaker`, `PLYR_HOME_STATE` (Player); `TeamPrestige` 0–10 (Team). School (dealbreaker) grades: `Team.MySchoolTrackingTable` → row with `*Grade` letters, `ProPotentialGrade<group>`, `PlayingStyleGradeByPlayerTypeTable` → `PlayerTypeGradeTable` (grade per archetype). Coach perks: `Team.CoachTalentEffects` → `PlayersLeaving_InterestBoost_Transfers` / `PlayersLeaving_ThresholdDecrease_Dealbreakers` int[8] in order QB, RB/FB, WR/TE, OL, DL, LB, DB, K/P. `Motivation1–3` are empty. madden-franchise won't add fields to an already-read table, so request every field in `Dynasty.load`.
+- Player side: `RecruitingDealbreaker`, `IdealRecruitingPitch` (20 pitches × 3 categories; his dealbreaker is always one of his pitch's categories), `PLYR_HOME_STATE` (Player); `TeamPrestige` 0–10 (Team). School (dealbreaker) grades: `Team.MySchoolTrackingTable` → row with `*Grade` letters, `ProPotentialGrade<group>`, `PlayingStyleGradeByPlayerTypeTable` → `PlayerTypeGradeTable` (grade per archetype). Coach perks: `Team.CoachTalentEffects` → `PlayersLeaving_InterestBoost_Transfers` / `PlayersLeaving_ThresholdDecrease_Dealbreakers` int[8] in order QB, RB/FB, WR/TE, OL, DL, LB, DB, K/P. `Motivation1–3` are empty. madden-franchise won't add fields to an already-read table, so request every field in `Dynasty.load`.
 - Archetype = `PlayerType`; skill caps = `SkillGroupCap1–6` (0–20). The `Age` field is unreliable (1 or 52 for many players).
 - At the Signing Day → preseason rollover the game deletes uncommitted transfers and unsigned recruits, and trims rosters to 85 by cutting veterans, never incoming recruits.
 - Game commits always go to a school on the player's in-game list at that time (574 of 581 to #1), but lists change during the portal (about half of Signing Day commits went to a school added after Week 1). Commits: Week 1 0, Week 2 1, Week 4 172, Signing Day 581; 1,310 uncommitted at Signing Day.
 - NIL: player `BaseNILValue`, team `NILProgramPointsSpent` / `ProgramPointBudget`; how the game uses them for CPU schools is unknown.
-- Shell note (Windows Git Bash): apostrophes in JS strings have broken `node -e` quoting; for bigger edits write a script file and run it.
+- Shell note (Windows Git Bash): apostrophes in JS strings break `node -e` and heredoc quoting. For anything bigger than a one-liner, write the script with the Write tool into the scratchpad and run it with `node <path>`.
 
 ## Testing commands (run from the repo root; paths with spaces need quotes)
 
