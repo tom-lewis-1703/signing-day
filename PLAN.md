@@ -88,12 +88,13 @@ Everything after the draft lock is built from the same four blocks. They run in 
 - **Reality checks:** a backup only counts if his max overall reaches their weakest starter −3 (T5); a "starter" more than 5 below the usual starter at schools of that prestige is a stopgap and counts as a backup (T10); ×0.25 for each similar player already coming into that room (same year, OVR within 3) (T11); he only takes a start from another newcomer if he's 4+ better, and a school takes at most (starters lost in that room + 1) transfers there (T12).
 - QB ×1.25, OT and EDGE ×1.1, used only when comparing players at different positions (T9).
 
-**3. Would he go there? Player score, 0–100 (P1–P4).**
+**3. Would he go there? Player score, 0–100 (P1–P5).**
 - **Dealbreaker is pass/fail** using the game's own school grade: B− needed for 85+ OVR, C for 78–84, D+ below that. Playing Time needs Starter or Rotation; Proximity needs his home state. The Playing Time dealbreaker is ignored for players below the league's average starter at their position (P1).
 - **Score** = playing time × year weight (Fr 20%, So 35%, Jr 50%, final year 70%; halved for 80+ OVR) + the rest split: dealbreaker grade 45%, his two other ideal-pitch categories 15% each, prestige 15%, team strength 5%, home state 5%; ±3 small fixed randomness (P2, P4).
-- **Prestige floor:** 90+ OVR want prestige 6+ (fall back to 4+), 85–89 want 4+ (fall back to 2+), his old school always allowed (P3).
+- **Prestige floor:** 90+ OVR want prestige 6+ (fall back to 4+), 85–89 want 4+ (fall back to 2+) (P3).
+- **Never back to his old school** (P5, Tom's option A, ninth session): the school he left is never on his Top 10 or a weekly commit; at Signing Day only as the last "best fit" so a real player isn't deleted.
 
-**4. His Top 10 (K1–K4).** A school can be on his list only if it passes his dealbreaker, the school wants him (team score above 0) and it meets his prestige floor (K2). Ranked by a 50/50 mix of team score and player score (K1). **User team:** skips the team side and the floor; it's on his list whenever it passes his dealbreaker, ranked by his player score; with a full transfer perk at his position it can join from as low as 18th, at #10 (K3, K4).
+**4. His Top 10 (K1–K4).** A school can be on his list only if it passes his dealbreaker, the school wants him (team score above 0) it meets his prestige floor and it isn't the school he left (K2, P5). Ranked by a 50/50 mix of team score and player score (K1). **User team:** skips the team side and the floor; it's on his list whenever it passes his dealbreaker, ranked by his player score; with a full transfer perk at his position it can join from as low as 18th, at #10 (K3, K4).
 
 ### Signing Day roster build (SD1–SD6)
 

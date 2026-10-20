@@ -196,8 +196,9 @@ td a.code { text-decoration: none; }
           <tr><td><a class="code" href="#P2">P2</a></td><td>Player score: year weight (halved for 80+), rest split, jitter</td><td>playerSide.yearWeight, .playingTimeByRating, .rest, .jitter</td></tr>
           <tr><td><a class="code" href="#P3">P3</a></td><td>Prestige floor and fallback</td><td>playerSide.prestigeFloor, .spotOrNeed</td></tr>
           <tr><td><a class="code" href="#P4">P4</a></td><td>Ideal pitch: his two secondary categories</td><td>playerSide.rest.secondary, lib/data/pitches.json</td></tr>
+          <tr><td><a class="code" href="#P5">P5</a></td><td>Never back to the school he left (Signing Day last resort only)</td><td>—</td></tr>
           <tr><td><a class="code" href="#K1">K1</a></td><td>Combined score</td><td>playerSide.playerWeight</td></tr>
-          <tr><td><a class="code" href="#K2">K2</a></td><td>Eligibility (dealbreaker, team wants him, floor)</td><td>—</td></tr>
+          <tr><td><a class="code" href="#K2">K2</a></td><td>Eligibility (dealbreaker, team wants him, floor, not his old school)</td><td>—</td></tr>
           <tr><td><a class="code" href="#K3">K3</a></td><td>Order and coach perks (your team only)</td><td>playerSide.perk.full, .userReach</td></tr>
           <tr><td><a class="code" href="#K4">K4</a></td><td>Your-team rule (Kansas in this dynasty)</td><td>userTeam</td></tr>
           <tr><td><a class="code" href="#SD1">SD1</a></td><td>Signing Day recruit cleanup (un-sign weak recruits)</td><td>signingDay.recruitCleanup</td></tr>
@@ -472,7 +473,7 @@ player score    = w × playing time + (1 − w) × rest + jitter (fixed per play
           <tr><td>Under 85</td><td colspan="2">No floor; prestige only affects the score</td></tr>
         </tbody>
       </table></div>
-      <p>His old school is always allowed. The game itself sent 8 transfers back to their old school at Signing Day.</p>
+      <p>His old school gets no exemption from the floor (P5). The game itself sent 8 transfers back to their old school at Signing Day.</p>
 
       <h3 id="P4"><span class="code">P4</span>Ideal pitch: his two secondary categories</h3>
       <p>Every player has an ideal recruiting pitch (<code>IdealRecruitingPitch</code>), and each pitch covers three categories. His dealbreaker is always one of them; the other two are things he cares about that aren't dealbreakers. They add to his player score (30% of the rest between them, normally 15% each, P2; 10% each until Oct 20, 2026) using the same school grades as P1; Playing Time = his role there, Proximity = home state. They never block a school.</p>
@@ -503,6 +504,9 @@ player score    = w × playing time + (1 − w) × rest + jitter (fixed per play
       </table></div>
       <p><b>Checked against the save:</b> your list (read in-game) is in the save's own order, and for 19 of 20 pitches every player's dealbreaker is one of its three categories. Gym Rat is the exception: its players' dealbreakers in the save are Pro Potential or Brand Exposure, so for them all three Gym Rat categories count, sharing the same 30%. Example: Nate Sheppard (HB 93, Gym Rat, dealbreaker Pro Potential): Texas, Tennessee, USC, Miami, Auburn.</p>
       <p><b>Examples (Week 1):</b> Caleb Hawkins (Standard Bearer: Playing Style + Coach Prestige, Conference Prestige): Tennessee moves up to 2nd. Austin Mack (Primetime Player: Playing Time + Brand Exposure, Championship Contender): Indiana and Michigan now ahead of UCLA. Braeden Wisloski (Conference Legend: Contender + Conference Prestige, home): Pittsburgh, in his home state, moves up to 2nd. Pitches change about 1 in 4 #1 picks but don't spread them out: teams with many open spots still win most close calls (step 6 balancing).</p>
+      <h3 id="P5"><span class="code">P5</span>Never back to the school he left</h3>
+      <p>The school a transfer left (<code>PrevTeamIndex</code>) is never on his Top 10, so no weekly commit or Signing Day Top 10 pick sends him back. At Signing Day it comes last in the "best fit" fallback, used only when no other school has room, so a real player is never deleted because of this rule. (Oct 20, 2026, your option A, ninth session: Yhonzae Pierre RE 91 had Alabama, the school he left, as #1 at Signing Day because it skipped his prestige floor and has his home state and A+ Pro Potential; he now goes to Ohio State, Top 10 #1, as a starter.)</p>
+      <p>Effect: Week 2, his old school was in 162 of 1,890 Top 10s (#1 for 12) and got 4 of 377 weekly commits; now 0. Signing Day: 14 placed back at their old school, now 0; real cuts 146 → 151 and deleted 14 → 15 (all FB/TE 56–68, e.g. Aiden Arias TE 58, NC State).</p>
     </section>
 
     <section id="top10">
@@ -510,11 +514,12 @@ player score    = w × playing time + (1 − w) × rest + jitter (fixed per play
       <h3 id="K1"><span class="code">K1</span>Combined score</h3>
       <pre class="formula">combined = 0.5 × player score + 0.5 × (team score ÷ 2)       team score ÷ 2 puts it on 0–100
 your team: combined = player score                            you decide your own needs</pre>
-      <h3 id="K2"><span class="code">K2</span>A school is eligible for his list when all three hold</h3>
+      <h3 id="K2"><span class="code">K2</span>A school is eligible for his list when all four hold</h3>
       <ol class="steps">
         <li>It meets his <b>dealbreaker</b> (P1).</li>
         <li>The <b>team wants him</b>: team score above 0. Your team always counts.</li>
-        <li>It passes his <b>prestige floor</b>, or it's his old school. Your team always counts.</li>
+        <li>It passes his <b>prestige floor</b>. Your team always counts.</li>
+        <li>It isn't the school he left (P5).</li>
       </ol>
       <h3 id="K3"><span class="code">K3</span>Order and coach perks (your team only)</h3>
       <ol class="steps">
