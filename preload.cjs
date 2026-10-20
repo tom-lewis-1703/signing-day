@@ -12,6 +12,5 @@ contextBridge.exposeInMainWorld("ttt", {
   portalPlayers: () => ipcRenderer.invoke("ttt:portal-players"),
   roleAt: (playerIndex, teamIndex) => ipcRenderer.invoke("ttt:role-at", playerIndex, teamIndex),
   whoWantsHim: playerIndex => ipcRenderer.invoke("ttt:who-wants-him", playerIndex),
-  destinations: playerIndex => ipcRenderer.invoke("ttt:destinations", playerIndex),
-  playerCard: playerIndex => ipcRenderer.invoke("ttt:player-card", playerIndex)
+  destinations: playerIndex => ipcRenderer.invoke("ttt:destinations", playerIndex)
 });

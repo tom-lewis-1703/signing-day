@@ -227,152 +227,23 @@ async function loadPortal() {
   $("portalInput").disabled = !players.length;
 }
 
-// Letter grades as the game shows them: "Bminus" -> "B-".
-const grade = g => g ? String(g).replace("minus", "-").replace("plus", "+") : "–";
-const gradeClass = g => `grade grade-${String(g || "none")[0]}`;
-const words = s => String(s || "").replace(/([a-z])([A-Z])/g, "$1 $2");
-const chip = (text, cls = "", title = "") => el("span", { className: `chip ${cls}`, textContent: text, title });
-
 async function showFit() {
   selectedPortal = portalByLabel.get($("portalInput").value) ?? null;
-  show("cardBox", selectedPortal !== null);
   show("fitBox", selectedPortal !== null);
   if (selectedPortal === null) return;
-  const [card, w] = await Promise.all([call("playerCard", selectedPortal), call("destinations", selectedPortal)]);
-  if (card) renderCard(card);
-  if (w) { renderWants(w); renderFit(w); }
-}
-
-// ---------- player card ----------
-let showAllRatings = false;
-
-function renderCard(c) {
-  $("cOvr").textContent = c.overall;
-  $("cMax").textContent = c.max;
-  $("cName").textContent = c.name;
-  $("cJersey").textContent = c.jersey ? `#${c.jersey}` : "";
-  $("cSub").textContent = `${c.position} · ${c.archetype} · ${c.year}${c.redshirt === "Previous" ? " (redshirted)" : c.redshirt === "Current" ? " (redshirting)" : ""} → ${c.nextYear} next year`;
-  $("cChips").replaceChildren(
-    chip(`${c.dev} dev`, `dev dev-${c.dev}`),
-    c.height ? chip(`${c.height}, ${c.weight} lbs`) : null,
-    chip(`From ${c.fromTeam}`),
-    chip([c.hometown, c.homeState].filter(Boolean).join(", ") || "Home unknown"),
-    c.stars ? chip(`${c.stars}★ recruit`, "stars") : null,
-    c.personality ? chip(c.personality) : null);
-
-  const tierPill = (tier, cls = "") => el("span", { className: `tier tier-${tier} ${cls}`, textContent: tier === "None" ? "–" : tier });
-  $("cPhysical").replaceChildren(el("div", { className: "muted small", textContent: "Physical (by his archetype)" }),
-    ...c.physical.map(a => el("div", { className: `ability${a.tierLevel ? "" : " off"}`, title: a.description },
-      tierPill(a.tier),
-      el("span", { className: "aname", textContent: a.name }),
-      el("span", { className: "muted small", textContent: a.nextTier
-        ? `${a.nextTier} at ${a.needs.filter(n => n.value < n.needed).map(n => `${n.short} ${n.needed} (now ${n.value})`).join(" + ")}`
-        : "top tier" }))));
-  $("cMental").replaceChildren(el("div", { className: "muted small", textContent: "Mental" }),
-    ...(c.mental.length ? c.mental.map(m => el("div", { className: "ability" }, tierPill(m.tier), el("span", { className: "aname", textContent: m.name })))
-      : [el("div", { className: "muted small", textContent: "none" })]));
-
-  $("cGroups").replaceChildren(...c.skillGroups.map(g => {
-    const bar = el("div", { className: "bar", title: `Level ${g.level} of 20; his cap is ${g.cap}` },
-      el("div", { className: "fill" }), el("div", { className: "capmark" }));
-    bar.firstChild.style.width = `${Math.min(g.level, 20) / 20 * 100}%`;
-    bar.lastChild.style.left = `${Math.min(g.cap, 20) / 20 * 100}%`;
-    return el("div", { className: "group" },
-      el("span", { className: "gname", textContent: g.name }), bar,
-      el("span", { className: "small", textContent: `${g.level} / cap ${g.cap}${g.atCap ? " (at cap)" : ""}` }),
-      el("span", { className: "small", textContent: g.target ? `${g.rating} → ${g.target}` : `${g.rating}` }));
-  }));
-
-  const ratingRow = r => el("div", { className: "rating" },
-    el("span", { className: "rshort", textContent: r.short }),
-    el("span", { className: "rname", textContent: r.name }),
-    el("span", { className: "rval", textContent: r.value }),
-    r.atCap > r.value ? el("span", { className: "rcap", textContent: `→ ${r.atCap}` }) : el("span"));
-  $("cRatings").replaceChildren(...c.skillGroups.map(g =>
-    el("div", { className: "rgroup" }, el("h4", { textContent: g.name }), ...g.ratings.map(ratingRow))));
-  const others = c.ratings.filter(r => !r.inGroups).sort((a, b) => b.value - a.value);
-  $("cOtherRatings").replaceChildren(el("div", { className: "rgroup wide" },
-    el("h4", { textContent: "Other ratings (not in his skill groups)" }), el("div", { className: "rcols" }, ...others.map(ratingRow))));
-  const updateToggle = () => {
-    show("cOtherRatings", showAllRatings);
-    $("allRatingsBtn").textContent = showAllRatings ? "Hide other ratings" : `Show all ratings (${others.length} more)`;
-  };
-  $("allRatingsBtn").onclick = () => { showAllRatings = !showAllRatings; updateToggle(); };
-  updateToggle();
-}
-
-function renderWants(w) {
-  const dropped = w.dealbreaker === "none" && w.originalDealbreaker;
-  const row = (k, ...v) => el("tr", {}, el("th", { textContent: k }), el("td", {}, ...v));
-  $("cWants").replaceChildren(
-    row("Dealbreaker", dropped
-      ? `none (${words(w.originalDealbreaker)} dropped: below his position average)`
-      : `${words(w.dealbreaker)}`, !dropped && w.dealbreakerBar ? el("span", { className: "muted" }, " · needs ", chip(grade(w.dealbreakerBar), gradeClass(w.dealbreakerBar))) : null),
-    row("Ideal pitch", `${w.pitch}`, w.secondaries?.length ? el("span", { className: "muted", textContent: ` · also ${w.secondaries.map(words).join(", ")}` }) : null),
-    row("Home state", w.homeState || "–"),
-    row("Prestige floor", w.floor),
-    row("Schools", `${w.eligible} pass both sides`));
-}
-
-// ---------- Top 10 table ----------
-let showMoreSchools = false;
-
-function renderFit(w) {
-  $("fitSummary").textContent = `· ${w.top10.length} schools on his list`;
+  const w = await call("destinations", selectedPortal);
+  if (!w) return;
+  $("fitSummary").textContent = `${w.player} · ${w.position} ${w.overall} (max ${w.max}, ${w.dev}) · next year ${w.year} · dealbreaker ${w.dealbreaker === "none" && w.originalDealbreaker ? `none (Playing Time dropped: below his position average)` : w.dealbreaker}${w.dealbreaker !== "none" && w.dealbreakerBar ? ` (needs ${w.dealbreakerBar})` : ""} · pitch ${w.pitch}${w.secondaries?.length ? ` (also cares about ${w.secondaries.join(", ")})` : ""} · home ${w.homeState} · floor ${w.floor} · ${w.eligible} teams pass both sides`;
   // Top 25 (first 10 = Top 10 preview), plus his old team if it ranks lower.
   const rows = w.teams.map((t, i) => ({ ...t, place: i + 1 })).filter(t => t.place <= 25 || t.oldTeam);
-  const th = (text, props = {}) => el("th", { textContent: text, ...props });
-  const head = el("thead", {},
-    el("tr", {}, th("#", { rowSpan: 2 }), th("School", { rowSpan: 2 }), th("Prestige", { rowSpan: 2 }),
-      th("Does he like them?", { colSpan: 3, className: "grp side-player" }), th("Do they want him?", { colSpan: 3, className: "grp side-team" }),
-      th("Combined", { rowSpan: 2 }), th("Notes", { rowSpan: 2 })),
-    el("tr", {}, th("Dealbreaker", { className: "side-player" }), th("Pitch grades", { className: "side-player" }), th("Player score", { className: "side-player" }),
-      th("His role there", { className: "side-team" }), th("Need in his room", { className: "side-team" }), th("Team score", { className: "side-team" })));
-
-  const tr = t => {
-    const inTop = t.place <= w.top10.length;
-    const role = t.stopgap
-      ? chip("Backup · stopgap", "role-chip role-Backup", `Their usual starter is about ${t.targetLevel}`)
-      : chip(`${t.role} #${t.rank}`, `role-chip role-${t.role}`);
-    const need = t.need === "Drop-off" ? `Drop-off ${t.dropOff}` : t.need === "Weak" ? `Weak (${t.weakness} below)`
-      : t.need === "Upgrade" ? `Upgrade +${t.upgrade} (counts +${t.weightedUpgrade})` : t.need;
-    const notes = [
-      t.userTeam ? chip("your team", "note-you") : null,
-      t.joinedByPerk ? chip(`joined by coach perk (ranked #${w.userRank})`, "note-good") : t.userTeam && t.perkReach ? chip(`coach perk (can join from #${w.userReach})`) : null,
-      t.meets ? null : chip("fails dealbreaker", "note-bad"),
-      t.allowed ? null : chip("below prestige floor", "note-bad"),
-      t.wantsHim ? null : chip("team not interested", "note-bad"),
-      t.levelOk ? null : chip("ceiling too low", "note-bad"),
-      t.parts.home ? chip("home state", "note-good") : null,
-      t.oldTeam ? chip("his old team") : null,
-      t.serviceAcademy ? chip("service academy") : null].filter(Boolean);
-    const row = el("tr", { className: `click${inTop ? " top" : ""}${t.userTeam ? " you" : ""}` },
-      el("td", { className: "num", textContent: inTop ? `${t.place} ★` : t.place }),
-      el("td", { className: "team", textContent: t.team }),
-      el("td", { className: "num", textContent: t.prestigeLevel }),
-      el("td", { className: "side-player" }, chip(grade(t.dealbreakerGrade), t.meets ? "pass" : "fail", t.meets ? "Meets his dealbreaker" : "Below his dealbreaker grade")),
-      el("td", { className: "side-player" }, ...((t.pitchGrades || []).length ? t.pitchGrades.map(g => chip(grade(g), gradeClass(g))) : ["–"])),
-      el("td", { className: "num side-player", textContent: t.playerScore }),
-      el("td", { className: "side-team" }, role, t.pathToStart ? chip("path to start", "note-good") : null),
-      el("td", { className: "side-team" }, need, el("span", { className: "muted small", textContent: ` ×${t.needMult}` })),
-      el("td", { className: "num side-team", textContent: t.score }),
-      el("td", { className: "num combined", textContent: t.combined }),
-      el("td", {}, ...notes));
-    row.addEventListener("click", () => openTeam(t.teamIndex));
-    return row;
-  };
-  const top = rows.filter(t => t.place <= w.top10.length), rest = rows.filter(t => t.place > w.top10.length);
-  const restBody = el("tbody", { className: "rest" }, ...rest.map(tr));
-  restBody.hidden = !showMoreSchools;
-  $("fitTable").replaceChildren(head, el("tbody", {}, ...top.map(tr)), restBody);
-  show("moreSchoolsBtn", rest.length > 0);
-  const updateToggle = () => {
-    restBody.hidden = !showMoreSchools;
-    const last = rest.filter(t => t.place <= 25).length ? `${w.top10.length + 1}–${Math.min(25, w.teams.length)}` : "";
-    $("moreSchoolsBtn").textContent = showMoreSchools ? "Hide the other schools" : `Show schools ${last}${rest.some(t => t.place > 25) ? `${last ? " and " : ""}his old team` : ""}`;
-  };
-  $("moreSchoolsBtn").onclick = () => { showMoreSchools = !showMoreSchools; updateToggle(); };
-  updateToggle();
+  fillTable($("fitTable"), ["#", "Team", "Prestige", "Dealbreaker grade", "Pitch grades", "Combined", "Player score", "Team score", "His role there", "Need in room", "Notes"],
+    rows.map(t => [t.place <= w.top10.length ? `${t.place} ★` : t.place, t.team, t.prestigeLevel, t.dealbreakerGrade ?? "–", (t.pitchGrades || []).join(" / ") || "–", t.combined, t.playerScore, t.score,
+      `${t.stopgap ? `Backup (stopgap: their usual starter ≈${t.targetLevel})` : `${t.role} (#${t.rank})`}${t.pathToStart ? " · path to start" : ""}`,
+      `${t.need === "Drop-off" ? `Drop-off ${t.dropOff}` : t.need === "Weak" ? `Weak (${t.weakness} below)` : t.need === "Upgrade" ? `Upgrade +${t.upgrade} (counts +${t.weightedUpgrade})` : t.need} (×${t.needMult})`,
+      [t.userTeam ? "your team" : "", t.joinedByPerk ? `joined his list by coach perk (ranked #${w.userRank})` : t.userTeam && t.perkReach ? `coach perk (can join from #${w.userReach})` : "", t.meets ? "" : `fails dealbreaker (${t.dealbreakerGrade ?? "no"})`, t.allowed ? "" : "below prestige floor", t.wantsHim ? "" : "team not interested", t.levelOk ? "" : "ceiling too low",
+        t.parts.home ? "home state" : "", t.oldTeam ? "his old team" : "", t.serviceAcademy ? "service academy" : ""].filter(Boolean).join(", ")]),
+    [2, 5, 6, 7],
+    i => openTeam(rows[i].teamIndex));
 }
 
 $("teamSelect").addEventListener("change", renderTeam);
@@ -399,7 +270,7 @@ async function openPath(filePath) {
   if (!res.ok) return log(`Open failed: ${res.error}`, "bad");
   info = res.result;
   depthTeams = null; leagueLoaded = false; portalLoaded = false; selectedPortal = null;
-  $("portalInput").value = ""; $("roleResult").textContent = ""; show("fitBox", false); show("cardBox", false);
+  $("portalInput").value = ""; $("roleResult").textContent = ""; show("fitBox", false);
   show("empty", false); show("tabs");
   renderStage();
   showTab("stage");
