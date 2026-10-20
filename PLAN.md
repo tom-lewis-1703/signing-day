@@ -11,7 +11,9 @@ Shortened on Oct 20, 2026 (sixth session). The old long version, with every tuni
 - Week 2: old school in 162 of 1,890 Top 10s and 4 of 377 weekly commits → 0. Signing Day: 14 back at old school → 0; placed 1,310, 0 unplaced, 0 over 85; real cuts 146 → 151, deleted 14 → 15 (all FB/TE 56–68).
 - The eighth session (task 2: weekly commits + weekly interest update, proven in-game Week 2 → 3) is in git history and under "Weekly commits" below.
 
-**Next:** task 3, moving a cut returning player to another school.
+- Task 3 done: moving a cut player to another school = a direct roster move (`movePlayer`), saved and verified on a copy; not checked in-game (Tom's call).
+
+**Next:** task 4, write the Signing Day plan to the save.
 
 **Goal right now (Tom, sixth session):** one complete test run of a whole offseason on copies, Players Leaving → Preseason, with Tom checking in-game. Be token-efficient: Claude runs the bare minimum tests that prove each piece works; Tom tests the rest in-game. Quality stays the same.
 
@@ -23,7 +25,7 @@ Start a chat with `/next` (takes the top task that isn't done); end it with `/ha
 
 1. ~~**Save writer**~~ **Done (seventh session).** `lib/roster-edits.mjs` + the stronger save check; proven in-game at Liberty and Missouri.
 2. ~~**Weekly commits**~~ **Done (eighth session),** plus the weekly interest update; both proven in-game Week 2 → 3 (design below, "Weekly commits").
-3. **"Cut player moved to another school" write** (review #2): the Signing Day plan moves 137 cut real players to other schools, but our proven commit edit works on a transfer's recruit row, which a returning player probably doesn't have. Check the save; if there's no clean way, bring Tom options (e.g. only cut a real player when he has somewhere to go, or cut recruits only).
+3. ~~**"Cut player moved to another school" write**~~ **Done (ninth session):** none of the 136 moved players has a recruit row, so Tom chose a direct move (`RosterEdits.movePlayer`): the proven cut, then his team = the new school and onto its roster list (100 slots, at most 79 used), left off its depth chart (normal: 105 rostered players have none at Signing Day). Save check passed on a copy (Tagert Bardin → New Mexico St., Ansel Nedore → W. Kentucky, Kortez Rupert → Utah State). **Not checked in-game (Tom: assume it works); check it in the full run.** If it fails: option C, only cut a real player when needed and let the game delete him.
 4. **Signing Day write**: write the existing Signing Day plan to the save.
 5. **App controls, minimal:** a "Run this week" / "Run Signing Day" button in the Stage view, using the existing log and Save. Show Tom a mockup first. Also fix the stale stage labels (review #6). Tom (eighth session): outliers and oddities must be his call, so the app must let him review the plan and change or drop single moves before Save.
 6. **Check script:** one reusable script that runs every stage on fresh copies of the test saves and checks: rosters ≤ 85, every transfer placed, boards ≤ 35, nobody left teamless, the user team untouched, the save reopens, no transfer skipped for an unknown position. This is the app's automated test.
@@ -35,7 +37,7 @@ Start a chat with `/next` (takes the top task that isn't done); end it with `/ha
 
 Every layer was read line by line. No calculation errors in the rules; speed is fine everywhere. Findings:
 - **#1** `lib/dynasty.mjs` doesn't read `Team.RecruitingBoard` when the save opens, and madden-franchise can't add a field to an already-read table. That is why one script found 0 boards. Fix: add the field to the team read list (task 2).
-- **#2** No proven write for moving a cut returning player to another school (task 3).
+- **#2** Moving a cut returning player to another school: `movePlayer` (task 3, not yet proven in-game).
 - **#3** Fixed: a `userTeam` name not found in the save now stops the save from opening (before, the user team was silently unprotected).
 - **#4** Fixed: `settings.json` now overrides defaults at every level, so a missing nested value keeps its default instead of switching its rule off.
 - **#5** Save check too weak for commits and cuts (task 1).
