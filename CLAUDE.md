@@ -60,7 +60,7 @@ To get numbers for options before changing code: write a scratch script (in the 
 | What | Where |
 |---|---|
 | Plan, handoff, walkthrough | this repo: `PLAN.md`, `CLAUDE.md`, `docs/ttt-internals.html` |
-| Test saves (never written) | `test_saves/` — PLAYERSLEAVING, WEEK1PORTALOPENS, WEEK2, WEEK4PORTALCLOSES, SIGNINGDAY, PRESEASON (`DYNASTY-*COPY`); `DYNASTY-STEP5PROOF` (Signing Day copy with the 4 proven edits at Liberty) and `DYNASTY-STEP5PROOF-PRESEASON` (the game's save after Tom advanced it) |
+| Test saves (never written) | `test_saves/` — PLAYERSLEAVING, WEEK1PORTALOPENS, WEEK2, WEEK4PORTALCLOSES, SIGNINGDAY, PRESEASON (`DYNASTY-*COPY`); `DYNASTY-STEP5PROOF` (Signing Day copy with the 4 proven edits at Liberty) and `DYNASTY-STEP5PROOF-PRESEASON` (the game's save after Tom advanced it); `DYNASTY-WRITERTEST` (Signing Day copy, task 1 piece 3: at Missouri un-sign Clement Watson, Victor Paulino, Derrick Ali; cut Brett Le Blanc; commit Wayshawn Parker (on his list), Nate Sheppard and Brandon Finney Jr. (off his list)) |
 | Tom's real saves and local test runs | `C:\Users\tomle\Documents\EA SPORTS College Football 27\saves\` (`TomsTransferTools\test_runs\` for run copies) |
 | Old tool (reference only, PC only) | `C:\Users\tomle\Downloads\TrapsTransferTool` |
 | Maxi's tool (source of the ratings model; PC only) | `C:\Users\tomle\Downloads\DynastyProgressionMonitor-9.2.1` |
