@@ -6,31 +6,33 @@ Shortened on Oct 20, 2026 (sixth session). The old long version, with every tuni
 
 ## Where we are and what's next
 
-**Last chat (Oct 20, seventh session):** task 1, the save writer, done and proven in-game.
-- `lib/roster-edits.mjs` commits a transfer, un-signs a recruit and cuts a player; redoing the Liberty edits gives the proven save record for record (12 records).
-- A commit to a school not on his in-game list replaces his last school, then moves it to #1 with the top influence + 10 (Tom OK'd both). Tom's check of `test_saves/DYNASTY-WRITERTEST` at Preseason: Wayshawn Parker (on his list), Nate Sheppard and Brandon Finney Jr. (off his list) on Missouri; un-signed Clement Watson, Victor Paulino, Derrick Ali and cut Brett Le Blanc gone.
-- The save check (review #5) re-reads every field the edits wrote and refuses the save if any other record changed (tested: a stray change was caught, the original stayed untouched).
-- Tom's new rule in `CLAUDE.md`: fast and loose but not sloppy (minimal tests, batch in-game checks into one launch).
+**Last chat (Oct 20, eighth session):** task 2, weekly commits and the weekly interest update, built and proven in-game (branch `claude/upbeat-wozniak-1xn0fq`).
+- Recruiting boards read (review #1, `lib/dynasty.mjs`): every RecruitTarget table (the user team's board is in its own; missing it let the tool commit Austin Mack, Kendre Harrison and Jonaz Walton off Tom's board; fixed). Game offers barely match our Top 10s (Week 2: an offering school is in our Top 10 for 28%; `tools/offers-report.mjs`).
+- Weekly commits (`lib/weekly-commits.mjs`, `tools/weekly-run.mjs` writes, `tools/weekly-report.mjs` previews): Week 2 copy → 377 commits; Week 3 → 357 more (756 of 1,891). In-game: all held into Week 3 (Lagway → SMU, Lindsey → Auburn, Underwood → Ole Miss); the game's own 21 Week 2→3 commits all went to the #1 of our written lists.
+- Weekly interest update (`planListUpdates`, `RosterEdits.setTopSchools`, `tools/lists-report.mjs`): Week 2 → 1,502 lists rewritten to our live Top 10; held in-game at Week 3 (Iamaleava, Carroll, Moore). User team: same spot and influence on all 439 lists that have it; players on its board untouched.
+- Rule changes (Tom): T12 newcomer lock (below), never commit a stopgap, Signing Day never cuts a committed transfer. Signing Day preview after all of it: 1,310 placed, 829 cuts (146 real, 14 deleted), 0 over 85.
+- Effect Tom noticed (fine with him): our lists drop schools that don't need a player, so big schools run short of players listing them (Alabama 220 → 53; D-line 19 → 2) and went after Tom's targets (Alabama on Kameryn Crawford, Auburn on Jonaz Walton). Tom: keep "fit" lists; harder recruiting is OK.
+- Test copies built before the last three rule changes (stopgaps, lock break, board fix for WEEKLYTEST); the full run tests the latest rules.
 
-**Next: task 2, weekly commits.**
+**Next:** decide Tom's open question first (not built): **a transfer's old school** (Yhonzae Pierre RE 91 had Alabama, the school he left, as #1: exempt from the prestige floor + home state + A+ Pro Potential). Recommended A: never in his Top 10 or a weekly commit; only Signing Day's last-resort "best fit" so a real player isn't deleted. B: score × 0.5. C: never, anywhere. Then task 3.
 
 **Goal right now (Tom, sixth session):** one complete test run of a whole offseason on copies, Players Leaving → Preseason, with Tom checking in-game. Be token-efficient: Claude runs the bare minimum tests that prove each piece works; Tom tests the rest in-game. Quality stays the same.
 
-**Built:** reading the save, safe saving, draft lock (writes), next-season depth chart, team score, player score, Top 10 preview, Signing Day plan (recruit cleanup + placing every uncommitted transfer + cuts; preview only). The app writes the draft lock; the save writer (commit, un-sign, cut) is built but no screen or stage uses it yet.
+**Built:** reading the save (incl. recruiting boards), safe saving, draft lock (writes), next-season depth chart, team score, player score, Top 10 preview, Signing Day plan (preview only), save writer (commit, un-sign, cut, list update), weekly commits + interest update (CLI `tools/weekly-run.mjs`; no app button yet).
 
 ### Task list (one chat each, top first)
 
 Start a chat with `/next` (takes the top task that isn't done); end it with `/handoff`. Agreed with Tom Oct 20, sixth session.
 
-1. ~~**Save writer**~~ **Done (seventh session).** `lib/roster-edits.mjs` + the stronger save check; proven in-game at Liberty and Missouri. Weekly commits are written as the game writes its own (HardCommitted, 1 offer, not on the board, school #1); not yet proven, Week 1 of the full run tests it.
-2. **Weekly commits** (design below, "Weekly commits"). Writes to the save. First fix the recruiting-board read (review #1), then print how the game's offers line up with our Top 10s (replaces the separate "measure offers and influence" step).
+1. ~~**Save writer**~~ **Done (seventh session).** `lib/roster-edits.mjs` + the stronger save check; proven in-game at Liberty and Missouri.
+2. ~~**Weekly commits**~~ **Done (eighth session),** plus the weekly interest update; both proven in-game Week 2 → 3 (design below, "Weekly commits").
 3. **"Cut player moved to another school" write** (review #2): the Signing Day plan moves 137 cut real players to other schools, but our proven commit edit works on a transfer's recruit row, which a returning player probably doesn't have. Check the save; if there's no clean way, bring Tom options (e.g. only cut a real player when he has somewhere to go, or cut recruits only).
 4. **Signing Day write**: write the existing Signing Day plan to the save.
-5. **App controls, minimal:** a "Run this week" / "Run Signing Day" button in the Stage view, using the existing log and Save. Show Tom a mockup first. Also fix the stale stage labels (review #6). Tom (seventh session): outliers and oddities must be his call, so the app must let him review the plan and change or drop single moves before Save.
+5. **App controls, minimal:** a "Run this week" / "Run Signing Day" button in the Stage view, using the existing log and Save. Show Tom a mockup first. Also fix the stale stage labels (review #6). Tom (eighth session): outliers and oddities must be his call, so the app must let him review the plan and change or drop single moves before Save.
 6. **Check script:** one reusable script that runs every stage on fresh copies of the test saves and checks: rosters ≤ 85, every transfer placed, boards ≤ 35, nobody left teamless, the user team untouched, the save reopens, no transfer skipped for an unknown position. This is the app's automated test.
 7. **Tom's full offseason run** (Players Leaving → Preseason, in-game).
 
-**Side task (Tom, seventh session; not in the order above):** the depth chart uses projected next-season OVR = OVR + expected training gain. Measured Signing Day → Preseason (7,046 returning players): about +2.4 on average, by room to max (0–2: +0.6 … 15+: +2.9) and dev trait (Elite with 15+ room: +4.1); e.g. Ty Hawkins (SMU QB) 82 → 86. It changes every need/role rule, so check before/after on named teams.
+**Side task (Tom, eighth session; not in the order above):** the depth chart uses projected next-season OVR = OVR + expected training gain. Measured Signing Day → Preseason (7,046 returning players): about +2.4 on average, by room to max (0–2: +0.6 … 15+: +2.9) and dev trait (Elite with 15+ room: +4.1); e.g. Ty Hawkins (SMU QB) 82 → 86. It changes every need/role rule, so check before/after on named teams.
 
 ### Code review (Oct 20, sixth session)
 
@@ -102,13 +104,14 @@ Everything after the draft lock is built from the same four blocks. They run in 
 5. **Protected (SD3):** never cut or left unplaced: Jr/Sr 77+, or Fr/So 72+ with max 77+.
 6. **Finish (SD6):** schools still over 85 trim recruits first, then the lowest-keep-value bench players. Cut real players are offered to other schools (schools that want him first); deleted only if no school has room.
 
-### Weekly commits (decided; building now)
+### Weekly commits (built, eighth session; settings `weekly`)
 
-- The tool commits players itself each week, recomputing interest after every commit (same live engine as Signing Day).
-- **Pace:** share of all portal transfers committed by the end of Week 1 / 2 / 3 / 4 = 10% / 25% / 45% / 70% (≈ 190 / 475 / 850 / 1,325 of 1,891); the rest at Signing Day. The game's own commits count toward it.
-- **Who first:** clear favorites (his #1 well ahead of #2), boosted for higher-ranked players and for players with one offer from a school close to his CommitScore.
-- **Where:** a school that offered him in-game and is in his Top 10; otherwise his live #1 with room.
-- **Never** while the user team is in his top 3. **No cuts and no recruit cleanup during the weeks**; a commit needs a free board slot and room under the caps.
+- **Pace:** share of all portal transfers committed by the end of Week 1 / 2 / 3 / 4 = 0% / 20% / 40% / 70% (Week 1 is free for the user to scout); the game's own commits count. The rest at Signing Day.
+- **Who first (Tom: not all stars at once):** chance-based order. Chance = 0.1 + favorite (his #1 ahead of #2, percentile) + 2 × rank (national transfer rank) + offer (best in-game offer / CommitScore); a weighted draw fixed per player and week, so a save always gives the same plan. Week 2: about 1 in 5 of each rank band commits (top 25: 4 of 24).
+- **Where:** any school on his live Top 10 (rescored after every commit), schools that offered him in-game first; never where he'd be a stopgap (below the school's starter level, T10). Board slots counted as after Signing Day's recruit cleanup; position caps and 85 ignored during the weeks (Signing Day trims; it never cuts a committed transfer).
+- **Never:** a player on the user team's recruiting board, or with the user team in his top 3. No cuts and no recruit cleanup during the weeks.
+- **Interest update (from Week 2):** each uncommitted transfer's in-game list becomes his live Top 10, with his existing influence numbers high to low; schools with him on their board keep theirs (the game commits from that number); the user team keeps its exact spot and influence and is never added or removed; players on its board are left alone.
+- **T12 newcomer lock (Tom):** a transfer coming in at the school's starter level (T10: within 5 of the usual starter for its prestige) locks his starting spot (Drake Lindsey QB 84 keeps Iamaleava 89 off Auburn), unless the newcomer is beaten by 8+ OVR or by a top-5 transfer at his position (Pierre 91 over Julian Walker 80 at Alabama; KaMario Taylor QB #1 over Lindsey). Below the level he's a stopgap: 4+ better takes his spot. In rooms with several starters only the newcomer's own spot is protected.
 
 ## What the game does on its own (why the rules exist)
 
@@ -125,6 +128,8 @@ Everything after the draft lock is built from the same four blocks. They run in 
 | Cut a player (release) | Jayden Whaley FS 65 | Deleted by the game at rollover |
 | Commit a transfer | Matyus McLain RE 74 | On Liberty's roster at Preseason |
 | Commit to a school not on his list (seventh session, Missouri) | Nate Sheppard HB 93, Brandon Finney Jr. CB 91 | On Missouri's roster at Preseason |
+| Weekly commit (eighth session, Week 2 → 3) | 377 commits, e.g. DJ Lagway → SMU, Drake Lindsey → Auburn | All still committed at Week 3 |
+| Weekly list update (eighth session, Week 2 → 3) | 1,502 lists, e.g. Nico Iamaleava, Michael Carroll, Dakorien Moore | Same lists at Week 3 |
 
 Exactly the 12 planned records changed. How each is written: `CLAUDE.md` → "Signing Day edits proven in-game".
 
@@ -141,8 +146,8 @@ Exactly the 12 planned records changed. How each is written: `CLAUDE.md` → "Si
 ## Later and open questions
 
 - **Later phases:** outflow control (who enters the portal and how many per team); Pass A review of game commits; #1-pick balancing; weekly tracking screen.
-- **CPU schools offer their Top 10 players (Tom, seventh session, realism):** most transfers have no in-game offer (Week 2: 139 of 197 uncommitted 85+, e.g. Nico Iamaleava QB 89, Austin Simmons QB 86). Would mean creating RecruitTarget rows on CPU boards (unproven) and would start the game's own commit clock beside ours, and give the user team real competition; placement doesn't need it. Try after the full run.
+- **CPU schools offer their Top 10 players (Tom, eighth session, realism):** most transfers have no in-game offer (Week 2: 139 of 197 uncommitted 85+, e.g. Nico Iamaleava QB 89, Austin Simmons QB 86). Would mean creating RecruitTarget rows on CPU boards (unproven) and would start the game's own commit clock beside ours, and give the user team real competition; placement doesn't need it. Try after the full run.
 - **Tom's ideas, not designed:** player tags that change how teams recruit him ("Project Player", "Win Now"); review where max overall is used (T5, T10, keep value, protection, recruit keep rule, Pass B order), since it assumes every upgrade is bought.
 - **Open observation:** "best fit" leftovers go by player score, so prestige can beat playing time (Christian Clark HB 80 So → Texas, #3 on the depth chart). Ask only if Tom raises it.
-- **Open questions:** Week 3's stage number (5) is inferred; 3-4 defenses' extra DTs count only as DT; whether the game backfills NFL draft picks after the lock; NIL not modeled (Tom: forget it).
+- **Open questions:** 3-4 defenses' extra DTs count only as DT; whether the game backfills NFL draft picks after the lock; NIL not modeled (Tom: forget it).
 - **Known UI rough edge:** on the Signing Day Schools page, a clicked school's list appears below all 137 rows.
