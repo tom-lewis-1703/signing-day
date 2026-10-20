@@ -10,13 +10,28 @@ Shortened on Oct 20, 2026 (sixth session). The old long version, with every tuni
 
 **Built:** reading the save, safe saving, draft lock (writes), next-season depth chart, team score, player score, Top 10 preview, Signing Day plan (recruit cleanup + placing every uncommitted transfer + cuts; preview only). The only thing the app writes today is the draft lock.
 
-**Agreed path to the full run (Tom OK'd Oct 20, sixth session).** One piece at a time; check in after each.
+### Task list (one chat each, top first)
 
-1. **Save writer** (`lib/roster-edits.mjs`): commit a transfer, un-sign a recruit, cut a player. All three edits are already proven in-game (see "Edits proven in-game").
-2. **Weekly commits** (design below, "Weekly commits"). Writes to the save. While reading the game's recruiting boards it also prints how the game's offers line up with our Top 10s (this replaces the separate "measure offers and influence" step). First read the boards explicitly via `Team.RecruitingBoard` and check the counts: last session one script found 559 transfers on boards at Week 4 and another found 0 (unresolved).
-3. **Signing Day write**: write the existing Signing Day plan to the save.
-4. **App controls, minimal:** a "Run this week" / "Run Signing Day" button in the Stage view, using the existing log and Save. Show Tom a mockup first.
-5. **Check script:** one reusable script that runs every stage on fresh copies of the test saves and checks: rosters ≤ 85, every transfer placed, boards ≤ 35, nobody left teamless, the user team untouched, the save reopens. This is the app's automated test.
+Start a chat with `/next` (takes the top task that isn't done); end it with `/handoff`. Agreed with Tom Oct 20, sixth session.
+
+1. **Save writer** (`lib/roster-edits.mjs`): commit a transfer, un-sign a recruit, cut a player (all three proven in-game, see "Edits proven in-game"). After saving, re-read every changed record and confirm each edit is there; today's save check only compares stage and player count, which is enough for the draft lock only (review #5).
+2. **Weekly commits** (design below, "Weekly commits"). Writes to the save. First fix the recruiting-board read (review #1), then print how the game's offers line up with our Top 10s (replaces the separate "measure offers and influence" step).
+3. **"Cut player moved to another school" write** (review #2): the Signing Day plan moves 137 cut real players to other schools, but our proven commit edit works on a transfer's recruit row, which a returning player probably doesn't have. Check the save; if there's no clean way, bring Tom options (e.g. only cut a real player when he has somewhere to go, or cut recruits only).
+4. **Signing Day write**: write the existing Signing Day plan to the save.
+5. **App controls, minimal:** a "Run this week" / "Run Signing Day" button in the Stage view, using the existing log and Save. Show Tom a mockup first. Also fix the stale stage labels (review #6).
+6. **Check script:** one reusable script that runs every stage on fresh copies of the test saves and checks: rosters ≤ 85, every transfer placed, boards ≤ 35, nobody left teamless, the user team untouched, the save reopens, no transfer skipped for an unknown position. This is the app's automated test.
+7. **Tom's full offseason run** (Players Leaving → Preseason, in-game).
+
+### Code review (Oct 20, sixth session)
+
+Every layer was read line by line. No calculation errors in the rules; speed is fine everywhere. Findings:
+- **#1** `lib/dynasty.mjs` doesn't read `Team.RecruitingBoard` when the save opens, and madden-franchise can't add a field to an already-read table. That is why one script found 0 boards. Fix: add the field to the team read list (task 2).
+- **#2** No proven write for moving a cut returning player to another school (task 3).
+- **#3** Fixed: a `userTeam` name not found in the save now stops the save from opening (before, the user team was silently unprotected).
+- **#4** Fixed: `settings.json` now overrides defaults at every level, so a missing nested value keeps its default instead of switching its rule off.
+- **#5** Save check too weak for commits and cuts (task 1).
+- **#6** `lib/stage.mjs` labels and build-step numbers are stale (task 5).
+- Left alone: a transfer placed back at his old school is tagged "Transfer from (his school)"; backups in `TTT Backups` are never deleted.
 
 **Week 1 of Tom's run doubles as the write test:** the tool commits with the direct edit (proven at Signing Day); Claude checks the save reopens and the changed records are right; Tom advances one week. If the commits hold, carry on. If not, switch to the other method (raise an offering school's `ProspectInfluenceTotal` to the player's `CommitScore` so the game commits him) with one setting and redo Week 1 from the copy.
 
@@ -27,6 +42,8 @@ Shortened on Oct 20, 2026 (sixth session). The old long version, with every tuni
 **Housekeeping:** branches: `main` has everything to date; one branch per session, merged into `main` at the end (merge commit) and both pushed. `claude/confident-mendel-53hrhb` (rejected UI) and `review-base` / `full-review` (code-review only) are never merged. Test copies: cloud, copy from `test_saves/` to the scratchpad; Tom's PC, `saves\TomsTransferTools\test_runs\`.
 
 ## How we'll work
+
+**One task per chat (Tom, Oct 20, sixth session):** start each chat with `/next`, end it with `/handoff` (both in `.claude/skills/`; typing `/handoff` is Tom's OK to commit, merge into `main` and push). Long chats get expensive and lose detail; the repo carries everything between chats.
 
 The full rules are in `CLAUDE.md` ("Working rules" and "Check in before doing more"); they are Tom's and mandatory. In short: small pieces, list what you'll change first, stop after each piece and show real players, mockups before any screen change, no extras without asking, no commit until Tom says OK. Tom refers to rules by code (T3, P2…); when a rule changes, update its code, the walkthrough page and this plan.
 
