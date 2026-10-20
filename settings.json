@@ -318,5 +318,20 @@
         "Buried"
       ]
     }
+  },
+  "weekly": {
+    "pace": {
+      "week-1": 0.1,
+      "week-2": 0.25,
+      "week-3": 0.45,
+      "week-4": 0.7
+    },
+    "weights": {
+      "favorite": 0.5,
+      "rank": 0.5,
+      "offer": 0.5
+    },
+    "userTopN": 3,
+    "maxSpot": 10
   }
 }
