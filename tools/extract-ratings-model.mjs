@@ -2,7 +2,7 @@
 // Monitor & Planner (a free single-page tool) into lib/data/ratings-model.json.
 // Our app never reads Maxi's tool at runtime; it only uses the JSON this writes.
 //   node tools/extract-ratings-model.mjs <path to DynastyProgressionMonitor.html>
-// For personal use only: the data was compiled by that tool's author.
+// Keep the repo private: the extracted numbers come from that tool (no license stated).
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

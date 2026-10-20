@@ -3,7 +3,10 @@ let busy = false;
 let info = null;          // last open() result
 let depthTeams = null;    // team list for the picker
 let portalByLabel = new Map();
+let portalLoaded = false;
+let selectedPortal = null;  // player index picked on the Portal Players tab
 let leagueLoaded = false;
+let signingPlan = null;     // Signing Day cleanup plan (loaded on first view)
 
 // ---------- helpers ----------
 function log(msg, cls = "") {
@@ -29,7 +32,7 @@ function el(tag, props = {}, ...children) {
 }
 
 function fillTable(table, headers, rows, numericCols = [], onRowClick = null) {
-  const head = el("tr", {}, ...headers.map(h => el("th", { textContent: h })));
+  const head = el("tr", {}, ...headers.map((h, i) => el("th", { textContent: h, className: numericCols.includes(i) ? "num" : "" })));
   const body = rows.map((cells, r) => {
     const tr = el("tr", {}, ...cells.map((c, i) => el("td", { textContent: c, className: numericCols.includes(i) ? "num" : "" })));
     if (onRowClick) { tr.className = "click"; tr.addEventListener("click", () => onRowClick(r)); }
@@ -47,9 +50,11 @@ async function call(name, ...args) {
 // ---------- tabs ----------
 function showTab(tab) {
   for (const b of $("tabs").querySelectorAll("button")) b.classList.toggle("active", b.dataset.tab === tab);
-  for (const t of ["stage", "depth", "league"]) show(`tab-${t}`, t === tab);
+  for (const t of ["stage", "players", "depth", "league", "signing"]) show(`tab-${t}`, t === tab);
+  if (tab === "players") loadPortal();
   if (tab === "depth") loadDepth();
   if (tab === "league") loadLeague();
+  if (tab === "signing") loadSigning();
 }
 $("tabs").addEventListener("click", e => { if (e.target.dataset.tab) showTab(e.target.dataset.tab); });
 
@@ -166,11 +171,14 @@ async function fetchDepth() {
   $("projectionNote").textContent = depthTeams.projects
     ? `Projected next season: current roster minus graduating, early-draft and portal players, plus committed transfers and recruits. Ranked by current OVR. (${depthTeams.ms} ms for all teams)`
     : "This save is not at an offseason stage, so rosters are shown as they are now.";
-  const players = await call("portalPlayers") || [];
-  portalByLabel = new Map(players.map(p => [p.label, p.index]));
-  $("portalList").replaceChildren(...players.map(p => el("option", { value: p.label })));
-  $("portalInput").placeholder = players.length ? `Type a name (${players.length} uncommitted transfers)…` : "No uncommitted transfers at this stage";
-  $("portalInput").disabled = !players.length;
+  await renderTeam();
+}
+
+// Opens a team's depth chart (from the Portal Players or League Needs tab).
+async function openTeam(teamIndex) {
+  showTab("depth");
+  await loadDepth();
+  $("teamSelect").value = teamIndex;
   await renderTeam();
 }
 
@@ -197,40 +205,51 @@ async function renderTeam() {
     const filled = n && n.filledByIncoming.length ? el("div", { className: "filled", textContent: `Replaced by: ${n.filledByIncoming.map(f => `${f.name} ${f.overall}`).join(", ")}` }) : null;
     return el("div", { className: "room" }, header, el("table", { className: "grid" }, ...rows), lost, filled);
   }));
-  if ($("portalInput").value) showRoleAt();
+  await showRoleAt();
 }
 
+// Role of the player picked on the Portal Players tab at the team shown here.
 async function showRoleAt() {
-  const idx = portalByLabel.get($("portalInput").value);
-  if (idx === undefined) { $("roleResult").textContent = ""; return; }
-  const r = await call("roleAt", idx, $("teamSelect").value);
+  if (selectedPortal === null) { $("roleResult").textContent = ""; return; }
+  const r = await call("roleAt", selectedPortal, $("teamSelect").value);
   if (!r) return;
   const ahead = r.ahead.length ? ` Ahead of him: ${r.ahead.map(a => `${a.name} ${a.overall} (${a.year})`).join(", ")}.` : "";
   $("roleResult").textContent = `${r.player} (${r.overall} OVR, max ${r.max}, ${r.dev}) at ${r.team}: ${r.role} (#${r.rank} ${r.room}, ${r.starters} starter${r.starters === 1 ? "" : "s"})${r.pathToStart ? ", path to start the year after" : ""}.${ahead}`;
   $("roleResult").className = `role-${r.role}`;
 }
 
+// ---------- portal players tab ----------
+async function loadPortal() {
+  if (portalLoaded) return;
+  const players = await call("portalPlayers") || [];
+  portalLoaded = true;
+  portalByLabel = new Map(players.map(p => [p.label, p.index]));
+  $("portalList").replaceChildren(...players.map(p => el("option", { value: p.label })));
+  $("portalInput").placeholder = players.length ? `Type a name (${players.length} uncommitted transfers)…` : "No uncommitted transfers at this stage";
+  $("portalInput").disabled = !players.length;
+}
+
 async function showFit() {
-  const idx = portalByLabel.get($("portalInput").value);
-  show("fitBox", idx !== undefined);
-  if (idx === undefined) return;
-  const w = await call("destinations", idx);
+  selectedPortal = portalByLabel.get($("portalInput").value) ?? null;
+  show("fitBox", selectedPortal !== null);
+  if (selectedPortal === null) return;
+  const w = await call("destinations", selectedPortal);
   if (!w) return;
-  $("fitSummary").textContent = `${w.player} · ${w.position} ${w.overall} (max ${w.max}, ${w.dev}) · next year ${w.year} · dealbreaker ${w.dealbreaker === "none" && w.originalDealbreaker ? `none (Playing Time dropped: below his position average)` : w.dealbreaker}${w.dealbreaker !== "none" && w.dealbreakerBar ? ` (needs ${w.dealbreakerBar})` : ""} · home ${w.homeState} · floor ${w.floor} · ${w.eligible} teams pass both sides`;
+  $("fitSummary").textContent = `${w.player} · ${w.position} ${w.overall} (max ${w.max}, ${w.dev}) · next year ${w.year} · dealbreaker ${w.dealbreaker === "none" && w.originalDealbreaker ? `none (Playing Time dropped: below his position average)` : w.dealbreaker}${w.dealbreaker !== "none" && w.dealbreakerBar ? ` (needs ${w.dealbreakerBar})` : ""} · pitch ${w.pitch}${w.secondaries?.length ? ` (also cares about ${w.secondaries.join(", ")})` : ""} · home ${w.homeState} · floor ${w.floor} · ${w.eligible} teams pass both sides`;
   // Top 25 (first 10 = Top 10 preview), plus his old team if it ranks lower.
   const rows = w.teams.map((t, i) => ({ ...t, place: i + 1 })).filter(t => t.place <= 25 || t.oldTeam);
-  fillTable($("fitTable"), ["#", "Team", "Prestige", "Dealbreaker grade", "Combined", "Player score", "Team score", "His role there", "Need in room", "Notes"],
-    rows.map(t => [t.place <= w.top10.length ? `${t.place} ★` : t.place, t.team, t.prestigeLevel, t.dealbreakerGrade ?? "–", t.combined, t.playerScore, t.score,
+  fillTable($("fitTable"), ["#", "", "Team", "Prestige", "Dealbreaker grade", "Pitch grades", "Combined", "Player score", "Team score", "His role there", "Need in room", "Notes"],
+    rows.map(t => [t.place, t.place <= w.top10.length ? "★" : "", t.team, t.prestigeLevel, t.dealbreakerGrade ?? "–", (t.pitchGrades || []).join(" / ") || "–", t.combined, t.playerScore, t.score,
       `${t.stopgap ? `Backup (stopgap: their usual starter ≈${t.targetLevel})` : `${t.role} (#${t.rank})`}${t.pathToStart ? " · path to start" : ""}`,
       `${t.need === "Drop-off" ? `Drop-off ${t.dropOff}` : t.need === "Weak" ? `Weak (${t.weakness} below)` : t.need === "Upgrade" ? `Upgrade +${t.upgrade} (counts +${t.weightedUpgrade})` : t.need} (×${t.needMult})`,
-      [t.userTeam ? "your team" : "", t.perk ? `coach perk ${t.perk}${t.portalKing ? " (full: top 2 if in his list)" : " (+" + t.perk + ")"}` : "", t.meets ? "" : `fails dealbreaker (${t.dealbreakerGrade ?? "no"})`, t.allowed ? "" : "below prestige floor", t.wantsHim ? "" : "team not interested", t.levelOk ? "" : "ceiling too low",
+      [t.userTeam ? "your team" : "", t.joinedByPerk ? `joined his list by coach perk (ranked #${w.userRank})` : t.userTeam && t.perkReach ? `coach perk (can join from #${w.userReach})` : "", t.meets ? "" : `fails dealbreaker (${t.dealbreakerGrade ?? "no"})`, t.allowed ? "" : "below prestige floor", t.wantsHim ? "" : "team not interested", t.levelOk ? "" : "ceiling too low",
         t.parts.home ? "home state" : "", t.oldTeam ? "his old team" : "", t.serviceAcademy ? "service academy" : ""].filter(Boolean).join(", ")]),
-    [2, 4, 5, 6],
-    async i => { $("teamSelect").value = rows[i].teamIndex; await renderTeam(); });
+    [0, 3, 6, 7, 8],
+    i => openTeam(rows[i].teamIndex));
 }
 
 $("teamSelect").addEventListener("change", renderTeam);
-$("portalInput").addEventListener("change", () => { showRoleAt(); showFit(); });
+$("portalInput").addEventListener("change", showFit);
 
 // ---------- league tab ----------
 async function loadLeague() {
@@ -241,12 +260,96 @@ async function loadLeague() {
   fillTable($("leagueTable"), ["Team", "Open", "Starters lost", "Replaced", "Open rooms", "Next-season roster", "Offense", "Defense"],
     rows.map(r => [r.team, r.openSlots, r.startersLost, r.startersFilled, r.openRooms.join(", "), r.rosterNextSeason, r.offScheme.replace(/^OFF_/, ""), r.defScheme.replace(/^DEF_/, "")]),
     [1, 2, 3, 5],
-    async i => {
-      showTab("depth");
-      await loadDepth();
-      $("teamSelect").value = rows[i].teamIndex;
-      await renderTeam();
+    i => openTeam(rows[i].teamIndex));
+}
+
+// ---------- signing day tab (step 5 preview, read-only) ----------
+let sdSort = { key: "unsign", desc: true };
+const SD_COLS = [
+  { key: "team", label: "School", value: t => t.team },
+  { key: "signed", label: "Signed recruits", value: t => t.signed, num: true },
+  { key: "unsign", label: "Un-signed", value: t => t.unsign.length, num: true, cls: "count-out" },
+  { key: "kept", label: "Kept under 60", value: t => t.kept.length, num: true, cls: "count-kept" },
+  { key: "boardBefore", label: "Board now", value: t => t.boardBefore, num: true },
+  { key: "boardAfter", label: "Board after", value: t => t.boardAfter, num: true },
+  { key: "boardFree", label: "Free spots", value: t => t.boardFree, num: true, cls: "count-free" }
+];
+
+async function loadSigning() {
+  if (signingPlan) return;
+  const plan = await call("signingDayPlan");
+  if (!plan) return;
+  signingPlan = plan;
+  show("sdBody", plan.available);
+  if (!plan.available) {
+    $("sdNote").textContent = `The recruit cleanup only runs at Signing Day. This save is at ${plan.stage}.`;
+    return;
+  }
+  $("sdNote").textContent = `Preview only: nothing changes until a later step adds Apply and you click Save. ${plan.userTeam} is never changed.`;
+  renderSigningSummary();
+  renderSigningSchools();
+  show("sdSchool", false);
+  log(`Signing Day preview: ${plan.unsign.length} recruits to un-sign at ${plan.teams.length} schools (${plan.ms} ms).`);
+}
+
+function renderSigningSummary() {
+  const p = signingPlan, n = x => x.toLocaleString();
+  const byDev = list => Object.entries(list.reduce((m, e) => ({ ...m, [e.dev]: (m[e.dev] || 0) + 1 }), {}))
+    .sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${n(v)}`).join(", ");
+  const total = p.teams.length * p.boardSlots;
+  const before = p.teams.reduce((a, t) => a + t.boardBefore, 0), after = p.teams.reduce((a, t) => a + t.boardAfter, 0);
+  const signed = p.teams.reduce((a, t) => a + t.signed, 0);
+  const row = (k, v) => el("tr", {}, el("th", { textContent: k }), el("td", { textContent: v }));
+  $("sdSummary").replaceChildren(
+    row("Signed recruits at CPU schools", `${n(signed)} (${n(p.unsign.length + p.kept.length)} under ${p.underOverall})`),
+    row("Un-signed", `${n(p.unsign.length)} (${byDev(p.unsign)})`),
+    row(`Kept under ${p.underOverall}`, `${n(p.kept.length)} (${byDev(p.kept)}): ${p.keepDev.join("/")} whose max reaches the average starter at his position`),
+    row(`Board spots free (${p.boardSlots} per school)`, `${n(total - before)} → ${n(total - after)}`),
+    row("Schools with a full board", `${p.teams.filter(t => t.boardBefore >= p.boardSlots).length} → ${p.teams.filter(t => t.boardAfter >= p.boardSlots).length}`));
+}
+
+function renderSigningSchools() {
+  const col = SD_COLS.find(c => c.key === sdSort.key);
+  const teams = [...signingPlan.teams].sort((a, b) => {
+    const va = col.value(a), vb = col.value(b);
+    const c = col.num ? va - vb : String(va).localeCompare(String(vb));
+    return (sdSort.desc ? -c : c) || a.team.localeCompare(b.team);
+  });
+  const head = el("tr", {}, ...SD_COLS.map(c => {
+    // The sort mark always takes the same space (before a number heading, after a text one),
+    // so headings and columns never shift when the sort changes.
+    const mark = el("span", { className: "sortmark", textContent: c.key === sdSort.key ? (sdSort.desc ? "▼" : "▲") : "" });
+    const th = c.num ? el("th", { className: "sort num" }, mark, c.label) : el("th", { className: "sort" }, c.label, mark);
+    th.addEventListener("click", () => {
+      sdSort = { key: c.key, desc: c.key === sdSort.key ? !sdSort.desc : !!c.num };
+      renderSigningSchools();
     });
+    return th;
+  }));
+  const rows = teams.map(t => {
+    const tr = el("tr", { className: "click" }, ...SD_COLS.map(c => el("td", { textContent: c.value(t), className: [c.num ? "num" : "", c.cls || ""].join(" ").trim() })));
+    tr.addEventListener("click", () => renderSigningSchool(t));
+    return tr;
+  });
+  $("sdSchools").replaceChildren(head, ...rows);
+}
+
+function renderSigningSchool(t) {
+  const p = signingPlan;
+  show("sdSchool");
+  $("sdSchoolTitle").textContent = `${t.team}: ${t.signed} signed recruits · board ${t.boardBefore} → ${t.boardAfter} (${t.boardFree} free)`;
+  $("sdUnsignTitle").textContent = `Un-signed (${t.unsign.length})`;
+  $("sdKeptTitle").textContent = `Kept under ${p.underOverall} (${t.kept.length})`;
+  const head = () => el("tr", {}, ...[["Player"], ["Pos"], ["OVR", 1], ["Max", 1], ["Dev"], ["Type"], ["Avg starter", 1]]
+    .map(([h, num]) => el("th", { textContent: h, className: num ? "num" : "", title: h === "Avg starter" ? "League average next-season starter at his position" : "" })));
+  const row = e => el("tr", {},
+    el("td", { textContent: e.name }), el("td", { textContent: e.position }),
+    el("td", { className: "num", textContent: e.overall }), el("td", { className: "num max", textContent: e.max }),
+    el("td", { textContent: e.dev }), el("td", { textContent: e.recruitClass.startsWith("JuniorCollege") ? "JUCO" : "HS" }),
+    el("td", { className: "num", textContent: e.avgStarter ?? "–" }));
+  $("sdUnsign").replaceChildren(head(), ...[...t.unsign].sort((a, b) => b.overall - a.overall).map(row));
+  $("sdKept").replaceChildren(head(), ...t.kept.map(row));
+  $("sdSchool").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 // ---------- open / save ----------
@@ -257,7 +360,7 @@ async function openPath(filePath) {
   setBusy(false);
   if (!res.ok) return log(`Open failed: ${res.error}`, "bad");
   info = res.result;
-  depthTeams = null; leagueLoaded = false;
+  depthTeams = null; leagueLoaded = false; portalLoaded = false; selectedPortal = null; signingPlan = null;
   $("portalInput").value = ""; $("roleResult").textContent = ""; show("fitBox", false);
   show("empty", false); show("tabs");
   renderStage();

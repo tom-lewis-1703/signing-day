@@ -19,8 +19,8 @@ const row = (t, i) => [
   `${String(i).padStart(3)}.`, t.team.padEnd(16), `P${t.prestigeLevel}`.padEnd(4),
   `comb ${String(t.combined).padStart(3)}`, `| player ${String(t.playerScore).padStart(3)}`, `team ${String(t.score).padStart(3)}`,
   `| ${t.role}${t.pathToStart ? "+path" : ""}`.padEnd(16),
-  `db ${t.dealbreakerGrade ?? t.parts.dealbreakerValue}${t.meets ? "" : "✗"}`.padEnd(10), `pres ${t.parts.prestige}`.padEnd(8), `str ${t.parts.teamStrength}`.padEnd(7), t.parts.home ? "home" : "    ",
-  [t.userTeam ? "your team" : "", t.perk ? `perk ${t.perk}${t.portalKing ? " (full: top 2 if listed)" : ""}` : "", !t.meets ? "fails dealbreaker" : "", !t.allowed ? "below prestige floor" : "", !t.wantsHim ? "team not interested" : "", t.oldTeam ? "old team" : ""].filter(Boolean).join(", ")
+  `db ${t.dealbreakerGrade ?? t.parts.dealbreakerValue}${t.meets ? "" : "✗"}`.padEnd(10), `pitch ${(t.pitchGrades || []).join("/")}`.padEnd(22), `pres ${t.parts.prestige}`.padEnd(8), `str ${t.parts.teamStrength}`.padEnd(7), t.parts.home ? "home" : "    ",
+  [t.userTeam ? "your team" : "", t.joinedByPerk ? "joined by coach perk" : t.userTeam && t.perkReach ? "coach perk" : "", !t.meets ? "fails dealbreaker" : "", !t.allowed ? "below prestige floor" : "", !t.wantsHim ? "team not interested" : "", t.oldTeam ? "old team" : ""].filter(Boolean).join(", ")
 ].join(" ");
 
 for (const name of opt("who")) {
@@ -28,7 +28,7 @@ for (const name of opt("who")) {
   const p = matches.find(x => x.isTransfer) || matches[0];
   if (!p) { console.log(`\n${name}: not found`); continue; }
   const r = session.destinations(p.index);
-  console.log(`\n=== ${r.player} · ${r.position} ${r.overall} (max ${r.max}, ${r.dev}, ${r.archetype}) · next year ${r.year} · from ${r.from} · home ${r.homeState} · dealbreaker ${r.dealbreaker}`);
+  console.log(`\n=== ${r.player} · ${r.position} ${r.overall} (max ${r.max}, ${r.dev}, ${r.archetype}) · next year ${r.year} · from ${r.from} · home ${r.homeState} · dealbreaker ${r.dealbreaker} · pitch ${r.pitch} (+${r.secondaries.join(", ")})`);
   console.log(`    dealbreaker bar: ${r.dealbreakerBar ?? "-"} · floor: ${r.floor} · ${r.eligible} teams pass both sides${r.committedTo ? ` · committed to ${r.committedTo}` : ""}`);
   r.top10.forEach((t, i) => console.log(row(t, i + 1)));
   const at = new Set((opt("at")[0] || "").split(",").filter(Boolean).map(n => d.findTeamByName(n)?.index));
@@ -57,6 +57,9 @@ if (flag("league")) {
     const fallback = band.filter(x => /fallback/.test(x.r.floor)).length;
     console.log(`  ${lo}-${hi} OVR (${band.length}): #1 choice prestige avg ${(pres.reduce((a, b) => a + b, 0) / pres.length).toFixed(1)}, min ${Math.min(...pres)}, at <=3: ${pres.filter(x => x <= 3).length}${fallback ? `, fallback floor used: ${fallback}` : ""}`);
   }
+  const userIn = results.filter(x => x.r.top10.some(t => t.userTeam));
+  const joined = userIn.filter(x => x.r.top10.some(t => t.joinedByPerk)).length;
+  console.log(`  ${session.settings.userTeam} in ${userIn.length} Top 10s (${(userIn.length / results.length * 100).toFixed(1)}%), ${joined} of them joined by coach perk, top 2 in ${userIn.filter(x => x.r.top10.slice(0, 2).some(t => t.userTeam)).length}`);
   // Compare against the game's own commits on this save (committed transfers).
   const committed = d.players.filter(p => p.transferCommitted);
   if (committed.length) {

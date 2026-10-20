@@ -1,8 +1,10 @@
 # Tom's Transfer Tools — handoff for new sessions
 
-Personal CFB 27 dynasty utility for Tom (plays Kansas). **Read `PLAN.md` first**: its "Current status and next step" section says where the build is and what to do next. Its "How we'll work" section is mandatory.
+Personal CFB 27 dynasty utility for Tom (works for any dynasty; his current one is Kansas). **Read `PLAN.md` first**: its "Current status and next step" section says where the build is and what to do next. Its "How we'll work" section is mandatory.
 
-This repository is the app folder, `C:\Users\tomle\Documents\TomsTransferTools` on Tom's PC, pushed to a **private** GitHub repo so cloud sessions can work on it. Keep it private: `lib/data/ratings-model.json` is Maxi's data, personal use only.
+This repository is the app folder, `C:\Users\tomle\Documents\TomsTransferTools` on Tom's PC, pushed to the **private** GitHub repo https://github.com/tom-lewis-1703/toms-transfer-tools (`origin`) so cloud sessions can work on it. Keep it private: the numbers in `lib/data/ratings-model.json` were extracted from Maxi's tool (it states no license). Tom considers the ratings model our own work; describe it that way, without implying Maxi owns it.
+
+Branches: `main`; feature branches per step (current work: `step4b-pitches-perks`, which also holds step 5 so far); `review-base` + `full-review` exist only so a pull request can show the whole app for `/code-review ultra` (never merge them). On Tom's PC pushing from Claude is blocked by auto mode, so give Tom the push command to run; cloud sessions can push. **New cloud chats start on `main`**, so at the end of every session merge the working branch into `main` (merge commit, no rebase) and push both; otherwise the next chat sees old files.
 
 ## Working rules (from Tom)
 
@@ -10,7 +12,17 @@ This repository is the app folder, `C:\Users\tomle\Documents\TomsTransferTools` 
 - Never write to the test saves in `test_saves/` (or `test_copies\` on Tom's PC) or to any real save. Copy a save to a scratch or `test_runs/` folder first. Opening a save is read-only; only Save writes.
 - Use as little old-tool code as possible (TrapsTransferTool was badly built). Priorities: peak performance and usability. Verify anything reused against real saves.
 - Only the worst of the worst real players may ever be left unplaced/deleted. Real players always come before generated recruits.
-- Kansas (TeamIndex 37) is exempt from all automated changes.
+- The user team (`settings.json` → `userTeam`; Kansas, TeamIndex 37, in the current dynasty) is exempt from all automated changes. Never hard-code Kansas; read the setting.
+
+### Check in before doing more (from Tom, after the reverted Portal Players redesign)
+
+- Work in small pieces. After each piece, stop, show Tom what changed, and wait for his OK before starting the next.
+- Before starting, list exactly what you'll change. Anything not on that list needs a new OK.
+- When Tom says "recommendations are good", he's approving those decisions, not a big build all at once.
+- For anything Tom will see (screens, layout, colors), show a mockup or a single example first and get his OK before changing the app.
+- Don't add extras he didn't ask for, even small ones. Offer them in one line instead.
+- Don't commit or push until Tom has seen the result and said OK.
+- If a piece turns out bigger than described, stop and tell him before carrying on.
 
 ## Local vs. cloud sessions
 
@@ -27,14 +39,22 @@ Cloud sessions: commit to a branch and push; Tom pulls and checks locally. Don't
 
 Tom refers to rules by code (e.g. "T3" = weak-starter need, "T10" = starter level, "P2" = player score). The code list, formulas, real-player examples and the setting behind each code are in `docs/ttt-internals.html`, published at https://claude.ai/artifact/4kbXJoCjikjx8PL56jqb98 (Tom's private artifact). When a rule changes: change the code, rerun on a fresh test copy with real players, update `docs/ttt-internals.html`, republish it to the same URL (Artifact tool with `url`; from a cloud session, if publishing isn't possible, just update the file and tell Tom), and update `PLAN.md`.
 
+The first publish of `docs/ttt-internals.html` in a new session is refused and returns a diff against the live page. If that diff only shows your own edits, publish again unchanged; otherwise merge the live lines in first.
+
+How to talk to Tom (he is not a programmer): short plain-language summaries with real players and teams, then one clear recommendation. Trust what he reads in-game (e.g. the pitch categories); if the save disagrees, say so once and use his value, without asking him to re-check.
+
+Screens (Tom is very particular about alignment): everything must line up. Numbers right-aligned with their headers aligned the same way, the same column widths for tables shown together, label columns the same width, even spacing. Check every screenshot for anything out of line before showing it to him. He wants a dark theme with a little color, not plain gray.
+
 How Tom tunes: he describes a problem with a real player (often a screenshot of the app), you propose 2–4 concrete options with numbers from the save, he picks; then show before/after on named players and league-wide counts (empty Top 10s, #1-pick spread, Top 10 prestige by rating band).
+
+To get numbers for options before changing code: write a scratch script (in the scratchpad, not the repo) that opens a `Session` on a fresh copy, changes `session.settings` in memory (it's read on every call) or re-sorts the returned `teams` rows, and calls `session.destinations(p.index)` for each uncommitted transfer. Report the same league counts as `tools/step4b-report.mjs --league`.
 
 ## Locations
 
 | What | Where |
 |---|---|
 | Plan, handoff, walkthrough | this repo: `PLAN.md`, `CLAUDE.md`, `docs/ttt-internals.html` |
-| Test saves (never written) | `test_saves/` — PLAYERSLEAVING, WEEK1PORTALOPENS, WEEK2, WEEK4PORTALCLOSES, SIGNINGDAY, PRESEASON (`DYNASTY-*COPY`) |
+| Test saves (never written) | `test_saves/` — PLAYERSLEAVING, WEEK1PORTALOPENS, WEEK2, WEEK4PORTALCLOSES, SIGNINGDAY, PRESEASON (`DYNASTY-*COPY`); `DYNASTY-STEP5PROOF` (Signing Day copy with the 4 proven edits at Liberty) and `DYNASTY-STEP5PROOF-PRESEASON` (the game's save after Tom advanced it) |
 | Tom's real saves and local test runs | `C:\Users\tomle\Documents\EA SPORTS College Football 27\saves\` (`TomsTransferTools\test_runs\` for run copies) |
 | Old tool (reference only, PC only) | `C:\Users\tomle\Downloads\TrapsTransferTool` |
 | Maxi's tool (source of the ratings model; PC only) | `C:\Users\tomle\Downloads\DynastyProgressionMonitor-9.2.1` |
@@ -45,13 +65,14 @@ How Tom tunes: he describes a problem with a real player (often a screenshot of 
 - `lib/stage.mjs` — stage from `SeasonInfo.CurrentOffseasonStage`: 2 Players Leaving, 3 Week 1, 4 Week 2, 5 Week 3 (inferred), 6 Week 4, 7 Signing Day; `CurrentStage=PreSeason` is preseason (no action).
 - `lib/draft-lock.mjs` — step 2 (sets every EarlyNFL leaving row of non-graduating, non-Kansas players to Staying, PersuadeAttempts ≥ 1).
 - `lib/depth-chart.mjs` — step 3 projection: rooms, roles, path to start, needs (starters lost/replaced/open, this season's starter OVRs), `roleAtTeam`.
-- `lib/ratings-model.mjs` + `lib/data/ratings-model.json` — overall formula and max overall (Maxi's method). Data extracted by `tools/extract-ratings-model.mjs` (needs Maxi's tool, PC only); personal use only.
+- `lib/ratings-model.mjs` + `lib/data/ratings-model.json` — overall formula and max overall (our implementation, modeled on Maxi's tool). Data extracted once by `tools/extract-ratings-model.mjs` (needs Maxi's tool, PC only).
 - `lib/fit.mjs` — step 4 team side (T1–T10): role at a team (fast, verified equal to `roleAtTeam`), stopgap vs prestige starter level (T10), room need = max(drop-off, weakness) or Stacked, per-player upgrade (level-weighted) and succession, position importance, level check; `fitAt`, `whoWantsHim`. Returns `baseScore` (used inside one player's list) and `score` (× position importance, for comparing across positions). Tuning in `settings.json` → `fit`.
-- `lib/destinations.mjs` — step 4b player side (P1–P3, K1–K4): dealbreaker = the game's school grade, pass/fail by OVR (Playing Time dropped below position average); player score; prestige floor; home state; coach perks (full → #2, partial → +points); combined Top 10 preview (`destinations`). Kansas skips team side and floor. School states in `lib/data/team-states.json`; tuning in `settings.json` → `playerSide`.
-- `lib/session.mjs` — app session used by the window and the CLI tools (open, draft lock, depth chart, Top 10 preview, save).
+- `lib/destinations.mjs` — step 4b player side (P1–P4, K1–K4): dealbreaker = the game's school grade, pass/fail by OVR (Playing Time dropped below position average); player score (playing-time weight halved for 80+; the two other categories of his ideal pitch, from `lib/data/pitches.json`); prestige floor; home state; coach perks for the user team only (full transfer perk → joins his list from as low as 18th, at #10); combined Top 10 preview (`destinations`). The user team (`settings.userTeam`, any dynasty; Kansas now) skips team side and floor. School states in `lib/data/team-states.json`; tuning in `settings.json` → `playerSide`.
+- `lib/signing-day.mjs` — step 5 (Signing Day roster build), read-only plans so far: `planRecruitCleanup` (un-sign signed HS/JUCO recruits under 60 at CPU teams, keep Star/Elite/Impact whose max reaches the league's average next-season starter, `fit.mjs` `starterLevels`), `BOARD_SLOTS` = 35. Tuning in `settings.json` → `signingDay`. Pieces 3–4 (placing transfers, cuts, writing via `lib/roster-edits.mjs`) are not built yet; see PLAN.md "Step 5 results".
+- `lib/session.mjs` — app session used by the window and the CLI tools (open, draft lock, depth chart, Top 10 preview, Signing Day plan, save).
 - `lib/safe-save.mjs` — backup to `TTT Backups\` beside the save → write temp → reopen and verify stage + player count → replace.
 - `lib/settings.mjs` + `settings.json` — every tuning value (user team, starters by scheme, role cutoffs, `fit`, `playerSide`). `settings.json` overrides defaults at the top level only, so when adding a nested value, add it to both.
-- `electron-main.cjs`, `preload.cjs`, `ui/` — the window (tabs: Stage, Depth Chart, League Needs). Depth Chart tab → type a portal player → role at the selected team + "Top 10 preview" table (★ = in his Top 10).
+- `electron-main.cjs`, `preload.cjs`, `ui/` — the window (tabs: Stage, Portal Players, Depth Chart, League Needs, Signing Day). Basic dark theme: colors are tokens at the top of `ui/styles.css`; numbers and their headings right-aligned (`fillTable` marks numeric headings), tabular digits, fixed column widths in depth-chart cards. Portal Players tab → type a portal player → "Top 10 preview" table (★ column = in his Top 10); click a team → its depth chart with his role there. Signing Day tab → recruit cleanup summary, all CPU schools (click a heading to sort), click a school for its un-signed and kept recruits. The page's CSP blocks inline `style=""` attributes; set sizes from JS (`el.style.width`) or in `styles.css`.
 
 ## Save facts worth knowing
 
@@ -59,12 +80,15 @@ How Tom tunes: he describes a problem with a real player (often a screenshot of 
 - HS recruits and transfers point at **different** ProspectTargetSchool tables; follow the reference (the old tool's bug).
 - Players who left keep their old team in `PrevTeamIndex` (transfers from Week 1, graduates from Week 2). `TeamIndex` 255 = no team.
 - Signing Day: transfer destination = team whose `CommittedPlayers` board holds him, else Top School #1 when `RecruitStage` is Signed/HardCommitted.
-- Player side: `RecruitingDealbreaker`, `PLYR_HOME_STATE` (Player); `TeamPrestige` 0–10 (Team). School (dealbreaker) grades: `Team.MySchoolTrackingTable` → row with `*Grade` letters, `ProPotentialGrade<group>`, `PlayingStyleGradeByPlayerTypeTable` → `PlayerTypeGradeTable` (grade per archetype). Coach perks: `Team.CoachTalentEffects` → `PlayersLeaving_InterestBoost_Transfers` / `PlayersLeaving_ThresholdDecrease_Dealbreakers` int[8] in order QB, RB/FB, WR/TE, OL, DL, LB, DB, K/P. `Motivation1–3` are empty. madden-franchise won't add fields to an already-read table, so request every field in `Dynasty.load`.
+- Player side: `RecruitingDealbreaker`, `IdealRecruitingPitch` (20 pitches × 3 categories in `lib/data/pitches.json`; his dealbreaker is one of them, except Gym Rat players, whose dealbreaker isn't), `PLYR_HOME_STATE` (Player); `TeamPrestige` 0–10 (Team). School (dealbreaker) grades: `Team.MySchoolTrackingTable` → row with `*Grade` letters, `ProPotentialGrade<group>`, `PlayingStyleGradeByPlayerTypeTable` → `PlayerTypeGradeTable` (grade per archetype). Coach perks: `Team.CoachTalentEffects` → `PlayersLeaving_InterestBoost_Transfers` / `PlayersLeaving_ThresholdDecrease_Dealbreakers` int[8] in order QB, RB/FB, WR/TE, OL, DL, LB, DB, K/P. `Motivation1–3` are empty. madden-franchise won't add fields to an already-read table, so request every field in `Dynasty.load`.
 - Archetype = `PlayerType`; skill caps = `SkillGroupCap1–6` (0–20). The `Age` field is unreliable (1 or 52 for many players).
 - At the Signing Day → preseason rollover the game deletes uncommitted transfers and unsigned recruits, and trims rosters to 85 by cutting veterans, never incoming recruits.
 - Game commits always go to a school on the player's in-game list at that time (574 of 581 to #1), but lists change during the portal (about half of Signing Day commits went to a school added after Week 1). Commits: Week 1 0, Week 2 1, Week 4 172, Signing Day 581; 1,310 uncommitted at Signing Day.
 - NIL: player `BaseNILValue`, team `NILProgramPointsSpent` / `ProgramPointBudget`; how the game uses them for CPU schools is unknown.
-- Shell note (Windows Git Bash): apostrophes in JS strings have broken `node -e` quoting; for bigger edits write a script file and run it.
+- Signing Day edits proven in-game (step 5 piece 1): **un-sign** = Recruit `RecruitStage` Top10 + `TotalScholarshipOffers` 0 + off the team's `CommittedPlayers` board; **cut** = `TeamIndex` 255 + `PrevTeamIndex` old team + off the team's roster list (Player[] table id 6137, one row per team; the row index is not the TeamIndex) and its depth-chart slots (Player[] 6136 rows, referenced by DepthChart 6302); **commit a transfer** = `RecruitStage` Signed + `TotalScholarshipOffers` 1 + on the board + the school moved to #1 of his list with the top influence. Arrays are kept packed (later slots move up, empty = 32 zero bits).
+- Each team's `CommittedPlayers` board (Player[] 6135) has 35 slots. The Player table holds 17,500 rows (16,235 used at Signing Day), so removed players must be deleted, never left teamless. At the rollover the game fills teams under 85 with leftover uncommitted transfers. Team colors: `TEAM_BACKGROUNDCOLORR/G/B` (+`2` for secondary); short name `Mascot_AssetName` (LIB, KU); logo images are not in the save.
+- After Tom advances a save in-game, the game writes `<name>-AUTOSAVE` next to it; the loaded file itself is unchanged.
+- Shell note (Windows Git Bash): apostrophes in JS strings break `node -e` and heredoc quoting. For anything bigger than a one-liner, write the script with the Write tool into the scratchpad and run it with `node <path>`.
 
 ## Testing commands (run from the repo root; paths with spaces need quotes)
 
@@ -73,12 +97,13 @@ npm install                                                                     
 node tools/step3-report.mjs test_saves/DYNASTY-WEEK1PORTALOPENSCOPY --teams=Missouri --rooms=QB,WR --league=10
 node tools/step4-report.mjs test_saves/DYNASTY-WEEK1PORTALOPENSCOPY --who="Caleb Hawkins" --at=Team,Team --league --verify
 node tools/step4b-report.mjs test_saves/DYNASTY-WEEK1PORTALOPENSCOPY --who="Caleb Hawkins" --at=Kansas --league
-node tools/capacity-check.mjs test_saves/DYNASTY-SIGNINGDAYCOPY                  # room for uncommitted transfers after recruit cleanup
+node tools/step5-report.mjs test_saves/DYNASTY-SIGNINGDAYCOPY --team=Liberty      # step 5 recruit cleanup preview (league totals, boards, one school's list)
+node tools/capacity-check.mjs test_saves/DYNASTY-SIGNINGDAYCOPY                  # room for uncommitted transfers after recruit cleanup (older, simpler check)
 node tools/list-journey.mjs test_saves                                           # in-game lists over time vs where players landed
 node tools/step1-test.mjs "<folder of saves>" "<work folder>"                    # open/save/compare (writes copies into the work folder)
 node tools/step2-test.mjs "<PLAYERSLEAVING save>" "<work folder>"                # draft lock + diff
 node tools/step2-check.mjs "<...draft-lock.json>" "<later save>"                 # locked players still on teams?
-runtime\electron\electron.exe tools\ui-smoke.cjs --depth=Missouri --role=Name "<save>" "<out.png>"   # PC only: drive the real window
+runtime\electron\electron.exe tools\ui-smoke.cjs --player=Name --depth=Missouri "<save>" "<out.png>"   # PC only: drive the real window
 ```
 
 The tools only read the saves you pass; step1/step2 tests write to the work folder you give them, never to the input save.
