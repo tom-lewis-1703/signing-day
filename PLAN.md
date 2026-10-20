@@ -6,6 +6,8 @@ Shortened on Oct 20, 2026 (sixth session). The old long version, with every tuni
 
 ## Where we are and what's next
 
+**Last chat (Oct 20, sixth session):** shortened this plan around a plain-language "How the tool works"; reviewed every layer of the code (findings below, no calculation errors); fixed review #3 (misspelled `userTeam` now stops the save opening) and #4 (settings fill in missing nested values); added the one-task-per-chat workflow (`/next`, `/handoff`). **Next: task 1, the save writer.**
+
 **Goal right now (Tom, sixth session):** one complete test run of a whole offseason on copies, Players Leaving → Preseason, with Tom checking in-game. Be token-efficient: Claude runs the bare minimum tests that prove each piece works; Tom tests the rest in-game. Quality stays the same.
 
 **Built:** reading the save, safe saving, draft lock (writes), next-season depth chart, team score, player score, Top 10 preview, Signing Day plan (recruit cleanup + placing every uncommitted transfer + cuts; preview only). The only thing the app writes today is the draft lock.
