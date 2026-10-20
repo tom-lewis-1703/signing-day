@@ -6,15 +6,12 @@ Shortened on Oct 20, 2026 (sixth session). The old long version, with every tuni
 
 ## Where we are and what's next
 
-**Last chat (Oct 20, eighth session):** task 2, weekly commits and the weekly interest update, built and proven in-game (branch `claude/upbeat-wozniak-1xn0fq`).
-- Recruiting boards read (review #1, `lib/dynasty.mjs`): every RecruitTarget table (the user team's board is in its own; missing it let the tool commit Austin Mack, Kendre Harrison and Jonaz Walton off Tom's board; fixed). Game offers barely match our Top 10s (Week 2: an offering school is in our Top 10 for 28%; `tools/offers-report.mjs`).
-- Weekly commits (`lib/weekly-commits.mjs`, `tools/weekly-run.mjs` writes, `tools/weekly-report.mjs` previews): Week 2 copy → 377 commits; Week 3 → 357 more (756 of 1,891). In-game: all held into Week 3 (Lagway → SMU, Lindsey → Auburn, Underwood → Ole Miss); the game's own 21 Week 2→3 commits all went to the #1 of our written lists.
-- Weekly interest update (`planListUpdates`, `RosterEdits.setTopSchools`, `tools/lists-report.mjs`): Week 2 → 1,502 lists rewritten to our live Top 10; held in-game at Week 3 (Iamaleava, Carroll, Moore). User team: same spot and influence on all 439 lists that have it; players on its board untouched.
-- Rule changes (Tom): T12 newcomer lock (below), never commit a stopgap, Signing Day never cuts a committed transfer. Signing Day preview after all of it: 1,310 placed, 829 cuts (146 real, 14 deleted), 0 over 85.
-- Effect Tom noticed (fine with him): our lists drop schools that don't need a player, so big schools run short of players listing them (Alabama 220 → 53; D-line 19 → 2) and went after Tom's targets (Alabama on Kameryn Crawford, Auburn on Jonaz Walton). Tom: keep "fit" lists; harder recruiting is OK.
-- Test copies built before the last three rule changes (stopgaps, lock break, board fix for WEEKLYTEST); the full run tests the latest rules.
+**Last chat (Oct 20, ninth session):** Tom's open question decided, option A = new rule **P5** (branch `claude/tender-davinci-i51hoi`).
+- A transfer's old school is never on his Top 10 (so never a weekly commit) and no longer skips his prestige floor; at Signing Day it is last in the "best fit" fallback. Yhonzae Pierre (RE 91) → Ohio State (Top 10 #1, starter) instead of Alabama.
+- Week 2: old school in 162 of 1,890 Top 10s and 4 of 377 weekly commits → 0. Signing Day: 14 back at old school → 0; placed 1,310, 0 unplaced, 0 over 85; real cuts 146 → 151, deleted 14 → 15 (all FB/TE 56–68).
+- The eighth session (task 2: weekly commits + weekly interest update, proven in-game Week 2 → 3) is in git history and under "Weekly commits" below.
 
-**Next:** decide Tom's open question first (not built): **a transfer's old school** (Yhonzae Pierre RE 91 had Alabama, the school he left, as #1: exempt from the prestige floor + home state + A+ Pro Potential). Recommended A: never in his Top 10 or a weekly commit; only Signing Day's last-resort "best fit" so a real player isn't deleted. B: score × 0.5. C: never, anywhere. Then task 3.
+**Next:** task 3, moving a cut returning player to another school.
 
 **Goal right now (Tom, sixth session):** one complete test run of a whole offseason on copies, Players Leaving → Preseason, with Tom checking in-game. Be token-efficient: Claude runs the bare minimum tests that prove each piece works; Tom tests the rest in-game. Quality stays the same.
 
@@ -69,7 +66,7 @@ The full rules are in `CLAUDE.md` ("Working rules" and "Check in before doing mo
 |---|---|---|---|
 | Players Leaving | Underclassmen declare for the draft; players enter the portal | **Draft lock:** only players out of eligibility (seniors not redshirting) may leave for the draft; everyone else is set to Staying | Built, writes, signed off |
 | Week 1 | Portal opens; each transfer has a Top 10 of schools | Nothing yet (writing Top 10s skipped for the first run) | — |
-| Weeks 1–4 | Schools recruit; a player commits when an offering school's influence reaches his CommitScore | **Weekly commits:** commit a share of transfers each week to schools that need them | Designed, building next |
+| Weeks 1–4 | Schools recruit; a player commits when an offering school's influence reaches his CommitScore | **Weekly commits:** commit a share of transfers each week to schools that need them | Built, proven Week 2 → 3 |
 | Signing Day | Last commits; recruits sign | **Roster build:** un-sign weak recruits, place every uncommitted transfer, cut only where needed, every CPU team ≤ 85 | Planned in preview; writing next |
 | Preseason (rollover) | Deletes uncommitted transfers and unsigned recruits; cuts veterans to reach 85 | Nothing; by now there is nothing left for the game to cut or delete | — |
 
@@ -88,12 +85,13 @@ Everything after the draft lock is built from the same four blocks. They run in 
 - **Reality checks:** a backup only counts if his max overall reaches their weakest starter −3 (T5); a "starter" more than 5 below the usual starter at schools of that prestige is a stopgap and counts as a backup (T10); ×0.25 for each similar player already coming into that room (same year, OVR within 3) (T11); he only takes a start from another newcomer if he's 4+ better, and a school takes at most (starters lost in that room + 1) transfers there (T12).
 - QB ×1.25, OT and EDGE ×1.1, used only when comparing players at different positions (T9).
 
-**3. Would he go there? Player score, 0–100 (P1–P4).**
+**3. Would he go there? Player score, 0–100 (P1–P5).**
 - **Dealbreaker is pass/fail** using the game's own school grade: B− needed for 85+ OVR, C for 78–84, D+ below that. Playing Time needs Starter or Rotation; Proximity needs his home state. The Playing Time dealbreaker is ignored for players below the league's average starter at their position (P1).
 - **Score** = playing time × year weight (Fr 20%, So 35%, Jr 50%, final year 70%; halved for 80+ OVR) + the rest split: dealbreaker grade 45%, his two other ideal-pitch categories 15% each, prestige 15%, team strength 5%, home state 5%; ±3 small fixed randomness (P2, P4).
-- **Prestige floor:** 90+ OVR want prestige 6+ (fall back to 4+), 85–89 want 4+ (fall back to 2+), his old school always allowed (P3).
+- **Prestige floor:** 90+ OVR want prestige 6+ (fall back to 4+), 85–89 want 4+ (fall back to 2+) (P3).
+- **Never back to his old school** (P5, Tom's option A, ninth session): the school he left is never on his Top 10 or a weekly commit; at Signing Day only as the last "best fit" so a real player isn't deleted.
 
-**4. His Top 10 (K1–K4).** A school can be on his list only if it passes his dealbreaker, the school wants him (team score above 0) and it meets his prestige floor (K2). Ranked by a 50/50 mix of team score and player score (K1). **User team:** skips the team side and the floor; it's on his list whenever it passes his dealbreaker, ranked by his player score; with a full transfer perk at his position it can join from as low as 18th, at #10 (K3, K4).
+**4. His Top 10 (K1–K4).** A school can be on his list only if it passes his dealbreaker, the school wants him (team score above 0) it meets his prestige floor and it isn't the school he left (K2, P5). Ranked by a 50/50 mix of team score and player score (K1). **User team:** skips the team side and the floor; it's on his list whenever it passes his dealbreaker, ranked by his player score; with a full transfer perk at his position it can join from as low as 18th, at #10 (K3, K4).
 
 ### Signing Day roster build (SD1–SD6)
 
@@ -112,6 +110,7 @@ Everything after the draft lock is built from the same four blocks. They run in 
 - **Never:** a player on the user team's recruiting board, or with the user team in his top 3. No cuts and no recruit cleanup during the weeks.
 - **Interest update (from Week 2):** each uncommitted transfer's in-game list becomes his live Top 10, with his existing influence numbers high to low; schools with him on their board keep theirs (the game commits from that number); the user team keeps its exact spot and influence and is never added or removed; players on its board are left alone.
 - **T12 newcomer lock (Tom):** a transfer coming in at the school's starter level (T10: within 5 of the usual starter for its prestige) locks his starting spot (Drake Lindsey QB 84 keeps Iamaleava 89 off Auburn), unless the newcomer is beaten by 8+ OVR or by a top-5 transfer at his position (Pierre 91 over Julian Walker 80 at Alabama; KaMario Taylor QB #1 over Lindsey). Below the level he's a stopgap: 4+ better takes his spot. In rooms with several starters only the newcomer's own spot is protected.
+- **Fit lists, harder recruiting (Tom, eighth session):** our lists drop schools that don't need a player, so big schools run short of players listing them (Alabama 220 → 53) and go after the user team's targets (Alabama on Kameryn Crawford, Auburn on Jonaz Walton). Tom: keep "fit" lists; harder recruiting is OK.
 
 ## What the game does on its own (why the rules exist)
 
