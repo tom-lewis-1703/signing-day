@@ -210,7 +210,7 @@
       "ovrWithin": 3,
       "mult": 0.25
     },
-    "newcomerUpgrade": 4,
+    "newcomerUpgrade": 99,
     "transferLimit": {
       "extra": 1
     }
