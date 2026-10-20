@@ -14,6 +14,12 @@ Branches: `main`; one branch per session or step (the sixth session's was `claud
 - Only the worst of the worst real players may ever be left unplaced/deleted. Real players always come before generated recruits.
 - The user team (`settings.json` → `userTeam`; Kansas, TeamIndex 37, in the current dynasty) is exempt from all automated changes. Never hard-code Kansas; read the setting.
 
+### Fast and loose, but not sloppy (Tom, Oct 20, seventh session)
+
+- Be hyper-efficient with Tom's usage limit and tokens: minimal testing (the least that proves it works), short replies, no re-reading or re-running what's already known. Quality stays the same.
+- Batch in-game tests: put everything that needs checking in the game into one test copy (or one set of copies) so Tom can check it all in one launch.
+- This does not loosen the check-in rules below: still small pieces, still wait for Tom's OK, never try to finish the whole project in one go.
+
 ### Check in before doing more (from Tom, after the reverted Portal Players redesign)
 
 - Work in small pieces. After each piece, stop, show Tom what changed, and wait for his OK before starting the next.
