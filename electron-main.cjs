@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require("electron");
+const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { pathToFileURL } = require("url");
@@ -32,7 +33,16 @@ handle("ttt:choose-save", async () => {
   });
   return picked.canceled ? null : picked.filePaths[0];
 });
-handle("ttt:open", async filePath => (await getSession()).open(filePath));
+handle("ttt:open", async filePath => {
+  const result = await (await getSession()).open(filePath);
+  writeState({ lastSave: result.filePath });
+  return result;
+});
+// The last save opened, so the window can offer to reopen it at launch.
+handle("ttt:last-save", async () => {
+  const last = readState().lastSave;
+  return last ? { path: last, exists: fs.existsSync(last) } : null;
+});
 handle("ttt:save", async () => (await getSession()).save());
 handle("ttt:draft-lock-preview", async () => (await getSession()).previewDraftLock());
 handle("ttt:draft-lock-apply", async () => (await getSession()).applyDraftLock());
@@ -45,10 +55,19 @@ handle("ttt:who-wants-him", async playerIndex => (await getSession()).whoWantsHi
 handle("ttt:destinations", async playerIndex => (await getSession()).destinations(playerIndex));
 handle("ttt:signing-day-plan", async () => (await getSession()).signingDayPlan());
 
+// Remembered between runs (app-state.json in the app's user-data folder, never in a save).
+const STATE_FILE = () => path.join(app.getPath("userData"), "app-state.json");
+function readState() {
+  try { return JSON.parse(fs.readFileSync(STATE_FILE(), "utf8")) || {}; } catch { return {}; }
+}
+function writeState(changes) {
+  try { fs.writeFileSync(STATE_FILE(), JSON.stringify({ ...readState(), ...changes })); } catch { /* not worth failing over */ }
+}
+
 function createWindow() {
   Menu.setApplicationMenu(null);
   mainWindow = new BrowserWindow({
-    width: 1100, height: 800, minWidth: 800, minHeight: 600,
+    width: 1600, height: 1000, minWidth: 1100, minHeight: 640,
     title: "Tom's Transfer Tools",
     backgroundColor: "#121519",
     webPreferences: {
