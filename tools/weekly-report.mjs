@@ -31,6 +31,9 @@ for (const [label, w] of variants) {
   console.log(`OVR 85+ ${band(85, 200)} · 80–84 ${band(80, 85)} · 75–79 ${band(75, 80)} · 70–74 ${band(70, 75)} · under 70 ${band(0, 70)} | stars 5★ ${star(5)} 4★ ${star(4)} 3★ ${star(3)} 2★ ${star(2)} 1★ ${star(1)}`);
   const avgP = (lo, hi) => { const x = c.filter(e => e.overall >= lo && e.overall < hi); return x.length ? (x.reduce((a, e) => a + d.teams.get(e.teamIndex).prestige, 0) / x.length).toFixed(1) : "-"; };
   console.log(`roles Starter ${c.filter(e => e.role === "Starter").length} · Rotation ${c.filter(e => e.role === "Rotation").length} · other ${c.filter(e => !["Starter", "Rotation"].includes(e.role)).length} | avg prestige 85+ ${avgP(85, 200)} · 80–84 ${avgP(80, 85)} · 75–79 ${avgP(75, 80)} · under 75 ${avgP(0, 75)}`);
+  const ids = new Set(c.map(e => e.index));
+  const topN = n => { const x = d.players.filter(p => p.isTransfer && !p.transferCommitted && p.nationalRank && p.nationalRank <= n); return `${x.filter(p => ids.has(p.index)).length} of ${x.length}`; };
+  console.log(`committed this week: top 25 ranked ${topN(25)} · top 100 ${topN(100)} · top 500 ${topN(500)}`);
   console.log(`went to our #1 ${pct(c.filter(e => e.topIndex === 0).length, c.length)} · to his in-game #1 ${pct(c.filter(e => e.teamIndex === e.gameNo1).length, c.length)} · to an offering school ${c.filter(e => e.how.startsWith("Offered")).length} · schools getting one ${new Set(c.map(e => e.teamIndex)).size}`);
   for (const e of c.slice(0, show)) {
     console.log(`  ${e.name.padEnd(22)} ${e.position.padEnd(4)} ${String(e.overall).padStart(2)} ${e.stars ?? "-"}★ #${String(e.nationalRank ?? "-").padEnd(5)} ${e.from.padEnd(16)} → ${e.team.padEnd(16)} ${e.how.padEnd(20)} ${e.role.padEnd(8)} lead ${Math.round(e.margin * 100)}%`);

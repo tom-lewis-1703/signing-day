@@ -321,18 +321,19 @@
   },
   "weekly": {
     "pace": {
-      "week-1": 0.1,
-      "week-2": 0.25,
-      "week-3": 0.45,
+      "week-1": 0,
+      "week-2": 0.2,
+      "week-3": 0.4,
       "week-4": 0.7
     },
     "weights": {
-      "favorite": 0,
-      "rank": 1,
-      "offer": 0
+      "favorite": 1,
+      "rank": 2,
+      "offer": 1
     },
     "userTopN": 3,
     "maxSpot": 10,
-    "softLimits": true
+    "softLimits": true,
+    "baseChance": 0.1
   }
 }
