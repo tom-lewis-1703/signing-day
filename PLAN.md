@@ -6,7 +6,7 @@ Shortened on Oct 20, 2026 (sixth session). The old long version, with every tuni
 
 ## Where we are and what's next
 
-**Last chat (Oct 20, ninth session):** Tom's open question decided, option A = new rule **P5** (branch `claude/tender-davinci-i51hoi`).
+**Last chat (Oct 20, ninth session):** new rule **P5** (Tom's option A) and task 3 (branch `claude/tender-davinci-i51hoi`).
 - A transfer's old school is never on his Top 10 (so never a weekly commit) and no longer skips his prestige floor; at Signing Day it is last in the "best fit" fallback. Yhonzae Pierre (RE 91) → Ohio State (Top 10 #1, starter) instead of Alabama.
 - Week 2: old school in 162 of 1,890 Top 10s and 4 of 377 weekly commits → 0. Signing Day: 14 back at old school → 0; placed 1,310, 0 unplaced, 0 over 85; real cuts 146 → 151, deleted 14 → 15 (all FB/TE 56–68).
 - The eighth session (task 2: weekly commits + weekly interest update, proven in-game Week 2 → 3) is in git history and under "Weekly commits" below.
