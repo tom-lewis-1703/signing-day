@@ -205,6 +205,14 @@
     "starterLevel": {
       "basis": "prestige",
       "margin": 5
+    },
+    "lookalike": {
+      "ovrWithin": 3,
+      "mult": 0.25
+    },
+    "newcomerUpgrade": 4,
+    "transferLimit": {
+      "extra": 1
     }
   },
   "playerSide": {
@@ -221,10 +229,10 @@
       }
     ],
     "rest": {
-      "dealbreaker": 0.4,
-      "secondary": 0.1,
-      "prestige": 0.25,
-      "teamStrength": 0.1,
+      "dealbreaker": 0.45,
+      "secondary": 0.15,
+      "prestige": 0.15,
+      "teamStrength": 0.05,
       "home": 0.05
     },
     "jitter": 3,
@@ -271,6 +279,43 @@
         "Star",
         "Elite",
         "Impact"
+      ]
+    },
+    "placement": {
+      "caps": {
+        "QB": 5,
+        "HB": 6,
+        "FB": 1,
+        "WR": 11,
+        "TE": 5,
+        "OT": 8,
+        "OG": 8,
+        "C": 4,
+        "EDGE": 8,
+        "DT": 8,
+        "LB": 12,
+        "CB": 9,
+        "S": 8,
+        "K": 2,
+        "P": 2
+      },
+      "rosterMax": 85,
+      "cutMargin": 5,
+      "yearFactor": {
+        "Freshman": 0.5,
+        "Sophomore": 0.35,
+        "Junior": 0.2,
+        "Senior": 0
+      },
+      "protect": {
+        "upperMinOverall": 77,
+        "underMinOverall": 72,
+        "underMinMax": 77
+      },
+      "maxRealCuts": 5,
+      "cutRoles": [
+        "Backup",
+        "Buried"
       ]
     }
   }

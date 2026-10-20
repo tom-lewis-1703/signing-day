@@ -10,8 +10,6 @@ const S = {
   projects: false,
   teamIndex: null,   // team shown on the Teams view
   signing: null,     // Signing Day plan
-  school: null,      // school shown on the Signing Day view
-  sdSort: { key: "unsign", desc: true },
   pending: []
 };
 
@@ -64,10 +62,10 @@ function grid(cols, rows, { onClick, selected, sort, onSort } = {}) {
     return th;
   }));
   const body = rows.map(r => {
-    const tr = el("tr", {}, ...cols.map(c => el("td", {
-      textContent: c.v(r) ?? "",
-      className: [c.num ? "num" : "", typeof c.cls === "function" ? c.cls(r) : c.cls || ""].join(" ").trim()
-    })));
+    const tr = el("tr", {}, ...cols.map(c => {
+      const className = [c.num ? "num" : "", typeof c.cls === "function" ? c.cls(r) : c.cls || ""].join(" ").trim();
+      return c.node ? el("td", { className }, c.node(r)) : el("td", { textContent: c.v(r) ?? "", className });
+    }));
     if (onClick) { tr.classList.add("click"); tr.addEventListener("click", () => onClick(r)); }
     if (selected && selected(r)) tr.classList.add("sel");
     return tr;
@@ -78,7 +76,7 @@ function grid(cols, rows, { onClick, selected, sort, onSort } = {}) {
 function sortBy(rows, cols, sort) {
   const c = cols.find(x => x.key === sort.key);
   return [...rows].sort((a, b) => {
-    const va = c.v(a), vb = c.v(b);
+    const val = c.sortValue || c.v, va = val(a), vb = val(b);
     const d = c.num ? va - vb : String(va).localeCompare(String(vb));
     return sort.desc ? -d : d;
   });
@@ -100,7 +98,7 @@ $("nav").addEventListener("click", e => { const v = e.target.dataset?.view; if (
 async function openPath(filePath) {
   const info = await busy(`Opening ${filePath}…`, () => call("open", filePath));
   if (!info) return null;
-  Object.assign(S, { info, portal: null, picked: null, pickedName: "", teams: null, teamIndex: info.userTeam?.teamIndex ?? null, signing: null, school: null, pending: [] });
+  Object.assign(S, { info, portal: null, picked: null, pickedName: "", teams: null, teamIndex: info.userTeam?.teamIndex ?? null, signing: null, pending: [] });
   for (const b of $("nav").querySelectorAll("button")) b.disabled = false;
   $("saveBtn").disabled = false;
   $("reopenBtn").hidden = true;
@@ -240,7 +238,7 @@ async function pickPlayer(p) {
   const need = t => `${t.need === "Drop-off" ? `Drop-off ${t.dropOff}` : t.need === "Weak" ? `Weak (${t.weakness} below)` : t.need === "Upgrade" ? `Upgrade +${t.upgrade}` : t.need} ×${t.needMult}`;
   const notes = t => [t.userTeam ? "your team" : "", t.joinedByPerk ? `joined by coach perk (was #${w.userRank})` : "",
     t.meets ? "" : "fails dealbreaker", t.allowed ? "" : "below prestige floor", t.wantsHim ? "" : "team not interested",
-    t.levelOk ? "" : "ceiling too low", t.parts.home ? "home state" : "", t.oldTeam ? "old team" : "", t.serviceAcademy ? "service academy" : ""].filter(Boolean).join(", ");
+    t.levelOk ? "" : "ceiling too low", t.parts.home ? "home state" : "", t.lookalikes ? `${t.lookalikes} lookalike${t.lookalikes > 1 ? "s" : ""} coming in` : "", t.oldTeam ? "old team" : "", t.serviceAcademy ? "service academy" : ""].filter(Boolean).join(", ");
   $("pTop").replaceChildren(
     el("h2", { textContent: `Top 10 preview (★) and next 15 · click a team for his role there` }),
     grid([
@@ -318,70 +316,247 @@ async function showTeam(teamIndex) {
   }));
 }
 
-// ---------- signing day ----------
-const SD_COLS = [
-  { key: "team", h: "School", v: t => t.team },
-  { key: "signed", h: "Signed", v: t => t.signed, num: true },
-  { key: "unsign", h: "Un-Signed", v: t => t.unsign.length, num: true, cls: "out" },
-  { key: "kept", h: "Kept Under 60", v: t => t.kept.length, num: true, cls: "kept" },
-  { key: "boardBefore", h: "Board Now", v: t => t.boardBefore, num: true },
-  { key: "boardAfter", h: "Board After", v: t => t.boardAfter, num: true },
-  { key: "boardFree", h: "Free", v: t => t.boardFree, num: true, cls: "free" }
-];
+// ---------- signing day (preview only): overview tiles → transfers, schools, one school, cuts, cleanup ----------
+const SD = { page: "home", teamIndex: null, back: "schools", schoolSort: { key: "avgIn", desc: true }, filter: { pos: "", stars: "", q: "", cutKind: "real" } };
+const starText = s => s ? "★".repeat(s) : "–";
+const yr = y => ({ Freshman: "Fr", Sophomore: "So", Junior: "Jr", Senior: "Sr" })[y] ?? y;
+const pct = (a, b) => b ? `${Math.round(a / b * 100)}%` : "–";
 
 async function loadSigning() {
   if (!S.signing) {
+    Object.assign(SD, { page: "home", teamIndex: null, tab: 0 });
     const plan = await busy("Building the Signing Day preview…", () => call("signingDayPlan"));
     if (!plan) return;
+    if (plan.available) {
+      const cleanupBy = new Map(plan.teams.map(t => [t.teamIndex, t]));
+      plan.rows = plan.placement.teams.map(t => {
+        const c = cleanupBy.get(t.teamIndex);
+        // Transfers in = game commits + transfers placed by the tool (cut players moved here are counted apart).
+        const tin = t.placed.filter(e => e.how !== "Cut elsewhere");
+        const best = [...tin].sort((a, b) => b.overall - a.overall)[0] || null;
+        const avgIn = tin.length ? Math.round(tin.reduce((a, e) => a + e.overall, 0) / tin.length * 10) / 10 : 0;
+        return { ...c, ...t, best, avgIn, inCount: tin.length, movedIn: t.placed.length - tin.length,
+          gameIn: tin.filter(e => e.how === "Committed").length, realCuts: t.cuts.filter(e => e.kind !== "Recruit").length,
+          topIn: tin.filter(e => (e.stars ?? 0) >= 4).length };
+      });
+      plan.allIn = [...plan.placement.placed, ...plan.placement.committed];
+    }
     S.signing = plan;
   }
-  const p = S.signing;
-  if (!p.available) {
-    $("sNote").textContent = `The recruit cleanup only runs at Signing Day. This save is at ${p.stage}.`;
-    $("sSummary").replaceChildren(); $("sSchools").replaceChildren(); $("sSchool").replaceChildren();
-    return;
-  }
-  $("sNote").textContent = `Preview only: nothing is written. ${p.userTeam} is never changed. Click a school for its recruits; click a heading to sort.`;
-  const byDev = list => Object.entries(list.reduce((m, e) => ({ ...m, [e.dev]: (m[e.dev] || 0) + 1 }), {}))
-    .sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${n(v)}`).join(", ");
-  const total = p.teams.length * p.boardSlots, sum = k => p.teams.reduce((a, t) => a + t[k], 0);
-  kvRows("sSummary", [
-    ["Signed recruits at CPU schools", `${n(sum("signed"))} (${n(p.unsign.length + p.kept.length)} under ${p.underOverall})`],
-    ["Un-signed", `${n(p.unsign.length)} (${byDev(p.unsign)})`],
-    [`Kept under ${p.underOverall}`, `${n(p.kept.length)} (${byDev(p.kept)}): ${p.keepDev.join("/")} whose max reaches the average starter at his position`],
-    [`Board spots free (${p.boardSlots} per school)`, `${n(total - sum("boardBefore"))} → ${n(total - sum("boardAfter"))}`],
-    ["Schools with a full board", `${p.teams.filter(t => t.boardBefore >= p.boardSlots).length} → ${p.teams.filter(t => t.boardAfter >= p.boardSlots).length}`]
-  ]);
-  renderSchools();
-  renderSchool(p.teams.find(t => t.teamIndex === S.school?.teamIndex) || sortBy(p.teams, SD_COLS, S.sdSort)[0]);
+  renderSigning();
 }
 
-function renderSchools() {
-  $("sSchools").replaceChildren(grid(SD_COLS, sortBy(S.signing.teams, SD_COLS, S.sdSort), {
-    sort: S.sdSort,
-    onSort: c => { S.sdSort = { key: c.key, desc: c.key === S.sdSort.key ? !S.sdSort.desc : !!c.num }; renderSchools(); },
-    onClick: renderSchool,
-    selected: t => t.teamIndex === S.school?.teamIndex
+function sdGo(page, teamIndex = null) {
+  if (page === "school") { SD.back = SD.page === "school" ? SD.back : SD.page; SD.teamIndex = teamIndex; }
+  SD.page = page;
+  renderSigning();
+  window.scrollTo(0, 0);
+}
+
+function crumbs(...parts) {
+  return el("div", { className: "crumbs" }, ...parts.flatMap((p, i) => {
+    const node = p.go ? el("button", { className: "link", textContent: p.label }) : el("span", { textContent: p.label });
+    if (p.go) node.addEventListener("click", p.go);
+    return i ? [el("span", { className: "muted", textContent: " › " }), node] : [node];
   }));
 }
 
-function renderSchool(t) {
-  S.school = t;
-  renderSchools();
-  const p = S.signing;
-  const cols = [
-    { h: "Player", v: e => e.name }, { h: "Pos", v: e => e.position }, { h: "OVR", v: e => e.overall, num: true },
-    { h: "Max", v: e => e.max, num: true, cls: "max" }, { h: "Dev", v: e => e.dev },
-    { h: "Type", v: e => e.recruitClass.startsWith("JuniorCollege") ? "JUCO" : "HS" },
-    { h: "Avg Starter", v: e => e.avgStarter ?? "–", num: true, tip: "League average next-season starter at his position" }
-  ];
-  $("sSchool").replaceChildren(
-    el("h2", { textContent: `${t.team}: ${t.signed} signed · board ${t.boardBefore} → ${t.boardAfter} (${t.boardFree} free)` }),
-    el("h2", { textContent: `Un-signed (${t.unsign.length})` }),
-    grid(cols, [...t.unsign].sort((a, b) => b.overall - a.overall)),
-    el("h2", { textContent: `Kept under ${p.underOverall} (${t.kept.length})` }),
-    grid(cols, t.kept));
+function tile(big, label, sub, go, cls = "") {
+  const t = el("div", { className: `tile ${go ? "click" : ""} ${cls}`.trim() },
+    el("div", { className: "label", textContent: label }), el("div", { className: "big", textContent: big }), el("div", { className: "sub", textContent: sub }));
+  if (go) t.addEventListener("click", go);
+  return t;
 }
+
+function card(title, link, ...body) {
+  const head = el("div", { className: "card-head" }, el("h2", { textContent: title }));
+  if (link) { const b = el("button", { className: "link", textContent: link.label }); b.addEventListener("click", link.go); head.append(b); }
+  return el("div", { className: "card" }, head, ...body);
+}
+
+function renderSigning() {
+  const p = S.signing, box = $("sdBox");
+  if (!p.available) {
+    box.replaceChildren(el("p", { className: "muted", textContent: `The Signing Day preview only runs at Signing Day. This save is at ${p.stage}.` }));
+    return;
+  }
+  const pages = { home: sdHome, transfers: sdTransfers, schools: sdSchools, school: sdSchool, cuts: sdCuts, cleanup: sdCleanup };
+  box.replaceChildren(...pages[SD.page](p));
+}
+
+const home = { label: "Signing Day", go: () => sdGo("home") };
+
+// Columns shared by the transfer tables.
+const RANK_COLS = [
+  { h: "Rank", v: e => e.nationalRank ?? "–", num: true, tip: "The game's national transfer ranking" },
+  { h: "Pos Rank", v: e => e.positionRank ?? "–", num: true },
+  { h: "Stars", v: e => starText(e.stars), cls: "stars" }
+];
+const PLAYER_COLS = [
+  { h: "Player", v: e => e.name }, { h: "Pos", v: e => e.position },
+  { h: "OVR", v: e => e.overall, num: true }, { h: "Max", v: e => e.max, num: true, cls: "max" }, { h: "Yr", v: e => yr(e.year) }
+];
+const badge = (text, kind) => el("span", { className: `badge ${kind}`, textContent: text });
+const roleCol = { h: "Role", v: e => e.role ? `${e.role} (#${e.rank})` : "–", cls: e => `role-${e.role}` };
+const pickCol = { h: "Pick", v: e => e.how, tip: "Where the school was on his Top 10 when he signed",
+  node: e => e.how === "Committed" ? badge("In-game", "muted") : e.how === "Top 10 #1" ? badge("#1", "good") : e.how.startsWith("Top 10") ? badge(e.how.replace("Top 10 ", ""), "info") : badge(e.how === "Best fit" ? "Best fit" : "Moved", "warn") };
+const thenCol = { h: "Then", v: e => e.fate,
+  node: e => e.fate === "Deleted" ? badge("Deleted", "bad") : e.fate === "Un-signed" ? badge("Un-signed", "muted")
+    : el("span", {}, badge("Moved", "good"), ` ${e.fate.replace(/^Moved → /, "")}`) };
+
+function sdHome(p) {
+  const P = p.placement, top = p.allIn.filter(e => e.how.startsWith("Top 10")), first = top.filter(e => e.how === "Top 10 #1");
+  const real = P.cuts.filter(e => e.kind !== "Recruit"), ends = P.teams.map(t => t.rosterEnd);
+  const bestHaul = [...p.rows].filter(t => t.inCount >= 5).sort((a, b) => b.avgIn - a.avgIn)[0];
+  const ranked = [...p.allIn].sort((a, b) => (a.nationalRank ?? 1e9) - (b.nationalRank ?? 1e9));
+  return [
+    el("p", { className: "muted", textContent: `Preview only: nothing is written. ${p.userTeam} is never changed. Click a tile to see the details.` }),
+    el("div", { className: "tiles" },
+      tile(n(P.placed.length), "Transfers placed", `${n(first.length)} at their #1 (${pct(first.length, P.placed.length)}) · ${n(P.unplaced.length)} left over`, () => sdGo("transfers")),
+      tile(String(p.rows.length), "Schools", bestHaul ? `Best haul: ${bestHaul.team}, ${bestHaul.inCount} in at ${bestHaul.avgIn.toFixed(1)} avg` : "", () => sdGo("schools")),
+      tile(n(real.length), "Real players cut", `${n(real.filter(e => e.fate.startsWith("Moved")).length)} moved to another school · ${n(real.filter(e => e.fate === "Deleted").length)} deleted`, () => sdGo("cuts")),
+      tile(n(p.unsign.length + P.cuts.length - real.length), "Recruits un-signed", `${n(p.unsign.length)} under ${p.underOverall} · ${n(P.cuts.length - real.length)} to make room · ${n(p.kept.length)} kept`, () => sdGo("cleanup")),
+      tile(`${Math.min(...ends)}–${Math.max(...ends)}`, "Rosters after", `${P.over.length} over ${P.rosterMax} · ${ends.filter(x => x < 75).length} under 75`,
+        () => { SD.schoolSort = { key: "rosterEnd", desc: false }; sdGo("schools"); }, P.over.length ? "bad" : "")),
+    el("div", { className: "cards2" },
+      card("Top transfers", { label: "See all →", go: () => sdGo("transfers") },
+        grid([...RANK_COLS.slice(0, 1), RANK_COLS[2], PLAYER_COLS[0], PLAYER_COLS[1], PLAYER_COLS[2], { h: "To", v: e => e.team }, pickCol],
+          ranked.slice(0, 12), { onClick: e => S.signing.rows.some(t => t.teamIndex === e.teamIndex) && sdGo("school", e.teamIndex) })),
+      card("Best transfer classes", { label: "See all →", go: () => sdGo("schools") },
+        grid([{ h: "School", v: t => t.team }, { h: "In", v: t => t.inCount, num: true }, { h: "Avg OVR In", v: t => t.avgIn.toFixed(1), num: true },
+          { h: "Best In", v: t => t.best ? `${t.best.name} ${t.best.position} ${t.best.overall}` : "" }],
+          [...p.rows].filter(t => t.inCount >= 5).sort((a, b) => b.avgIn - a.avgIn).slice(0, 12), { onClick: t => sdGo("school", t.teamIndex) })))
+  ];
+}
+
+function sdTransfers(p) {
+  const f = SD.filter, q = f.q.trim().toLowerCase();
+  const rows = [...p.allIn].filter(e => (!f.pos || roomOfPos(e.position) === f.pos) && (!f.stars || String(e.stars) === f.stars) &&
+    (!q || `${e.name} ${e.from} ${e.team}`.toLowerCase().includes(q))).sort((a, b) => (a.nationalRank ?? 1e9) - (b.nationalRank ?? 1e9));
+  const pos = el("select", {}, el("option", { value: "", textContent: "All positions" }), ...ROOMS_UI.map(r => el("option", { value: r, textContent: r })));
+  pos.value = f.pos; pos.addEventListener("change", () => { f.pos = pos.value; renderSigning(); });
+  const stars = el("select", {}, el("option", { value: "", textContent: "All stars" }), ...[5, 4, 3, 2, 1].map(s => el("option", { value: String(s), textContent: `${s} stars` })));
+  stars.value = f.stars; stars.addEventListener("change", () => { f.stars = stars.value; renderSigning(); });
+  const search = el("input", { placeholder: "Player, from or to school", value: f.q });
+  search.addEventListener("change", () => { f.q = search.value; renderSigning(); });
+  return [
+    crumbs(home, { label: "Transfers" }),
+    el("div", { className: "row filters" }, search, pos, stars, el("span", { className: "muted", textContent: `${n(rows.length)} transfers · click a row for his new school` })),
+    el("div", { className: "card" }, grid([...RANK_COLS, ...PLAYER_COLS, { h: "From", v: e => e.from }, { h: "To", v: e => e.team }, pickCol, roleCol], rows, { onClick: e => S.signing.rows.some(t => t.teamIndex === e.teamIndex) && sdGo("school", e.teamIndex) }))
+  ];
+}
+
+const SCHOOL_COLS = [
+  { key: "team", h: "School", v: t => t.team },
+  { key: "prestige", h: "Prestige", v: t => t.prestige, num: true },
+  { key: "inCount", h: "Transfers In", v: t => t.inCount, num: true },
+  { key: "avgIn", h: "Avg OVR In", v: t => t.avgIn ? t.avgIn.toFixed(1) : "–", num: true, sortValue: t => t.avgIn },
+  { key: "topIn", h: "4–5★ In", v: t => t.topIn, num: true, cls: "stars" },
+  { key: "bestOvr", h: "Best In", v: t => t.best ? `${t.best.name} ${t.best.position} ${t.best.overall}` : "" },
+  { key: "realCuts", h: "Real Players Cut", v: t => t.realCuts, num: true, cls: t => t.realCuts ? "out" : "" },
+  { key: "rosterEnd", h: "Roster", v: t => t.rosterEnd, num: true, tip: "Next season's roster after everything" },
+  { key: "board", h: "Board", v: t => t.board, num: true, tip: "Committed-players board slots used (35 per school)" }
+];
+
+function sdSchools(p) {
+  return [
+    crumbs(home, { label: "Schools" }),
+    el("p", { className: "muted", textContent: "Click a heading to sort; click a school for everything it did." }),
+    el("div", { className: "card" }, grid(SCHOOL_COLS, sortBy(p.rows, SCHOOL_COLS, SD.schoolSort), {
+      sort: SD.schoolSort,
+      onSort: c => { SD.schoolSort = { key: c.key, desc: c.key === SD.schoolSort.key ? !SD.schoolSort.desc : !!c.num }; renderSigning(); },
+      onClick: t => sdGo("school", t.teamIndex)
+    }))
+  ];
+}
+
+function sdSchool(p) {
+  const t = p.rows.find(x => x.teamIndex === SD.teamIndex);
+  const real = t.cuts.filter(e => e.kind !== "Recruit"), recruitsCut = t.cuts.length - real.length;
+  const starters = t.placed.filter(e => e.how !== "Cut elsewhere" && e.role === "Starter").length;
+  const moved = real.filter(e => e.fate.startsWith("Moved")).length;
+  const sentences = [
+    t.inCount ? `${t.team} gets ${t.inCount} transfer${t.inCount === 1 ? "" : "s"} averaging ${t.avgIn.toFixed(1)} OVR (${t.gameIn} committed in-game, ${t.inCount - t.gameIn} placed by the tool); ${starters} of them start. Best: ${t.best.name} (${t.best.position} ${t.best.overall}).` : `${t.team} gets no transfers.`,
+    t.movedIn ? `${t.movedIn} player${t.movedIn === 1 ? "" : "s"} cut elsewhere move${t.movedIn === 1 ? "s" : ""} here.` : null,
+    t.unsign.length || recruitsCut ? `${t.unsign.length + recruitsCut} signed recruit${t.unsign.length + recruitsCut === 1 ? " is" : "s are"} un-signed (${t.unsign.length} under ${p.underOverall}, ${recruitsCut} to make room); ${t.kept.length} kept under ${p.underOverall} for their ceiling.` : "No recruits are un-signed.",
+    real.length ? `${real.length} bench player${real.length === 1 ? " is" : "s are"} cut to make room: ${moved} move${moved === 1 ? "s" : ""} to another school, ${real.length - moved} ${real.length - moved === 1 ? "is" : "are"} deleted.` : "No real players are cut.",
+    `Roster goes from ${t.rosterStart} to ${t.rosterEnd}.`
+  ];
+  const cleanupCols = [...PLAYER_COLS.slice(0, 4), { h: "Dev", v: e => e.dev }, { h: "Type", v: e => e.recruitClass.startsWith("JuniorCollege") ? "JUCO" : "HS" },
+    { h: "Avg Starter", v: e => e.avgStarter ?? "–", num: true, tip: "League average next-season starter at his position" }];
+  const backLabel = { schools: "Schools", transfers: "Transfers", cuts: "Cuts", cleanup: "Recruit cleanup", home: null }[SD.back];
+  return [
+    crumbs(home, ...(backLabel ? [{ label: backLabel, go: () => sdGo(SD.back) }] : []), { label: t.team }),
+    el("div", { className: "tiles small" },
+      tile(`${t.rosterStart} → ${t.rosterEnd}`, "Roster", `prestige ${t.prestige}`),
+      tile(String(t.inCount), "Transfers in", t.inCount ? `avg OVR ${t.avgIn.toFixed(1)} · ${t.topIn} rated 4–5★` : "none"),
+      tile(String(real.length), "Real players cut", real.length ? `${moved} moved · ${real.length - moved} deleted` : "none"),
+      tile(String(t.unsign.length + recruitsCut), "Recruits un-signed", `${t.kept.length} kept under ${p.underOverall}`),
+      tile(`${t.board} / ${p.boardSlots}`, "Board", "committed-players slots used")),
+    el("div", { className: "card summary" }, ...sentences.filter(Boolean).map(s => el("p", { textContent: s }))),
+    schoolTabs([
+      [`Transfers In (${t.inCount}${t.movedIn ? ` + ${t.movedIn} moved` : ""})`, () => t.placed.length ? grid([...RANK_COLS, ...PLAYER_COLS, { h: "From", v: e => e.from }, pickCol, roleCol, { h: "Cut for Him", v: e => e.cut || "", cls: "note" }],
+        [...t.placed].sort((a, b) => b.overall - a.overall)) : none()],
+      [`Cut to Make Room (${t.cuts.length})`, () => t.cuts.length ? grid([...PLAYER_COLS, { h: "Type", v: e => e.kind }, { h: "Role Once He Arrives", v: e => e.role ?? "", cls: e => `role-${e.role}` },
+        { h: "Why", v: e => e.forName ? `${e.reason}: ${e.forName}` : e.reason, cls: "note" }, thenCol],
+        [...t.cuts].sort((a, b) => b.overall - a.overall)) : none()],
+      [`Recruit Cleanup (${t.unsign.length} un-signed, ${t.kept.length} kept)`, () => el("div", {},
+        el("h3", { textContent: `Un-signed: under ${p.underOverall} (${t.unsign.length})` }),
+        t.unsign.length ? grid(cleanupCols, [...t.unsign].sort((a, b) => b.overall - a.overall)) : none(),
+        el("h3", { textContent: `Kept under ${p.underOverall} for their ceiling (${t.kept.length})` }),
+        t.kept.length ? grid(cleanupCols, t.kept) : none())]
+    ])
+  ];
+}
+
+const none = () => el("p", { className: "muted", textContent: "None." });
+
+// Tabs inside a card; remembers the open tab across schools.
+function schoolTabs(tabs) {
+  const body = el("div", { className: "tab-body" });
+  const bar = el("div", { className: "tabbar" });
+  const show = i => {
+    SD.tab = i;
+    [...bar.children].forEach((b, j) => b.classList.toggle("active", j === i));
+    body.replaceChildren(tabs[i][1]());
+  };
+  tabs.forEach(([label], i) => { const b = el("button", { textContent: label }); b.addEventListener("click", () => show(i)); bar.append(b); });
+  const c = el("div", { className: "card" }, bar, body);
+  show(Math.min(SD.tab ?? 0, tabs.length - 1));
+  return c;
+}
+
+function sdCuts(p) {
+  const f = SD.filter;
+  const rows = p.placement.cuts.filter(e => f.cutKind === "all" || (f.cutKind === "real") === (e.kind !== "Recruit")).sort((a, b) => b.overall - a.overall);
+  const kind = el("select", {}, ...[["real", "Real players"], ["recruit", "Recruits"], ["all", "Everyone"]].map(([v, l]) => el("option", { value: v, textContent: l })));
+  kind.value = f.cutKind; kind.addEventListener("change", () => { f.cutKind = kind.value; renderSigning(); });
+  return [
+    crumbs(home, { label: "Cuts" }),
+    el("div", { className: "row filters" }, kind, el("span", { className: "muted", textContent: `${n(rows.length)} cut · only bench players once the newcomer arrives, at most ${p.placement.maxRealCuts} real players per school · click a row for the school` })),
+    el("div", { className: "card" }, grid([...PLAYER_COLS, { h: "Type", v: e => e.kind }, { h: "School", v: e => e.team }, { h: "Why", v: e => e.forName ? `${e.reason}: ${e.forName}` : e.reason, cls: "note" }, thenCol],
+      rows, { onClick: e => sdGo("school", e.teamIndex) }))
+  ];
+}
+
+function sdCleanup(p) {
+  const byDev = list => Object.entries(list.reduce((m, e) => ({ ...m, [e.dev]: (m[e.dev] || 0) + 1 }), {}))
+    .sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${n(v)}`).join(", ");
+  const signed = p.teams.reduce((a, t) => a + t.signed, 0);
+  return [
+    crumbs(home, { label: "Recruit cleanup" }),
+    el("div", { className: "card summary" },
+      el("p", { textContent: `CPU schools signed ${n(signed)} HS/JUCO recruits; ${n(p.unsign.length + p.kept.length)} are under ${p.underOverall} OVR.` }),
+      el("p", { textContent: `${n(p.unsign.length)} are un-signed (${byDev(p.unsign)}). ${n(p.kept.length)} are kept (${byDev(p.kept)}): ${p.keepDev.join("/")} recruits whose max reaches the average starter at their position.` })),
+    el("div", { className: "card" }, grid([{ h: "School", v: t => t.team }, { h: "Signed", v: t => t.signed, num: true }, { h: "Un-Signed", v: t => t.unsign.length, num: true, cls: "out" },
+      { h: `Kept Under ${p.underOverall}`, v: t => t.kept.length, num: true, cls: "kept" }],
+      [...p.rows].sort((a, b) => b.unsign.length - a.unsign.length || a.team.localeCompare(b.team)), { onClick: t => sdGo("school", t.teamIndex) }))
+  ];
+}
+
+const ROOMS_UI = ["QB", "HB", "FB", "WR", "TE", "OT", "OG", "C", "EDGE", "DT", "LB", "CB", "S", "K", "P"];
+const POS_ROOM = { LT: "OT", RT: "OT", LG: "OG", RG: "OG", LE: "EDGE", RE: "EDGE", NT: "DT", LOLB: "LB", MLB: "LB", ROLB: "LB", FS: "S", SS: "S" };
+const roomOfPos = pos => POS_ROOM[pos] ?? pos;
 
 // ---------- launch: offer the last save ----------
 (async () => {

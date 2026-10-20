@@ -1,7 +1,8 @@
 // UI smoke test: starts the real app, opens a save through the window and drives it,
 // then writes a screenshot plus the page text.
 //   runtime\electron\electron.exe tools\ui-smoke.cjs [options] <save file> <output .png>
-// Options: --draft-lock (Preview -> Apply), --save, --league (Signing Day view),
+// Options: --draft-lock (Preview -> Apply), --save, --league (Signing Day view), --sd=<page>[:School]
+//          (Signing Day page: home, transfers, schools, school:BYU, cuts, cleanup),
 //          --player=<portal player name prefix> (Portal view: his Top 10 preview),
 //          --depth=<Team name> (Teams view: that depth chart; with --player his role there)
 const { app } = require("electron");
@@ -10,7 +11,7 @@ const fs = require("fs");
 const args = process.argv;
 const [savePath, shotPath] = args.slice(-2);
 const opt = name => { const a = args.find(x => x === `--${name}` || x.startsWith(`--${name}=`)); return a ? (a.split("=")[1] ?? true) : null; };
-const steps = { draftLock: !!opt("draft-lock"), save: !!opt("save"), depth: opt("depth"), player: opt("player") || opt("role"), league: !!opt("league") };
+const steps = { draftLock: !!opt("draft-lock"), save: !!opt("save"), depth: opt("depth"), player: opt("player") || opt("role"), league: !!opt("league"), sd: opt("sd") };
 require("../electron-main.cjs");
 
 app.on("browser-window-created", (_e, win) => {
@@ -33,7 +34,11 @@ app.on("browser-window-created", (_e, win) => {
           document.getElementById("saveBtn").click();
           await wait(() => /Saved|Save failed/.test(logText()));
         }
-        if (steps.league) await showView("signing");
+        if (steps.league || steps.sd) await showView("signing");
+        if (steps.sd) {
+          const [page, school] = String(steps.sd).split(":");
+          sdGo(page, school ? S.signing.rows.find(t => t.team === school)?.teamIndex : null);
+        }
         if (steps.player) {
           await showView("portal");
           const p = S.portal.players.find(x => x.name.startsWith(steps.player));
