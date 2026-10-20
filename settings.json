@@ -263,5 +263,15 @@
     "playingTimeDrop": {
       "seniorMargin": 4
     }
+  },
+  "signingDay": {
+    "recruitCleanup": {
+      "underOverall": 60,
+      "keepDev": [
+        "Star",
+        "Elite",
+        "Impact"
+      ]
+    }
   }
 }

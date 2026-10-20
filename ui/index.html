@@ -19,6 +19,7 @@
     <button data-tab="players">Portal Players</button>
     <button data-tab="depth">Depth Chart</button>
     <button data-tab="league">League Needs</button>
+    <button data-tab="signing">Signing Day</button>
   </nav>
 
   <main>
@@ -97,6 +98,28 @@
     <div id="tab-league" class="tab" hidden>
       <p class="muted">Starters lost = this season's starters who won't be back. Open = lost minus incoming players who project to start. Click a team to see its depth chart.</p>
       <table class="grid" id="leagueTable"></table>
+    </div>
+
+    <!-- Signing Day tab (step 5 preview, read-only) -->
+    <div id="tab-signing" class="tab" hidden>
+      <p id="sdNote" class="muted"></p>
+      <div id="sdBody" hidden>
+        <section>
+          <h2>Recruit cleanup</h2>
+          <table class="kv" id="sdSummary"></table>
+        </section>
+        <section>
+          <h2>Schools <span class="muted small">click a school to see its list · click a heading to sort</span></h2>
+          <table class="grid" id="sdSchools"></table>
+        </section>
+        <section id="sdSchool" hidden>
+          <h2 id="sdSchoolTitle"></h2>
+          <h3 id="sdUnsignTitle"></h3>
+          <table class="grid recruits" id="sdUnsign"></table>
+          <h3 id="sdKeptTitle"></h3>
+          <table class="grid recruits" id="sdKept"></table>
+        </section>
+      </div>
     </div>
 
     <section>

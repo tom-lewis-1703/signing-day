@@ -43,13 +43,14 @@ handle("ttt:portal-players", async () => (await getSession()).portalPlayers());
 handle("ttt:role-at", async (playerIndex, teamIndex) => (await getSession()).roleAt(playerIndex, teamIndex));
 handle("ttt:who-wants-him", async playerIndex => (await getSession()).whoWantsHim(playerIndex));
 handle("ttt:destinations", async playerIndex => (await getSession()).destinations(playerIndex));
+handle("ttt:signing-day-plan", async () => (await getSession()).signingDayPlan());
 
 function createWindow() {
   Menu.setApplicationMenu(null);
   mainWindow = new BrowserWindow({
     width: 1100, height: 800, minWidth: 800, minHeight: 600,
     title: "Tom's Transfer Tools",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#121519",
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,

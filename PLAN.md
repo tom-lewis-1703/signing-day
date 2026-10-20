@@ -2,31 +2,19 @@
 
 Oct 20, 2026 · @Thomas Lewis
 
-## Current status and next step (updated Oct 20, 2026, end of third build session)
+## Current status and next step (updated Oct 20, 2026, end of the fourth build session)
 
-**How to pick up in a new chat (local or cloud):** this plan lives in the app repo (`C:\Users\tomle\Documents\TomsTransferTools` on Tom's PC; GitHub `tom-lewis-1703/toms-transfer-tools`, private). Read this section, then `CLAUDE.md` in the repo root, then the rule walkthrough page (below). Follow "How we'll work". Tom points at rules by their code (e.g. "T3", "P2").
+**How to pick up in a new chat (local or cloud):** read this section, then `CLAUDE.md` (its "Check in before doing more" and "Screens" rules are Tom's and are mandatory), then the rule walkthrough page. Work on branch `step4b-pitches-perks`. Tom points at rules by code (e.g. "T3", "P2").
 
-- **Where we are:** step 4b (player side + combined Top 10 preview, read-only) is built and tuned and **waiting for Tom's sign-off**. Tom said he has no more changes "at the moment". Next: ask him to look at a few players on the Portal Players tab and sign off; then mark it here, merge `step4b-pitches-perks` into `main` (Tom pushes), and restate step 5.
-- **Working branch:** `step4b-pitches-perks` (all current work). `main` = the app before the third session plus GitHub's LICENSE; merge 4b into it after sign-off. `review-base` / `full-review` exist only for the whole-app code review (a pull request `full-review` → `review-base`, never merged); refresh `full-review` from the working branch before a review. Claude can't push (auto mode blocks it): commit, then give Tom the push command.
-- **Done and signed off:** step 1 (app skeleton), step 2 (draft lock, verified in-game), step 3 (depth-chart projection), step 4 (ceiling + team-side need and fit).
-- **Third session changes (Oct 20, 2026, Tom's picks; all in the walkthrough page and "Step 4b results"):**
-  - P2: playing-time year weight halved for 80+ OVR. Rest = dealbreaker 40, pitch categories 20 (normally 10 + 10), prestige 25, strength 10, home 5.
-  - P4 (new): ideal recruiting pitch. The pitch's categories other than his dealbreaker add to his score (`lib/data/pitches.json`, Tom's in-game list). Gym Rat (read in-game by Tom): Athletic Facilities, Championship Contender, Playing Time; its players' dealbreakers in the save (Pro Potential / Brand Exposure) aren't among them, so all three count, sharing the same 20%.
-  - K3/K4: coach perks count for the **user team only** (AI transfer and threshold perks ignored). The user team's transfer perk (10+ at his group) lets it join his list when it ranks 11th–18th, at #10; it no longer jumps to #2. The user team is `settings.userTeam` (any dynasty; Kansas now).
-  - App: player search and Top 10 preview moved to their own **Portal Players** tab; clicking a team opens its depth chart with his role there.
-  - Week 1 results: 0 empty Top 10s; 80–84 players with a prestige ≤3 #1: 37 → 12; Kansas in 330 of 1,891 lists (17.5%), 126 via the perk. Details in "Step 4b results".
-- **Rule walkthrough page (source of truth for every rule and formula):** https://claude.ai/artifact/4kbXJoCjikjx8PL56jqb98 (Tom's private artifact; source `docs/ttt-internals.html`; edit it and republish to the same URL; from a cloud session, if publishing isn't possible, update the file and tell Tom). Codes: R1, S1, V1, L1, D1–D5, C1–C2, T1–T10, P1–P4, K1–K4. Keep codes stable; a new rule gets a new code.
-- **Step 5 (Signing Day roster build) design is decided** (see "Phase 3: Signing Day"): keep the sub-60 recruit cleanup but keep Star/Elite/Impact recruits whose max reaches the position's average starter; caps never block an upgrade, the team cuts its weakest link (lowest keep value) instead; keep value = OVR + (max − OVR) × Fr 0.5 / So 0.35 / Jr 0.2 / Sr 0; cut only when the newcomer's keep value is 5+ higher; protected players (never cut or left unplaced): Jr/Sr 77+, Fr/So 72+ with max 77+; position caps QB 5, HB 6, FB 1, WR 11, TE 5, OT 8, OG 8, C 4, EDGE 8, DT 8, LB 12, CB 9, S 8, K 2, P 2 (97).
-- **First tasks in step 5 (need Tom in-game, so PC only):** on a copy, prove that (1) un-signing a recruit makes the game remove him at rollover and (2) a chosen edit makes the game remove exactly that returning player. Restate step 5 and get Tom's OK before starting. A cloud session can prepare the edited copies and the checks; Tom loads them in-game.
-- **Open items to raise with Tom:**
-  - #1 picks still concentrate before balancing (Week 1: BYU 130, UNLV 122, Utah 94; UNLV is #1 for 47 QBs with 1 open QB slot, median lead over #2 just 2 points). Pitches personalize lists but don't spread #1s. Step 6 needs #1-pick balancing by open slots.
-  - NIL: the save has player `BaseNILValue` and team NIL spending/budget, but how the game uses NIL to block CPU schools is unknown (Tom doesn't know either). Not modeled.
-  - Optional check offered, not run: does the game send players to schools below our dealbreaker bar? (would validate P1's bars).
-  - Whether to also write the Playing Time dealbreaker drop into the save in step 6.
-  - Optional: re-derive the ratings-model numbers from the saves so none come from Maxi's tool (offered, not requested).
-  - Tom may add a newer save (his current dynasty, with every coach perk) to `test_saves/`; the current test saves predate his RB/FB and WR/TE perks.
-- **Analysis tools** (`tools\`): `step4b-report.mjs` (Top 10 preview; `--league` also prints user-team coverage), `capacity-check.mjs` (Signing Day room after the recruit cleanup; still a simple cut, without weakest-link cuts or protection rules), `list-journey.mjs` (Week 1 lists → Week 4 → Signing Day → where players ended up), `ui-smoke.cjs` (PC only; `--player=Name --depth=Team`).
-- **Test copies used on Tom's PC:** `saves\TomsTransferTools\test_runs\step4*` (fresh copies; never write to `test_copies\` or `test_saves/`).
+- **Where we are:** step 5 (Signing Day roster build) is in progress. Piece 1 (prove the save edits in-game) is **done**; piece 2 (recruit cleanup preview, in the app's new Signing Day tab) is **built and waiting for Tom's look**. The app now has a **basic dark theme** (Tom chose it over a flashier mockup; he will ask for UI changes **one at a time**).
+- **Very next thing:** ask Tom what he wants changed first (UI or piece 2), one item at a time. When piece 2 is OK'd, restate piece 3 (placing transfers + cuts, preview only) and get his OK before building it. Don't propose bigger UI redesigns; Tom rejected two (Portal Players redesign, flashy "v2" Signing Day).
+- **Done and signed off:** step 1 (app skeleton), step 2 (draft lock), step 3 (depth chart), step 4 (ceiling + team side), **step 4b** (player side + Top 10 preview; Tom moved on to step 5, Oct 20).
+- **Step 5 plan (Tom approved, Oct 20):** pieces, one at a time, each OK'd by Tom: (1) prove edits in-game ✔; (2) recruit cleanup preview ✔ built; (3) placing transfers and cuts, preview; (4) write it to a copy, Tom checks in-game after rollover. Pass A (review the game's own commits) and #1-pick balancing are later. Details: "Phase 3: Signing Day" and "Step 5 results" below.
+- **Kept as written for now (Tom, Oct 20):** Pass B processes uncommitted transfers by **max overall first** (the draft line); Tom wants to revisit the whole interest-board algorithm (players and teams, week to week) later, so don't change it now.
+- **Tom's ideas to come back to (not designed yet):** player **tags** that change how teams recruit him (e.g. "Project Player" for a low-OVR young player with a high ceiling, "Win Now"); how the interest board builds and progresses week to week; review where max overall is used (T5, keep value, protection, recruit keep rule, Pass B order). NIL: Tom said "forget it" (Oct 20); not modeled.
+- **Branches:** `step4b-pitches-perks` (all current work, now including step 5 pieces 1–2 and the dark theme); `main` = the app before the third session (merge when Tom asks); `review-base` / `full-review` only for whole-app code reviews (never merged). Cloud sessions can push; on Tom's PC give him the commands.
+- **Rule walkthrough page:** https://claude.ai/artifact/4kbXJoCjikjx8PL56jqb98 (source `docs/ttt-internals.html`). Codes: R1, S1, V1, L1, D1–D5, C1–C2, T1–T10, P1–P4, K1–K4. Step 5 rules get a section and codes once Tom signs off piece 2/3 (not added yet). Keep codes stable; a new rule gets a new code.
+- **Test copies:** cloud: copy from `test_saves/` into the scratchpad; Tom's PC: `saves\TomsTransferTools\test_runs\`. The game names its own save after advancing `<name>-AUTOSAVE` (Tom's piece 1 save was `DYNASTY-STEP5PROOF-AUTOSAVE`).
 
 ## Goals and scope
 
@@ -78,8 +66,8 @@ Build order:
 2. Draft lock: build, test, add to the app — **Done Oct 20, 2026** (see "Step 2 results" below)
 3. Depth-chart projection as a read-only report, so we can check that roles look right (e.g., Ohio State's QB room) — **Done Oct 20, 2026** (see "Step 3 results" below; Tom moved on after reviewing it)
 4. Ceiling and need scoring as a read-only report, reviewed together — **Done Oct 20, 2026**
-4b. **Player side + combined Top 10 preview** (moved up Oct 20, 2026; read-only) — **Built Oct 20, 2026, awaiting review** (see "Step 4b results") (see "Ceiling = max overall" and "Step 4 results")
-5. **Signing Day roster build** (moved up Oct 20, 2026): un-sign bad generated recruits, enforce position caps, review game commits, Commit Remaining with need logic, guarantee ≤ 85 so the game's rollover cut removes nobody. See "Phase 3: Signing Day".
+4b. **Player side + combined Top 10 preview** (moved up Oct 20, 2026; read-only) — **Done Oct 20, 2026** (see "Step 4b results", "Ceiling = max overall" and "Step 4 results")
+5. **Signing Day roster build** (moved up Oct 20, 2026): un-sign bad generated recruits, enforce position caps, review game commits, Commit Remaining with need logic, guarantee ≤ 85 so the game's rollover cut removes nobody. See "Phase 3: Signing Day". — **In progress** (piece 1 done, piece 2 built; see "Step 5 results")
 6. Week 1 Top 10 generator
 7. Weekly commit review and Top 10 refresh
 8. Later: outflow control
@@ -159,7 +147,7 @@ Useful: all 172 recruits who were unsigned at Signing Day were removed cleanly b
 - **The game's own Signing Day commits by prestige:** 90+ OVR (8) all went to prestige 6+ and never lower than their old school; 85–89 (67) never below prestige 4; 80–84 and below went anywhere (31 of 103 to prestige ≤ 3).
 - **Caleb Hawkins** (Week 1): HB 93, max 96, sophomore next year, from Oklahoma State (prestige 6), dealbreaker PlayingStyle, home Oklahoma. Team side ranks MTSU and Sam Houston (prestige 2) at the top.
 
-### Step 4b results: player side and Top 10 preview (built Oct 20, 2026, awaiting review)
+### Step 4b results: player side and Top 10 preview (signed off Oct 20, 2026)
 
 - **Tom's choices:** player side before Signing Day. Prestige floor by rating, less strict than the game: 90+ prefer prestige 6+, fall back to 4+; 85–89 prefer 4+, fall back to 2+; under 85 none; his old school always allowed; the fallback only applies when no team at the preferred level has a team score of 100+. Starting weights approved; combined = 50/50.
 - **Dealbreakers use the game's school grades** (Tom: "make it based off school grades"). Each team's `MySchoolTrackingTable` row has letter grades for Championship Contender, Brand Exposure, Coach Prestige, Coach Stability, Conference Prestige, Program Tradition, Stadium Atmosphere, Academic Prestige, Campus Lifestyle and Athletic Facilities, Pro Potential by position group, and a Playing Style grade per archetype (`PlayerTypeGradeTable`). These replaced the hand-made scheme table and the stand-ins (projected strength, ProgramPoints grades). Playing Time = his projected role; Proximity = home state.
@@ -181,6 +169,25 @@ Useful: all 172 recruits who were unsigned at Signing Day were removed cleanly b
 - **Data notes:** school states from `lib/data/team-states.json` (the save's City points at game data that isn't in the save; pipelines measure recruiting reach, not location); home = same state only.
 - **Speed:** open 0.65 s; whole portal scored in about 0.25 s. Role check still 0 mismatches.
 - **Where:** `lib/destinations.mjs`; Depth Chart tab → portal player → "Top 10 preview" (★ = in Top 10); `tools/step4b-report.mjs <save> --who="Name" --at=Team --league`.
+
+### Step 5 results (Oct 20, 2026, in progress)
+
+**Piece 1: save edits proven in-game (done).** Test copy `test_saves/DYNASTY-STEP5PROOF` (the Signing Day copy with 4 edits at Liberty); Tom loaded it, advanced, and the game's save is `test_saves/DYNASTY-STEP5PROOF-PRESEASON`. Every table and record was compared before handing it over: exactly the 12 planned records changed.
+
+| Edit | Player | What we write | Result at preseason |
+|---|---|---|---|
+| Un-sign a recruit | Joshua Fisher WR 53 | Recruit `RecruitStage` Signed → Top10, `TotalScholarshipOffers` → 0, removed from the school's board (later slots move up, last cleared) | Deleted (his player row reused by a new player) |
+| Cut a returning player, way **A** (release) — **use this one** | Jayden Whaley FS 65 | `TeamIndex` 255, `PrevTeamIndex` = old school, removed from the school's roster list (Player[] table 6137, one row per team) and from its depth chart slots (Player[] 6136 rows behind the DepthChart table) | Deleted |
+| Cut, way B (graduate-style) | Michael Floyde LE 65 | Same as A plus `SchoolYear` Senior (redshirt not current) | Deleted (works, but changes his year; not needed) |
+| Commit a transfer | Matyus McLain RE 74 | Recruit `RecruitStage` Top10 → Signed, `TotalScholarshipOffers` → 1, added to the school's board, the school moved to #1 on his list with the top influence | On Liberty's roster |
+
+Also learned: each team's committed-players board has **35 slots** (a hard limit on newcomers per team); the save holds 17,500 player rows, 16,235 used at Signing Day, so cut players must really be deleted, never left teamless; at the rollover **the game fills teams under 85 with leftover uncommitted transfers itself** (Liberty got Joenel Figueroa SS 73 and Juan Salas FS 73), so whatever room we leave, the game fills its own way. The scratch scripts that wrote and checked the copy are not in the repo; piece 4 rebuilds these edits in `lib/roster-edits.mjs`.
+
+**Piece 2: recruit cleanup preview (built, waiting for Tom).** `lib/signing-day.mjs` (`planRecruitCleanup`), `tools/step5-report.mjs`, settings `signingDay.recruitCleanup` (under 60; keep Star/Elite/Impact whose max reaches the league's average next-season starter at his position, `fit.mjs` `starterLevels`), and the app's **Signing Day** tab (summary, all CPU schools sortable, click a school for its un-signed and kept lists). Signing Day copy: 137 CPU schools, 3,913 signed recruits, 1,685 under 60; **1,535 un-signed** (Normal 1,508, Impact 23, Elite 4), **150 kept** (Impact 131, Elite 11, Star 8); free board spots 310 → 1,845 (enough for the 1,310 uncommitted transfers); full boards 49 → 1 (Georgia: 35 signed recruits, all 60+). Liberty: 15 un-signed (e.g. Adrian Hinojosa MLB 59), Andrew McQuillan RG 56 kept (Impact, max 78 vs OG average 74.9).
+
+**Piece 3 open questions (ask Tom when restating it):** does "still needs his position" mean he'd at least be Rotation there? Is a cut returning player offered to other schools before being deleted (recommended, per "only the worst of the worst")? Army/Navy/Air Force went over 85 at the game's own rollover (90, 93): allow it?
+
+**UI (Oct 20):** basic dark theme across the app (`ui/styles.css` color tokens), numbers and number headings right-aligned, tabular digits, same column widths in every depth-chart card, Top 10 ★ in its own column. Known rough edge: on the Signing Day tab a clicked school's list appears below all 137 rows (Tom will pick UI fixes one at a time).
 
 ### Working rule (Oct 20, 2026)
 
@@ -335,7 +342,7 @@ The final check is yours in-game: load each modified copy, advance one stage, an
 
 Open questions to settle while building:
 
-- [ ] How the game uses NIL to block CPU schools (data exists; mechanism unknown)
+- [ ] How the game uses NIL to block CPU schools (data exists; mechanism unknown; Tom: not now)
 - [x] 80–84 Playing Time players at prestige-3 #1s: fixed by halving playing-time weight for 80+ (Oct 20, 2026)
 - [x] Gym Rat pitch categories (Tom, from the game)
 - [ ] Write the Playing Time dealbreaker drop into the save in step 6, or keep it preview-only?
@@ -346,7 +353,7 @@ Open questions to settle while building:
 - [x] Role cutoffs: rank-based (Starter within starter count, next 1 Rotation at most rooms plus 1 OL swing, Backup to double the starters, rest Buried), in `settings.json`
 - [x] Ceiling formula: Maxi's max overall (skill groups to cap)
 - [ ] Is max overall too generous for scoring? It assumes every upgrade is bought (now also used by T5, T10, the recruit keep rule and the protection rule's max-77 test)
-- [ ] Does un-signing a recruit at Signing Day make the game remove him at rollover? (test on a copy at the start of step 5)
+- [x] Does un-signing a recruit at Signing Day make the game remove him at rollover? Yes, proven in-game (step 5 piece 1); so do cutting (release) and committing edits
 - [ ] Week 3 stage number (5) is inferred; confirm on a real Week 3 save
 - [ ] 3-4 defenses: should extra DTs count in the EDGE room? (strict position rooms for now)
 - [ ] Does the game backfill NFL draft picks after the draft lock? (Not answerable from Week 2 saves; lock itself verified working.)
