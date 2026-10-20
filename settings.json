@@ -335,6 +335,7 @@
     "userTopN": 3,
     "maxSpot": 10,
     "softLimits": true,
-    "baseChance": 0.1
+    "baseChance": 0.1,
+    "listsFrom": "week-2"
   }
 }

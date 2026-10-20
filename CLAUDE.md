@@ -47,6 +47,8 @@ Tom refers to rules by code (e.g. "T3" = weak-starter need, "T10" = starter leve
 
 The first publish of `docs/ttt-internals.html` in a new session is refused and returns a diff against the live page. If that diff only shows your own edits, publish again unchanged; otherwise merge the live lines in first.
 
+Always say "user team" when talking about the user team, never the school's name (Tom, seventh session).
+
 How to talk to Tom (he is not a programmer): short plain-language summaries with real players and teams, then one clear recommendation. Trust what he reads in-game (e.g. the pitch categories); if the save disagrees, say so once and use his value, without asking him to re-check.
 
 Screens (Tom is very particular about alignment): everything must line up. Numbers right-aligned with their headers aligned the same way, the same column widths for tables shown together, label columns the same width, even spacing. Check every screenshot for anything out of line before showing it to him. He wants a dark theme with a little color, not plain gray.

@@ -26,7 +26,7 @@ Start a chat with `/next` (takes the top task that isn't done); end it with `/ha
 2. **Weekly commits** (design below, "Weekly commits"). Writes to the save. First fix the recruiting-board read (review #1), then print how the game's offers line up with our Top 10s (replaces the separate "measure offers and influence" step).
 3. **"Cut player moved to another school" write** (review #2): the Signing Day plan moves 137 cut real players to other schools, but our proven commit edit works on a transfer's recruit row, which a returning player probably doesn't have. Check the save; if there's no clean way, bring Tom options (e.g. only cut a real player when he has somewhere to go, or cut recruits only).
 4. **Signing Day write**: write the existing Signing Day plan to the save.
-5. **App controls, minimal:** a "Run this week" / "Run Signing Day" button in the Stage view, using the existing log and Save. Show Tom a mockup first. Also fix the stale stage labels (review #6).
+5. **App controls, minimal:** a "Run this week" / "Run Signing Day" button in the Stage view, using the existing log and Save. Show Tom a mockup first. Also fix the stale stage labels (review #6). Tom (seventh session): outliers and oddities must be his call, so the app must let him review the plan and change or drop single moves before Save.
 6. **Check script:** one reusable script that runs every stage on fresh copies of the test saves and checks: rosters ≤ 85, every transfer placed, boards ≤ 35, nobody left teamless, the user team untouched, the save reopens, no transfer skipped for an unknown position. This is the app's automated test.
 7. **Tom's full offseason run** (Players Leaving → Preseason, in-game).
 
