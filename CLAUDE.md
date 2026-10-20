@@ -4,7 +4,7 @@ Personal CFB 27 dynasty utility for Tom (works for any dynasty; his current one 
 
 This repository is the app folder, `C:\Users\tomle\Documents\TomsTransferTools` on Tom's PC, pushed to the **private** GitHub repo https://github.com/tom-lewis-1703/toms-transfer-tools (`origin`) so cloud sessions can work on it. Keep it private: the numbers in `lib/data/ratings-model.json` were extracted from Maxi's tool (it states no license). Tom considers the ratings model our own work; describe it that way, without implying Maxi owns it.
 
-Branches: `main`; feature branches per step (current work: `step4b-pitches-perks`, which also holds step 5 so far); `review-base` + `full-review` exist only so a pull request can show the whole app for `/code-review ultra` (never merge them). On Tom's PC pushing from Claude is blocked by auto mode, so give Tom the push command to run; cloud sessions can push.
+Branches: `main`; feature branches per step (current work: `step4b-pitches-perks`, which also holds step 5 so far); `review-base` + `full-review` exist only so a pull request can show the whole app for `/code-review ultra` (never merge them). On Tom's PC pushing from Claude is blocked by auto mode, so give Tom the push command to run; cloud sessions can push. **New cloud chats start on `main`**, so at the end of every session merge the working branch into `main` (merge commit, no rebase) and push both; otherwise the next chat sees old files.
 
 ## Working rules (from Tom)
 
