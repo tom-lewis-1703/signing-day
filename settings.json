@@ -1,0 +1,259 @@
+{
+  "userTeam": "Kansas",
+  "starters": {
+    "base": {
+      "QB": 1,
+      "OT": 2,
+      "OG": 2,
+      "C": 1,
+      "K": 1,
+      "P": 1
+    },
+    "offense": {
+      "OFF_SPREAD": {
+        "HB": 1,
+        "FB": 0,
+        "WR": 3,
+        "TE": 1
+      },
+      "OFF_POWER_SPREAD": {
+        "HB": 1,
+        "FB": 0,
+        "WR": 3,
+        "TE": 1
+      },
+      "OFF_SPREAD_OPTION": {
+        "HB": 1,
+        "FB": 0,
+        "WR": 3,
+        "TE": 1
+      },
+      "OFF_MULTIPLE_OFFENSE": {
+        "HB": 1,
+        "FB": 0,
+        "WR": 3,
+        "TE": 1
+      },
+      "OFF_PISTOL": {
+        "HB": 1,
+        "FB": 0,
+        "WR": 3,
+        "TE": 1
+      },
+      "OFF_AIR_RAID": {
+        "HB": 1,
+        "FB": 0,
+        "WR": 4,
+        "TE": 0
+      },
+      "OFF_VEER_AND_SHOOT": {
+        "HB": 1,
+        "FB": 0,
+        "WR": 4,
+        "TE": 0
+      },
+      "OFF_RUN_AND_SHOOT": {
+        "HB": 1,
+        "FB": 0,
+        "WR": 4,
+        "TE": 0
+      },
+      "OFF_PRO_STYLE": {
+        "HB": 1,
+        "FB": 0,
+        "WR": 2,
+        "TE": 2
+      },
+      "OFF_OPTION": {
+        "HB": 1,
+        "FB": 1,
+        "WR": 2,
+        "TE": 1
+      }
+    },
+    "defense": {
+      "DEF_4_2_5": {
+        "EDGE": 2,
+        "DT": 2,
+        "LB": 2,
+        "CB": 3,
+        "S": 2
+      },
+      "DEF_MULTIPLE_DEFENSE": {
+        "EDGE": 2,
+        "DT": 2,
+        "LB": 2,
+        "CB": 3,
+        "S": 2
+      },
+      "DEF_BASE4_3": {
+        "EDGE": 2,
+        "DT": 2,
+        "LB": 3,
+        "CB": 2,
+        "S": 2
+      },
+      "DEF_4_3_MULTIPLE": {
+        "EDGE": 2,
+        "DT": 2,
+        "LB": 3,
+        "CB": 2,
+        "S": 2
+      },
+      "DEF_BASE3_4": {
+        "EDGE": 2,
+        "DT": 1,
+        "LB": 4,
+        "CB": 2,
+        "S": 2
+      },
+      "DEF_3_4_MULTIPLE": {
+        "EDGE": 2,
+        "DT": 1,
+        "LB": 4,
+        "CB": 2,
+        "S": 2
+      },
+      "DEF_3_3_5": {
+        "EDGE": 2,
+        "DT": 1,
+        "LB": 3,
+        "CB": 2,
+        "S": 3
+      },
+      "DEF_3_3_5_TITE": {
+        "EDGE": 2,
+        "DT": 1,
+        "LB": 3,
+        "CB": 2,
+        "S": 3
+      },
+      "DEF_3_2_6": {
+        "EDGE": 2,
+        "DT": 1,
+        "LB": 2,
+        "CB": 3,
+        "S": 3
+      }
+    },
+    "fallback": {
+      "HB": 1,
+      "FB": 0,
+      "WR": 3,
+      "TE": 1,
+      "EDGE": 2,
+      "DT": 2,
+      "LB": 3,
+      "CB": 3,
+      "S": 2
+    }
+  },
+  "roles": {
+    "rotation": {
+      "HB": 1,
+      "WR": 1,
+      "TE": 1,
+      "EDGE": 1,
+      "DT": 1,
+      "LB": 1,
+      "CB": 1,
+      "S": 1
+    },
+    "olSwing": 1
+  },
+  "fit": {
+    "roleScore": {
+      "Starter": 100,
+      "Rotation": 60,
+      "Backup": 30,
+      "Buried": 0
+    },
+    "pathToStartBonus": {
+      "Freshman": 30,
+      "Sophomore": 30,
+      "Junior": 15
+    },
+    "need": {
+      "maxMult": 2,
+      "fullDropOff": 10,
+      "stacked": 0.25,
+      "weakFrom": 5,
+      "weakFull": 10
+    },
+    "levelBar": 3,
+    "stackedBackupBar": 3,
+    "upgrade": {
+      "from": 4,
+      "full": 10,
+      "maxMult": 1.5,
+      "levelSlope": 0.05,
+      "minFactor": 0.25,
+      "maxFactor": 1.5
+    },
+    "succession": {
+      "years": [
+        "Freshman",
+        "Sophomore"
+      ],
+      "mult": 2
+    },
+    "positionWeight": {
+      "QB": 1.25,
+      "OT": 1.1,
+      "EDGE": 1.1
+    },
+    "starterLevel": {
+      "basis": "prestige",
+      "margin": 5
+    }
+  },
+  "playerSide": {
+    "yearWeight": {
+      "Freshman": 0.2,
+      "Sophomore": 0.35,
+      "Junior": 0.5,
+      "Senior": 0.7
+    },
+    "rest": {
+      "dealbreaker": 0.5,
+      "prestige": 0.3,
+      "teamStrength": 0.1,
+      "home": 0.1
+    },
+    "jitter": 3,
+    "prestigeFloor": [
+      {
+        "minOverall": 90,
+        "preferred": 6,
+        "fallback": 4
+      },
+      {
+        "minOverall": 85,
+        "preferred": 4,
+        "fallback": 2
+      }
+    ],
+    "spotOrNeed": 100,
+    "playerWeight": 0.5,
+    "dealbreakerBar": [
+      {
+        "minOverall": 85,
+        "grade": "Bminus"
+      },
+      {
+        "minOverall": 78,
+        "grade": "C"
+      },
+      {
+        "minOverall": 0,
+        "grade": "Dplus"
+      }
+    ],
+    "perk": {
+      "full": 10
+    },
+    "playingTimeDrop": {
+      "seniorMargin": 4
+    }
+  }
+}

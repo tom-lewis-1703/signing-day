@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+  <title>Tom's Transfer Tools</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Tom's Transfer Tools</h1>
+    <span id="headerFile" class="muted"></span>
+    <span id="headerStage"></span>
+    <button id="openBtn">Open Save…</button>
+  </header>
+
+  <nav id="tabs" hidden>
+    <button data-tab="stage" class="active">Stage</button>
+    <button data-tab="depth">Depth Chart</button>
+    <button data-tab="league">League Needs</button>
+  </nav>
+
+  <main>
+    <p id="empty" class="muted">Open a dynasty save to begin. Opening never changes the file.</p>
+
+    <!-- Stage tab -->
+    <div id="tab-stage" class="tab" hidden>
+      <section>
+        <p id="filePath" class="muted small"></p>
+        <table class="kv">
+          <tr><th>Stage</th><td id="stage"></td></tr>
+          <tr><th>Season</th><td id="season"></td></tr>
+          <tr><th>Your team</th><td id="userTeam"></td></tr>
+          <tr><th>Rostered players</th><td id="rostered"></td></tr>
+          <tr><th>Leaving early for draft</th><td id="earlyDraft"></td></tr>
+          <tr><th>Underclassmen set to leave</th><td id="draftCheck"></td></tr>
+          <tr><th>Entering portal</th><td id="enteringPortal"></td></tr>
+          <tr><th>Transfers uncommitted</th><td id="portalUncommitted"></td></tr>
+          <tr><th>Transfers committed</th><td id="portalCommitted"></td></tr>
+          <tr><th>Recruits committed</th><td id="recruitsCommitted"></td></tr>
+          <tr><th>Open time</th><td id="openMs"></td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Action for this stage</h2>
+        <p id="actionText"></p>
+        <button id="actionBtn" disabled></button>
+        <div id="preview" hidden>
+          <p id="previewSummary"></p>
+          <button id="applyBtn">Apply Draft Lock</button>
+          <p id="applyResult"></p>
+          <h3>Locked per team</h3>
+          <table class="grid" id="byTeamTable"></table>
+          <h3>Players to lock</h3>
+          <table class="grid" id="playersTable"></table>
+        </div>
+      </section>
+
+      <section>
+        <h2>Save</h2>
+        <p class="muted">Backs up the file to a <b>TTT Backups</b> folder next to it, writes a temp copy, checks it reopens with the same stage and player count, then replaces the original.</p>
+        <p id="pending" class="warn"></p>
+        <button id="saveBtn">Save</button>
+      </section>
+    </div>
+
+    <!-- Depth chart tab -->
+    <div id="tab-depth" class="tab" hidden>
+      <section class="toolbar">
+        <label>Team <select id="teamSelect"></select></label>
+        <span id="schemeInfo" class="muted"></span>
+      </section>
+      <p id="projectionNote" class="muted small"></p>
+      <section class="toolbar">
+        <label>Portal player at this team
+          <input id="portalInput" list="portalList" placeholder="Type a name…" size="44" autocomplete="off">
+        </label>
+        <datalist id="portalList"></datalist>
+        <span id="roleResult"></span>
+      </section>
+      <section id="fitBox" hidden>
+        <h3>Top 10 preview <span id="fitSummary" class="muted"></span></h3>
+        <p class="muted small">★ = in his Top 10: the school meets his dealbreaker grade, the team wants him, and it passes his prestige floor (your team only needs the dealbreaker, and is ranked by his player score). Combined = half player score, half team score. Team score = role there × need in his room (×1 to ×2 by drop-off; Stacked ×0.25). Player score = playing time (weighted by year) plus his dealbreaker, prestige where he'd play, team strength and home state. Click a team to see its depth chart.</p>
+        <table class="grid" id="fitTable"></table>
+      </section>
+      <p id="needLine"></p>
+      <div id="rooms" class="rooms"></div>
+    </div>
+
+    <!-- League needs tab -->
+    <div id="tab-league" class="tab" hidden>
+      <p class="muted">Starters lost = this season's starters who won't be back. Open = lost minus incoming players who project to start. Click a team to see its depth chart.</p>
+      <table class="grid" id="leagueTable"></table>
+    </div>
+
+    <section>
+      <h2>Log</h2>
+      <pre id="log"></pre>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

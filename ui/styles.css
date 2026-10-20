@@ -1,0 +1,43 @@
+body { font: 15px/1.4 "Segoe UI", system-ui, sans-serif; margin: 0; color: #111; background: #fff; }
+header { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-bottom: 1px solid #ccc; background: #f4f4f4; position: sticky; top: 0; z-index: 2; }
+h1 { font-size: 18px; margin: 0; }
+#headerFile { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+h2 { font-size: 15px; margin: 18px 0 6px; }
+h3 { font-size: 14px; margin: 14px 0 4px; }
+nav { display: flex; gap: 4px; padding: 8px 16px 0; border-bottom: 1px solid #ccc; }
+nav button { border: 1px solid #ccc; border-bottom: none; background: #f4f4f4; padding: 6px 16px; border-radius: 4px 4px 0 0; }
+nav button.active { background: #fff; font-weight: 600; position: relative; top: 1px; }
+main { padding: 0 16px 24px; }
+button { font: inherit; padding: 5px 14px; cursor: pointer; }
+button:disabled { cursor: default; }
+select, input { font: inherit; padding: 3px 6px; }
+.muted { color: #666; }
+.small { font-size: 12px; }
+.warn { color: #a15c00; font-weight: 600; }
+.bad { color: #b00020; font-weight: 600; }
+.good { color: #1b7a2f; font-weight: 600; }
+.toolbar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 12px 0 4px; }
+table.kv { border-collapse: collapse; }
+table.kv th { text-align: left; font-weight: 600; padding: 2px 18px 2px 0; vertical-align: top; }
+table.kv td { padding: 2px 0; }
+table.grid { border-collapse: collapse; font-size: 13px; }
+table.grid th, table.grid td { border: 1px solid #ddd; padding: 2px 8px; text-align: left; }
+table.grid th { background: #f4f4f4; }
+table.grid td.num { text-align: right; }
+table.grid tr.click { cursor: pointer; }
+table.grid tr.click:hover { background: #eef4ff; }
+.rooms { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 12px; margin-top: 8px; }
+.room { border: 1px solid #ddd; border-radius: 4px; padding: 6px 8px; }
+.room h3 { margin: 0 0 4px; display: flex; gap: 10px; align-items: baseline; }
+.room h3 .muted { font-weight: normal; font-size: 12px; }
+.room table { width: 100%; }
+.role { display: inline-block; min-width: 62px; font-size: 12px; font-weight: 600; }
+.role-Starter { color: #1b7a2f; }
+.role-Rotation { color: #1f5fbf; }
+.role-Backup { color: #a15c00; }
+.role-Buried { color: #888; }
+.tag { font-size: 11px; color: #555; }
+td.max { color: #1f5fbf; }
+.lost { font-size: 12px; color: #b00020; margin-top: 4px; }
+.filled { font-size: 12px; color: #1b7a2f; }
+pre#log { background: #f7f7f7; border: 1px solid #ddd; padding: 8px; min-height: 40px; max-height: 160px; overflow: auto; white-space: pre-wrap; font-size: 12px; }
