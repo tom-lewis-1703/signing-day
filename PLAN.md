@@ -30,6 +30,8 @@ Start a chat with `/next` (takes the top task that isn't done); end it with `/ha
 6. **Check script:** one reusable script that runs every stage on fresh copies of the test saves and checks: rosters ≤ 85, every transfer placed, boards ≤ 35, nobody left teamless, the user team untouched, the save reopens, no transfer skipped for an unknown position. This is the app's automated test.
 7. **Tom's full offseason run** (Players Leaving → Preseason, in-game).
 
+**Side task (Tom, seventh session; not in the order above):** the depth chart uses projected next-season OVR = OVR + expected training gain. Measured Signing Day → Preseason (7,046 returning players): about +2.4 on average, by room to max (0–2: +0.6 … 15+: +2.9) and dev trait (Elite with 15+ room: +4.1); e.g. Ty Hawkins (SMU QB) 82 → 86. It changes every need/role rule, so check before/after on named teams.
+
 ### Code review (Oct 20, sixth session)
 
 Every layer was read line by line. No calculation errors in the rules; speed is fine everywhere. Findings:
