@@ -14,6 +14,16 @@ Branches: `main`; feature branches per step (e.g. `step4b-pitches-perks`); `revi
 - Only the worst of the worst real players may ever be left unplaced/deleted. Real players always come before generated recruits.
 - The user team (`settings.json` → `userTeam`; Kansas, TeamIndex 37, in the current dynasty) is exempt from all automated changes. Never hard-code Kansas; read the setting.
 
+### Check in before doing more (from Tom, after the reverted Portal Players redesign)
+
+- Work in small pieces. After each piece, stop, show Tom what changed, and wait for his OK before starting the next.
+- Before starting, list exactly what you'll change. Anything not on that list needs a new OK.
+- When Tom says "recommendations are good", he's approving those decisions, not a big build all at once.
+- For anything Tom will see (screens, layout, colors), show a mockup or a single example first and get his OK before changing the app.
+- Don't add extras he didn't ask for, even small ones. Offer them in one line instead.
+- Don't commit or push until Tom has seen the result and said OK.
+- If a piece turns out bigger than described, stop and tell him before carrying on.
+
 ## Local vs. cloud sessions
 
 | | Tom's PC | Cloud session |
