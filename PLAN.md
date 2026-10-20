@@ -140,7 +140,8 @@ Exactly the 12 planned records changed. How each is written: `CLAUDE.md` → "Si
 
 ## Later and open questions
 
-- **Later phases:** outflow control (who enters the portal and how many per team); Week 1 Top 10 writing and weekly refresh; Pass A review of game commits; #1-pick balancing; weekly tracking screen.
+- **Later phases:** outflow control (who enters the portal and how many per team); Pass A review of game commits; #1-pick balancing; weekly tracking screen.
+- **CPU schools offer their Top 10 players (Tom, seventh session, realism):** most transfers have no in-game offer (Week 2: 139 of 197 uncommitted 85+, e.g. Nico Iamaleava QB 89, Austin Simmons QB 86). Would mean creating RecruitTarget rows on CPU boards (unproven) and would start the game's own commit clock beside ours, and give the user team real competition; placement doesn't need it. Try after the full run.
 - **Tom's ideas, not designed:** player tags that change how teams recruit him ("Project Player", "Win Now"); review where max overall is used (T5, T10, keep value, protection, recruit keep rule, Pass B order), since it assumes every upgrade is bought.
 - **Open observation:** "best fit" leftovers go by player score, so prestige can beat playing time (Christian Clark HB 80 So → Texas, #3 on the depth chart). Ask only if Tom raises it.
 - **Open questions:** Week 3's stage number (5) is inferred; 3-4 defenses' extra DTs count only as DT; whether the game backfills NFL draft picks after the lock; NIL not modeled (Tom: forget it).
