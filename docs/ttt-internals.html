@@ -321,7 +321,7 @@ td a.code { text-decoration: none; }
 
     <section id="ceiling">
       <div class="sec-head"><span class="sec-num">6</span><h2>Ceiling (max overall)</h2><span class="where">lib/ratings-model.mjs · step 4</span></div>
-      <p>This follows the method in Maxi's Dynasty Progression Monitor, rewritten in our own code. Maxi's weights were extracted once into a data file (personal use only).</p>
+      <p>This follows the method in Maxi's Dynasty Progression Monitor, rewritten in our own code. The weights were extracted once into our data file.</p>
       <h3 id="C1"><span class="code">C1</span>Overall and max overall formulas</h3>
       <pre class="formula">Overall     = archetype intercept + Σ (rating × archetype weight)
               rounded (halves round down), kept inside the archetype's floor and ceiling
@@ -435,9 +435,9 @@ team strength   = average OVR of the school's projected starters, scaled 0–100
 home            = 100 if the school is in his home state, else 0
 
                   80+ OVR: w is halved (Fr 0.10, So 0.175, Jr 0.25, final year 0.35)
-pitch 1, 2      = school's value on the two other categories of his ideal pitch (P4)
+pitch           = average of the school's values on the other categories of his ideal pitch (P4)
 
-rest            = 0.40 × dealbreaker value + 0.10 × pitch 1 + 0.10 × pitch 2
+rest            = 0.40 × dealbreaker value + 0.20 × pitch
                 + 0.25 × prestige + 0.10 × team strength + 0.05 × home
 player score    = w × playing time + (1 − w) × rest + jitter (fixed per player, school, season; within ±3)</pre>
       <p><b>Why w is halved for 80+ (Oct 20, 2026, your option C):</b> good players were picking low-prestige schools only because they'd start everywhere. Week 1: 80–84 players with a prestige ≤3 #1 went from 37 to 12 (with P4 and the K3 change); the five 80–84 Playing Time outliers (Samuel Singleton Jr. → James Madison, Kevin Riley → Sam Houston…) are gone; Singleton's #1 is now Duke (prestige 6).</p>
@@ -454,7 +454,7 @@ player score    = w × playing time + (1 − w) × rest + jitter (fixed per play
       <p>His old school is always allowed. The game itself sent 8 transfers back to their old school at Signing Day.</p>
 
       <h3 id="P4"><span class="code">P4</span>Ideal pitch: his two secondary categories</h3>
-      <p>Every player has an ideal recruiting pitch (<code>IdealRecruitingPitch</code>), and each pitch covers three categories. His dealbreaker is always one of them; the other two are things he cares about that aren't dealbreakers. They add to his player score (10% each of the rest, P2) using the same school grades as P1; Playing Time = his role there, Proximity = home state. They never block a school.</p>
+      <p>Every player has an ideal recruiting pitch (<code>IdealRecruitingPitch</code>), and each pitch covers three categories. His dealbreaker is always one of them; the other two are things he cares about that aren't dealbreakers. They add to his player score (20% of the rest between them, normally 10% each, P2) using the same school grades as P1; Playing Time = his role there, Proximity = home state. They never block a school.</p>
       <div class="tbl"><table>
         <thead><tr><th>In-game pitch</th><th>Save name</th><th>Categories</th></tr></thead>
         <tbody>
@@ -477,10 +477,10 @@ player score    = w × playing time + (1 − w) × rest + jitter (fixed per play
           <tr><td>Grassroots Traditionalist</td><td>Grassroots</td><td>Program Tradition, Proximity, Stadium Atmosphere</td></tr>
           <tr><td>Conference Legend</td><td>ConferenceSpotlight</td><td>Championship Contender, Conference Prestige, Proximity</td></tr>
           <tr><td>Sunday Player</td><td>SundayBound</td><td>Championship Contender, Conference Prestige, Pro Potential</td></tr>
-          <tr><td>Gym Rat</td><td>WorkHorse</td><td>Athletic Facilities, Brand Exposure, Pro Potential <i>(to confirm in-game)</i></td></tr>
+          <tr><td>Gym Rat</td><td>WorkHorse</td><td>Athletic Facilities, Championship Contender, Playing Time</td></tr>
         </tbody>
       </table></div>
-      <p><b>Checked against the save:</b> your list is in the save's own order, and for 19 of 20 pitches every player's dealbreaker is one of its three categories. Gym Rat's 579 players only have Pro Potential or Brand Exposure as dealbreakers, so it uses Athletic Facilities, Brand Exposure, Pro Potential until you confirm.</p>
+      <p><b>Checked against the save:</b> your list (read in-game) is in the save's own order, and for 19 of 20 pitches every player's dealbreaker is one of its three categories. Gym Rat is the exception: its players' dealbreakers in the save are Pro Potential or Brand Exposure, so for them all three Gym Rat categories count, sharing the same 20%. Example: Nate Sheppard (HB 93, Gym Rat, dealbreaker Pro Potential): Texas, Tennessee, USC, Miami, Auburn.</p>
       <p><b>Examples (Week 1):</b> Caleb Hawkins (Standard Bearer: Playing Style + Coach Prestige, Conference Prestige): Tennessee moves up to 2nd. Austin Mack (Primetime Player: Playing Time + Brand Exposure, Championship Contender): Indiana and Michigan now ahead of UCLA. Braeden Wisloski (Conference Legend: Contender + Conference Prestige, home): Pittsburgh, in his home state, moves up to 2nd. Pitches change about 1 in 4 #1 picks but don't spread them out: teams with many open spots still win most close calls (step 6 balancing).</p>
     </section>
 

@@ -1,5 +1,5 @@
 {
-  "_note": "Ideal recruiting pitches (Player.IdealRecruitingPitch), in the save's enum order, with the in-game name and its three categories (from Tom, Oct 20, 2026). A player's dealbreaker is always one of the three; the other two are his secondary categories. Gym Rat: Tom listed Athletic Facilities, Championship Contender, Playing Time, but its players' dealbreakers in the save are only Pro Potential and Brand Exposure, so Tom chose Athletic Facilities, Brand Exposure, Pro Potential (to confirm in-game).",
+  "_note": "Ideal recruiting pitches (Player.IdealRecruitingPitch), in the save's enum order, with the in-game name and its three categories (from Tom, read in-game, Oct 20, 2026). A player's dealbreaker is normally one of the three and the other two are his secondary categories. Exception: Gym Rat players in the save have Pro Potential or Brand Exposure as their dealbreaker, which isn't one of its three, so all three count as secondary for them.",
   "CollegeExperience": { "name": "College Experience", "categories": ["AcademicPrestige", "CampusLifestyle", "StadiumAtmosphere"] },
   "TeamPlayer": { "name": "Team Player", "categories": ["CoachStability", "PlayingStyle", "ProximityToHome"] },
   "CampusPersonality": { "name": "Campus Personality", "categories": ["PlayingTime", "PlayingStyle", "CampusLifestyle"] },
@@ -19,5 +19,5 @@
   "Grassroots": { "name": "Grassroots Traditionalist", "categories": ["ProgramTradition", "ProximityToHome", "StadiumAtmosphere"] },
   "ConferenceSpotlight": { "name": "Conference Legend", "categories": ["ChampionshipContender", "ConferencePrestige", "ProximityToHome"] },
   "SundayBound": { "name": "Sunday Player", "categories": ["ChampionshipContender", "ConferencePrestige", "ProPotential"] },
-  "WorkHorse": { "name": "Gym Rat", "categories": ["AthleticFacilities", "BrandExposure", "ProPotential"] }
+  "WorkHorse": { "name": "Gym Rat", "categories": ["AthleticFacilities", "ChampionshipContender", "PlayingTime"] }
 }

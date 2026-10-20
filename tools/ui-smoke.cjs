@@ -1,15 +1,16 @@
 // UI smoke test: starts the real app, opens a save through the window and drives it,
 // then writes a screenshot plus the page text.
 //   runtime\electron\electron.exe tools\ui-smoke.cjs [options] <save file> <output .png>
-// Options: --draft-lock (Preview -> Apply), --save, --depth=<Team name>,
-//          --role=<portal player name prefix> (with --depth), --league
+// Options: --draft-lock (Preview -> Apply), --save, --league,
+//          --player=<portal player name prefix> (Portal Players tab: his Top 10 preview),
+//          --depth=<Team name> (with --player or --role: his role at that team)
 const { app } = require("electron");
 const fs = require("fs");
 
 const args = process.argv;
 const [savePath, shotPath] = args.slice(-2);
 const opt = name => { const a = args.find(x => x === `--${name}` || x.startsWith(`--${name}=`)); return a ? (a.split("=")[1] ?? true) : null; };
-const steps = { draftLock: !!opt("draft-lock"), save: !!opt("save"), depth: opt("depth"), role: opt("role"), league: !!opt("league") };
+const steps = { draftLock: !!opt("draft-lock"), save: !!opt("save"), depth: opt("depth"), player: opt("player") || opt("role"), league: !!opt("league") };
 require("../electron-main.cjs");
 
 app.on("browser-window-created", (_e, win) => {
@@ -36,18 +37,19 @@ app.on("browser-window-created", (_e, win) => {
           showTab("league");
           await wait(() => document.getElementById("leagueTable").rows.length > 1);
         }
+        if (steps.player) {
+          showTab("players");
+          await loadPortal();
+          const inp = document.getElementById("portalInput");
+          inp.value = [...document.getElementById("portalList").options].map(o => o.value).find(v => v.startsWith(steps.player)) || "";
+          await showFit();
+        }
         if (steps.depth) {
           showTab("depth");
           await loadDepth();
           const sel = document.getElementById("teamSelect");
           sel.value = [...sel.options].find(o => o.textContent === steps.depth).value;
           await renderTeam();
-          if (steps.role) {
-            const inp = document.getElementById("portalInput");
-            inp.value = [...document.getElementById("portalList").options].map(o => o.value).find(v => v.startsWith(steps.role)) || "";
-            await showRoleAt();
-            await showFit();
-          }
         }
         window.scrollTo(0, 0);
         await new Promise(r => setTimeout(r, 200));

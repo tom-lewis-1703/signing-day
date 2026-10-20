@@ -16,6 +16,7 @@
 
   <nav id="tabs" hidden>
     <button data-tab="stage" class="active">Stage</button>
+    <button data-tab="players">Portal Players</button>
     <button data-tab="depth">Depth Chart</button>
     <button data-tab="league">League Needs</button>
   </nav>
@@ -72,20 +73,24 @@
         <span id="schemeInfo" class="muted"></span>
       </section>
       <p id="projectionNote" class="muted small"></p>
+      <p id="roleResult"></p>
+      <p id="needLine"></p>
+      <div id="rooms" class="rooms"></div>
+    </div>
+
+    <!-- Portal players tab -->
+    <div id="tab-players" class="tab" hidden>
       <section class="toolbar">
-        <label>Portal player at this team
+        <label>Portal player
           <input id="portalInput" list="portalList" placeholder="Type a name…" size="44" autocomplete="off">
         </label>
         <datalist id="portalList"></datalist>
-        <span id="roleResult"></span>
       </section>
       <section id="fitBox" hidden>
         <h3>Top 10 preview <span id="fitSummary" class="muted"></span></h3>
-        <p class="muted small">★ = in his Top 10: the school meets his dealbreaker grade, the team wants him, and it passes his prestige floor (your team only needs the dealbreaker, and is ranked by his player score; with your coach's transfer perk at his position it also joins his list at #10 when it ranks 11th–18th). Combined = half player score, half team score. Team score = role there × need in his room (×1 to ×2 by drop-off; Stacked ×0.25). Player score = playing time (weighted by year, halved for 80+ OVR) plus his dealbreaker, the two other categories of his ideal pitch (Pitch grades), prestige where he'd play, team strength and home state. Only your team's coach perks count. Click a team to see its depth chart.</p>
+        <p class="muted small">★ = in his Top 10: the school meets his dealbreaker grade, the team wants him, and it passes his prestige floor (your team only needs the dealbreaker, and is ranked by his player score; with your coach's transfer perk at his position it also joins his list at #10 when it ranks 11th–18th). Combined = half player score, half team score. Team score = role there × need in his room (×1 to ×2 by drop-off; Stacked ×0.25). Player score = playing time (weighted by year, halved for 80+ OVR) plus his dealbreaker, the other categories of his ideal pitch (Pitch grades), prestige where he'd play, team strength and home state. Only your team's coach perks count. Click a team to see its depth chart with his role there.</p>
         <table class="grid" id="fitTable"></table>
       </section>
-      <p id="needLine"></p>
-      <div id="rooms" class="rooms"></div>
     </div>
 
     <!-- League needs tab -->

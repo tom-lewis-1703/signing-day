@@ -3,6 +3,8 @@ let busy = false;
 let info = null;          // last open() result
 let depthTeams = null;    // team list for the picker
 let portalByLabel = new Map();
+let portalLoaded = false;
+let selectedPortal = null;  // player index picked on the Portal Players tab
 let leagueLoaded = false;
 
 // ---------- helpers ----------
@@ -47,7 +49,8 @@ async function call(name, ...args) {
 // ---------- tabs ----------
 function showTab(tab) {
   for (const b of $("tabs").querySelectorAll("button")) b.classList.toggle("active", b.dataset.tab === tab);
-  for (const t of ["stage", "depth", "league"]) show(`tab-${t}`, t === tab);
+  for (const t of ["stage", "players", "depth", "league"]) show(`tab-${t}`, t === tab);
+  if (tab === "players") loadPortal();
   if (tab === "depth") loadDepth();
   if (tab === "league") loadLeague();
 }
@@ -166,11 +169,14 @@ async function fetchDepth() {
   $("projectionNote").textContent = depthTeams.projects
     ? `Projected next season: current roster minus graduating, early-draft and portal players, plus committed transfers and recruits. Ranked by current OVR. (${depthTeams.ms} ms for all teams)`
     : "This save is not at an offseason stage, so rosters are shown as they are now.";
-  const players = await call("portalPlayers") || [];
-  portalByLabel = new Map(players.map(p => [p.label, p.index]));
-  $("portalList").replaceChildren(...players.map(p => el("option", { value: p.label })));
-  $("portalInput").placeholder = players.length ? `Type a name (${players.length} uncommitted transfers)…` : "No uncommitted transfers at this stage";
-  $("portalInput").disabled = !players.length;
+  await renderTeam();
+}
+
+// Opens a team's depth chart (from the Portal Players or League Needs tab).
+async function openTeam(teamIndex) {
+  showTab("depth");
+  await loadDepth();
+  $("teamSelect").value = teamIndex;
   await renderTeam();
 }
 
@@ -197,24 +203,35 @@ async function renderTeam() {
     const filled = n && n.filledByIncoming.length ? el("div", { className: "filled", textContent: `Replaced by: ${n.filledByIncoming.map(f => `${f.name} ${f.overall}`).join(", ")}` }) : null;
     return el("div", { className: "room" }, header, el("table", { className: "grid" }, ...rows), lost, filled);
   }));
-  if ($("portalInput").value) showRoleAt();
+  await showRoleAt();
 }
 
+// Role of the player picked on the Portal Players tab at the team shown here.
 async function showRoleAt() {
-  const idx = portalByLabel.get($("portalInput").value);
-  if (idx === undefined) { $("roleResult").textContent = ""; return; }
-  const r = await call("roleAt", idx, $("teamSelect").value);
+  if (selectedPortal === null) { $("roleResult").textContent = ""; return; }
+  const r = await call("roleAt", selectedPortal, $("teamSelect").value);
   if (!r) return;
   const ahead = r.ahead.length ? ` Ahead of him: ${r.ahead.map(a => `${a.name} ${a.overall} (${a.year})`).join(", ")}.` : "";
   $("roleResult").textContent = `${r.player} (${r.overall} OVR, max ${r.max}, ${r.dev}) at ${r.team}: ${r.role} (#${r.rank} ${r.room}, ${r.starters} starter${r.starters === 1 ? "" : "s"})${r.pathToStart ? ", path to start the year after" : ""}.${ahead}`;
   $("roleResult").className = `role-${r.role}`;
 }
 
+// ---------- portal players tab ----------
+async function loadPortal() {
+  if (portalLoaded) return;
+  const players = await call("portalPlayers") || [];
+  portalLoaded = true;
+  portalByLabel = new Map(players.map(p => [p.label, p.index]));
+  $("portalList").replaceChildren(...players.map(p => el("option", { value: p.label })));
+  $("portalInput").placeholder = players.length ? `Type a name (${players.length} uncommitted transfers)…` : "No uncommitted transfers at this stage";
+  $("portalInput").disabled = !players.length;
+}
+
 async function showFit() {
-  const idx = portalByLabel.get($("portalInput").value);
-  show("fitBox", idx !== undefined);
-  if (idx === undefined) return;
-  const w = await call("destinations", idx);
+  selectedPortal = portalByLabel.get($("portalInput").value) ?? null;
+  show("fitBox", selectedPortal !== null);
+  if (selectedPortal === null) return;
+  const w = await call("destinations", selectedPortal);
   if (!w) return;
   $("fitSummary").textContent = `${w.player} · ${w.position} ${w.overall} (max ${w.max}, ${w.dev}) · next year ${w.year} · dealbreaker ${w.dealbreaker === "none" && w.originalDealbreaker ? `none (Playing Time dropped: below his position average)` : w.dealbreaker}${w.dealbreaker !== "none" && w.dealbreakerBar ? ` (needs ${w.dealbreakerBar})` : ""} · pitch ${w.pitch}${w.secondaries?.length ? ` (also cares about ${w.secondaries.join(", ")})` : ""} · home ${w.homeState} · floor ${w.floor} · ${w.eligible} teams pass both sides`;
   // Top 25 (first 10 = Top 10 preview), plus his old team if it ranks lower.
@@ -226,11 +243,11 @@ async function showFit() {
       [t.userTeam ? "your team" : "", t.joinedByPerk ? `joined his list by coach perk (ranked #${w.userRank})` : t.userTeam && t.perkReach ? `coach perk (can join from #${w.userReach})` : "", t.meets ? "" : `fails dealbreaker (${t.dealbreakerGrade ?? "no"})`, t.allowed ? "" : "below prestige floor", t.wantsHim ? "" : "team not interested", t.levelOk ? "" : "ceiling too low",
         t.parts.home ? "home state" : "", t.oldTeam ? "his old team" : "", t.serviceAcademy ? "service academy" : ""].filter(Boolean).join(", ")]),
     [2, 5, 6, 7],
-    async i => { $("teamSelect").value = rows[i].teamIndex; await renderTeam(); });
+    i => openTeam(rows[i].teamIndex));
 }
 
 $("teamSelect").addEventListener("change", renderTeam);
-$("portalInput").addEventListener("change", () => { showRoleAt(); showFit(); });
+$("portalInput").addEventListener("change", showFit);
 
 // ---------- league tab ----------
 async function loadLeague() {
@@ -241,12 +258,7 @@ async function loadLeague() {
   fillTable($("leagueTable"), ["Team", "Open", "Starters lost", "Replaced", "Open rooms", "Next-season roster", "Offense", "Defense"],
     rows.map(r => [r.team, r.openSlots, r.startersLost, r.startersFilled, r.openRooms.join(", "), r.rosterNextSeason, r.offScheme.replace(/^OFF_/, ""), r.defScheme.replace(/^DEF_/, "")]),
     [1, 2, 3, 5],
-    async i => {
-      showTab("depth");
-      await loadDepth();
-      $("teamSelect").value = rows[i].teamIndex;
-      await renderTeam();
-    });
+    i => openTeam(rows[i].teamIndex));
 }
 
 // ---------- open / save ----------
@@ -257,7 +269,7 @@ async function openPath(filePath) {
   setBusy(false);
   if (!res.ok) return log(`Open failed: ${res.error}`, "bad");
   info = res.result;
-  depthTeams = null; leagueLoaded = false;
+  depthTeams = null; leagueLoaded = false; portalLoaded = false; selectedPortal = null;
   $("portalInput").value = ""; $("roleResult").textContent = ""; show("fitBox", false);
   show("empty", false); show("tabs");
   renderStage();

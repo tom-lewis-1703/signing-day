@@ -9,7 +9,8 @@ Oct 20, 2026 · @Thomas Lewis
 - **Done and signed off:** step 1 (app skeleton), step 2 (draft lock, verified in-game), step 3 (depth-chart projection), step 4 (ceiling + team-side need and fit).
 - **Step 4b built and tuned, NOT yet signed off:** player side + combined Top 10 preview, read-only (nothing writes to a save). Third session added Tom's next changes (below). Ask whether he has more, then for sign-off.
 - **Third session changes (Oct 20, 2026, Tom's picks; in the page and "Step 4b results"):** playing-time year weight halved for 80+ OVR (P2, option C); ideal recruiting pitches: the two non-dealbreaker categories of his pitch add 10% each to the rest (rest = dealbreaker 40, pitch 10+10, prestige 25, strength 10, home 5) (new code P4, pitch table in `lib/data/pitches.json`); coach perks now count for the **user team only**: AI transfer and threshold perks ignored; the user team's transfer perk (10+ at his group) lets it join his list when it ranks 11th–18th, at #10, and no longer moves it to #2 (K3). The user team is `settings.userTeam` (any dynasty; Kansas now) (K4).
-- **To confirm in-game (Tom):** Gym Rat's categories. Tom listed Athletic Facilities, Championship Contender, Playing Time, but its 579 players' dealbreakers are only Pro Potential / Brand Exposure; using Athletic Facilities, Brand Exposure, Pro Potential (Tom's OK) until checked.
+- **Gym Rat (Tom, read in-game):** Athletic Facilities, Championship Contender, Playing Time. Its players' dealbreakers in the save are Pro Potential / Brand Exposure (not among the three), so for them all three count as secondary, sharing the same 20% (pitch categories always share 2 × `rest.secondary` evenly).
+- **Portal Players tab (Tom, Oct 20, 2026):** the player search and Top 10 preview moved off the Depth Chart tab to their own tab; clicking a team opens its depth chart, which shows the selected player's role there.
 - **Rule walkthrough page (source of truth for every rule and formula):** https://claude.ai/artifact/4kbXJoCjikjx8PL56jqb98 (Tom's private artifact; source `docs/ttt-internals.html` in this repo; edit it and republish to the same URL). Codes: R1, S1, V1, L1, D1–D5, C1–C2, T1–T10, P1–P4, K1–K4. Keep codes stable; update and republish the page after every rule change.
 - **Rules changed this session (all in the page and in "Step 4b results" below):** dealbreakers use the game's own school grades and are pass/fail (P1); Playing Time dealbreaker dropped for players below their position's average starter (seniors: −4) (P1); Kansas skips team side and floor, ranked by player score (K4); coach perks: full (10+) → #2 of his list, partial → +points; threshold perk lowers the bar (K3, P1); need adds weak starters (T3), upgrade with level weighting starting at +4 against the weakest starter (T7), succession (T8), position importance used only across positions (T9), and starter level/stopgap vs prestige level (T10).
 - **Step 5 (Signing Day roster build) design is decided** (see "Phase 3: Signing Day"): keep the sub-60 recruit cleanup but keep Star/Elite/Impact recruits whose max reaches the position's average starter; caps never block an upgrade, the team cuts its weakest link (lowest keep value) instead; keep value = OVR + (max − OVR) × Fr 0.5 / So 0.35 / Jr 0.2 / Sr 0; cut only when the newcomer's keep value is 5+ higher; protected players (never cut or left unplaced): Jr/Sr 77+, Fr/So 72+ with max 77+; position caps QB 5, HB 6, FB 1, WR 11, TE 5, OT 8, OG 8, C 4, EDGE 8, DT 8, LB 12, CB 9, S 8, K 2, P 2 (97).
@@ -129,7 +130,7 @@ Useful: all 172 recruits who were unsigned at Signing Day were removed cleanly b
 
 ### Ceiling = max overall, Maxi's method (built Oct 20, 2026, part of step 4)
 
-- Follows Maxi's Dynasty Progression Monitor & Planner exactly, reimplemented in our code (`lib/ratings-model.mjs`). Its data (per-archetype overall weights, skill groups, level thresholds) was extracted once into `lib/data/ratings-model.json` by `tools/extract-ratings-model.mjs`; the app never needs Maxi's tool. **Personal use only — don't share that data file.**
+- Follows Maxi's Dynasty Progression Monitor & Planner exactly, reimplemented in our code (`lib/ratings-model.mjs`). Its data (per-archetype overall weights, skill groups, level thresholds) was extracted once into `lib/data/ratings-model.json` by `tools/extract-ratings-model.mjs`; the app never needs Maxi's tool.
 - Overall = archetype intercept + weighted ratings; archetype is the save's `PlayerType`. Reproduces 98.2–98.4% of stored overalls exactly (rest off by 1 from rounding).
 - Max overall = every skill group (caps = `SkillGroupCap1–6`, in each archetype's group order) taken to its cap. Matches Maxi's tooltip: Kameryn Crawford 86 → 89. Others: Keisean Henderson 88 → 97, Matt Zollers 74 → 98, Julian Sayin 95 → 97.
 - Max is a theoretical ceiling (assumes every upgrade is bought): 98% of sub-60 recruits have max 70+. The Signing Day recruit rule therefore cuts all Normal/Impact recruits under 60 regardless of max; the max check only decides the 24 Star/Elite ones.
@@ -331,7 +332,7 @@ Open questions to settle while building:
 
 - [ ] How the game uses NIL to block CPU schools (data exists; mechanism unknown)
 - [x] 80–84 Playing Time players at prestige-3 #1s: fixed by halving playing-time weight for 80+ (Oct 20, 2026)
-- [ ] Gym Rat pitch categories (confirm in-game)
+- [x] Gym Rat pitch categories (Tom, from the game)
 - [ ] Write the Playing Time dealbreaker drop into the save in step 6, or keep it preview-only?
 - [ ] #1-pick balancing by open slots (step 6)
 
