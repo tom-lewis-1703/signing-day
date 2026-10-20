@@ -33,6 +33,8 @@ Every layer was read line by line. No calculation errors in the rules; speed is 
 - **#6** `lib/stage.mjs` labels and build-step numbers are stale (task 5).
 - Left alone: a transfer placed back at his old school is tagged "Transfer from (his school)"; backups in `TTT Backups` are never deleted.
 
+### Notes for the full run
+
 **Week 1 of Tom's run doubles as the write test:** the tool commits with the direct edit (proven at Signing Day); Claude checks the save reopens and the changed records are right; Tom advances one week. If the commits hold, carry on. If not, switch to the other method (raise an offering school's `ProspectInfluenceTotal` to the player's `CommitScore` so the game commits him) with one setting and redo Week 1 from the copy.
 
 **Skipped for this first run (Tom):** writing Top 10s into the game during the weeks; Pass A (reviewing the game's own commits at Signing Day); mixing offers/influence into interest (measured only).
