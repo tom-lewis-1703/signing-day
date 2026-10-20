@@ -212,6 +212,10 @@
     },
     "newcomerUpgrade": 4,
     "newcomerLockAtLevel": true,
+    "lockBreak": {
+      "upgrade": 8,
+      "positionRank": 5
+    },
     "transferLimit": {
       "extra": 1
     }
