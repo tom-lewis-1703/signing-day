@@ -43,6 +43,7 @@ handle("ttt:portal-players", async () => (await getSession()).portalPlayers());
 handle("ttt:role-at", async (playerIndex, teamIndex) => (await getSession()).roleAt(playerIndex, teamIndex));
 handle("ttt:who-wants-him", async playerIndex => (await getSession()).whoWantsHim(playerIndex));
 handle("ttt:destinations", async playerIndex => (await getSession()).destinations(playerIndex));
+handle("ttt:player-card", async playerIndex => (await getSession()).playerCard(playerIndex));
 
 function createWindow() {
   Menu.setApplicationMenu(null);

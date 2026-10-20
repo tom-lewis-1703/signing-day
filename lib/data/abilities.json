@@ -1,0 +1,7290 @@
+{
+ "source": "TeamCrafters CFB 27 Dynasty Ability Requirements (teamcrafters.net/tools/cfb27/dynasty-abilities); archetype names mapped in tools/extract-abilities.mjs",
+ "tiers": [
+  "Bronze",
+  "Silver",
+  "Gold",
+  "Platinum"
+ ],
+ "archetypes": {
+  "QB_FieldGeneral": {
+   "name": "Pocket Passer",
+   "abilities": [
+    {
+     "name": "Resistance",
+     "rating": "ThrowUnderPressureRating",
+     "rating2": null,
+     "tiers": [
+      [
+       81,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Resist pressure from the pocket"
+    },
+    {
+     "name": "Step Up",
+     "rating": "ThrowAccuracyMidRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Accuracy boost climbing a clean pocket"
+    },
+    {
+     "name": "Sleight of Hand",
+     "rating": "PlayActionRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Defenders are slower to react on Play Action"
+    },
+    {
+     "name": "Dot!",
+     "rating": "ThrowAccuracyDeepRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Increased accuracy in pocket for open receivers"
+    },
+    {
+     "name": "On Time",
+     "rating": "ThrowAccuracyShortRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved accuracy when throwing with anticipation"
+    }
+   ]
+  },
+  "QB_Improviser": {
+   "name": "Backfield Creator",
+   "abilities": [
+    {
+     "name": "Off Platform",
+     "rating": "ThrowPowerRating",
+     "rating2": "ThrowAccuracyShortRating",
+     "tiers": [
+      [
+       90,
+       82
+      ],
+      [
+       92,
+       83
+      ],
+      [
+       94,
+       84
+      ],
+      [
+       96,
+       86
+      ]
+     ],
+     "description": "Improved accuracy on cross body or backfoot throws"
+    },
+    {
+     "name": "Pull Down",
+     "rating": "CarryingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       72,
+       0
+      ],
+      [
+       75,
+       0
+      ],
+      [
+       79,
+       0
+      ],
+      [
+       83,
+       0
+      ]
+     ],
+     "description": "Boosts ball security in the pocket"
+    },
+    {
+     "name": "On Time",
+     "rating": "ThrowAccuracyShortRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved accuracy when throwing with anticipation"
+    },
+    {
+     "name": "Magician",
+     "rating": "SpeedRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved pocket movement"
+    },
+    {
+     "name": "Mobile Deadeye",
+     "rating": "ThrowOnTheRunRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved accuracy on the run"
+    }
+   ]
+  },
+  "QB_Scrambler": {
+   "name": "Dual Threat",
+   "abilities": [
+    {
+     "name": "Downhill",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       88,
+       0
+      ]
+     ],
+     "description": "Break tackles at max speed"
+    },
+    {
+     "name": "Extender",
+     "rating": "BreakSackRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved break sack ability"
+    },
+    {
+     "name": "Option King",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       83,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Improved speed and accuracy on option pitches"
+    },
+    {
+     "name": "Dot!",
+     "rating": "ThrowAccuracyDeepRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Increased accuracy in pocket for open receivers"
+    },
+    {
+     "name": "Mobile Resistance",
+     "rating": "ThrowUnderPressureRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       83,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ]
+     ],
+     "description": "Improved pressure resistance on the run"
+    }
+   ]
+  },
+  "QB_PureScrambler": {
+   "name": "Pure Runner",
+   "abilities": [
+    {
+     "name": "Downhill",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Break tackles at max speed"
+    },
+    {
+     "name": "Option King",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       83,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Improved speed and accuracy on option pitches"
+    },
+    {
+     "name": "Shifty",
+     "rating": "ChangeOfDirectionRating",
+     "rating2": "SpeedRating",
+     "tiers": [
+      [
+       83,
+       89
+      ],
+      [
+       85,
+       90
+      ],
+      [
+       87,
+       91
+      ],
+      [
+       89,
+       92
+      ]
+     ],
+     "description": "Better at changing direction"
+    },
+    {
+     "name": "Side Step",
+     "rating": "JukeMoveRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Juke moves"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    }
+   ]
+  },
+  "HB_ElusiveBack": {
+   "name": "East/West Playmaker",
+   "abilities": [
+    {
+     "name": "Recoup",
+     "rating": "StaminaRating",
+     "rating2": null,
+     "tiers": [
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Improved fatigue recovery"
+    },
+    {
+     "name": "Shifty",
+     "rating": "ChangeOfDirectionRating",
+     "rating2": "SpeedRating",
+     "tiers": [
+      [
+       87,
+       92
+      ],
+      [
+       88,
+       93
+      ],
+      [
+       89,
+       94
+      ],
+      [
+       90,
+       95
+      ]
+     ],
+     "description": "Better at changing direction"
+    },
+    {
+     "name": "Side Step",
+     "rating": "JukeMoveRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Juke moves"
+    },
+    {
+     "name": "360",
+     "rating": "SpinMoveRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       89,
+       0
+      ]
+     ],
+     "description": "Improved spin moves"
+    },
+    {
+     "name": "Arm Bar",
+     "rating": "StiffArmRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved stiff arms"
+    }
+   ]
+  },
+  "HB_ElusivePower": {
+   "name": "Elusive Bruiser",
+   "abilities": [
+    {
+     "name": "Shifty",
+     "rating": "ChangeOfDirectionRating",
+     "rating2": "SpeedRating",
+     "tiers": [
+      [
+       87,
+       92
+      ],
+      [
+       88,
+       93
+      ],
+      [
+       89,
+       94
+      ],
+      [
+       90,
+       95
+      ]
+     ],
+     "description": "Better at changing direction"
+    },
+    {
+     "name": "Headfirst",
+     "rating": "TruckingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved Truck moves"
+    },
+    {
+     "name": "Side Step",
+     "rating": "JukeMoveRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Juke moves"
+    },
+    {
+     "name": "Downhill",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Break tackles at max speed"
+    },
+    {
+     "name": "Arm Bar",
+     "rating": "StiffArmRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved stiff arms"
+    }
+   ]
+  },
+  "HB_PowerBack": {
+   "name": "Contact Seeker",
+   "abilities": [
+    {
+     "name": "Downhill",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Break tackles at max speed"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Battering Ram",
+     "rating": "ToughnessRating",
+     "rating2": "AwarenessRating",
+     "tiers": [
+      [
+       90,
+       88
+      ],
+      [
+       91,
+       89
+      ],
+      [
+       92,
+       90
+      ],
+      [
+       94,
+       91
+      ]
+     ],
+     "description": "Increased Wear and Tear damage to defenders when being tackled"
+    },
+    {
+     "name": "Ball Security",
+     "rating": "CarryingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       90,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Decreases fumble chance on tackle attempts"
+    },
+    {
+     "name": "Balanced",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Protection from hit sticks"
+    }
+   ]
+  },
+  "HB_PowerBlocking": {
+   "name": "North/South Blocker",
+   "abilities": [
+    {
+     "name": "Headfirst",
+     "rating": "TruckingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved Truck moves"
+    },
+    {
+     "name": "Balanced",
+     "rating": "StiffArmRating",
+     "rating2": null,
+     "tiers": [
+      [
+       81,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from hit sticks"
+    },
+    {
+     "name": "Sidekick",
+     "rating": "PassBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       63,
+       0
+      ],
+      [
+       65,
+       0
+      ],
+      [
+       67,
+       0
+      ],
+      [
+       70,
+       0
+      ]
+     ],
+     "description": "Improved cut blocks"
+    },
+    {
+     "name": "Ball Security",
+     "rating": "CarryingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       90,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Decreases fumble chance on tackle attempts"
+    },
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    }
+   ]
+  },
+  "HB_PowerReceiving": {
+   "name": "North/South Receiver",
+   "abilities": [
+    {
+     "name": "Balanced",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Protection from hit sticks"
+    },
+    {
+     "name": "Arm Bar",
+     "rating": "StiffArmRating",
+     "rating2": null,
+     "tiers": [
+      [
+       81,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved stiff arms"
+    },
+    {
+     "name": "Safety Valve",
+     "rating": "CatchingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       73,
+       0
+      ],
+      [
+       76,
+       0
+      ],
+      [
+       80,
+       0
+      ],
+      [
+       85,
+       0
+      ]
+     ],
+     "description": "Improved route running and catching from the backfield for RB"
+    },
+    {
+     "name": "Headfirst",
+     "rating": "TruckingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ]
+     ],
+     "description": "Improved Truck moves"
+    },
+    {
+     "name": "Downhill",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Break tackles at max speed"
+    }
+   ]
+  },
+  "HB_ReceivingBack": {
+   "name": "Backfield Threat",
+   "abilities": [
+    {
+     "name": "360",
+     "rating": "SpinMoveRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       89,
+       0
+      ]
+     ],
+     "description": "Improved spin moves"
+    },
+    {
+     "name": "Safety Valve",
+     "rating": "CatchingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       73,
+       0
+      ],
+      [
+       76,
+       0
+      ],
+      [
+       80,
+       0
+      ],
+      [
+       85,
+       0
+      ]
+     ],
+     "description": "Improved route running and catching from the backfield for RB"
+    },
+    {
+     "name": "Takeoff",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Quicker release off line when not pressed"
+    },
+    {
+     "name": "Side Step",
+     "rating": "JukeMoveRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Juke moves"
+    },
+    {
+     "name": "Recoup",
+     "rating": "StaminaRating",
+     "rating2": null,
+     "tiers": [
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Improved fatigue recovery"
+    }
+   ]
+  },
+  "FB_Blocking": {
+   "name": "Blocking",
+   "abilities": [
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Second Level",
+     "rating": "LeadBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Improved 2nd level blocking"
+    },
+    {
+     "name": "Pocket Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       69,
+       0
+      ],
+      [
+       71,
+       0
+      ],
+      [
+       73,
+       0
+      ],
+      [
+       75,
+       0
+      ]
+     ],
+     "description": "Improved pass blocking"
+    },
+    {
+     "name": "Sidekick",
+     "rating": "PassBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       75,
+       0
+      ],
+      [
+       80,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved cut blocks"
+    },
+    {
+     "name": "Screen Enforcer",
+     "rating": "ImpactBlockingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       75,
+       0
+      ],
+      [
+       80,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Screen blocking"
+    }
+   ]
+  },
+  "FB_Utility": {
+   "name": "Utility",
+   "abilities": [
+    {
+     "name": "Safety Valve",
+     "rating": "CatchingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       73,
+       0
+      ],
+      [
+       76,
+       0
+      ],
+      [
+       80,
+       0
+      ],
+      [
+       85,
+       0
+      ]
+     ],
+     "description": "Improved route running and catching from the backfield for RB"
+    },
+    {
+     "name": "Balanced",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Protection from hit sticks"
+    },
+    {
+     "name": "Screen Enforcer",
+     "rating": "ImpactBlockingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       75,
+       0
+      ],
+      [
+       80,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved Screen blocking"
+    },
+    {
+     "name": "Sidekick",
+     "rating": "PassBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       75,
+       0
+      ],
+      [
+       80,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved cut blocks"
+    },
+    {
+     "name": "Recoup",
+     "rating": "StaminaRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       81,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       99,
+       0
+      ]
+     ],
+     "description": "Improved fatigue recovery"
+    }
+   ]
+  },
+  "WR_DeepThreat": {
+   "name": "Speedster",
+   "abilities": [
+    {
+     "name": "Side Step",
+     "rating": "JukeMoveRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Juke moves"
+    },
+    {
+     "name": "Double Dip",
+     "rating": "DeepRouteRunningRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Improved double move routes"
+    },
+    {
+     "name": "Takeoff",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Quicker release off line when not pressed"
+    },
+    {
+     "name": "Recoup",
+     "rating": "StaminaRating",
+     "rating2": null,
+     "tiers": [
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Improved fatigue recovery"
+    },
+    {
+     "name": "Shifty",
+     "rating": "ChangeOfDirectionRating",
+     "rating2": "AccelerationRating",
+     "tiers": [
+      [
+       94,
+       90
+      ],
+      [
+       95,
+       91
+      ],
+      [
+       96,
+       93
+      ],
+      [
+       97,
+       96
+      ]
+     ],
+     "description": "Better at changing direction"
+    }
+   ]
+  },
+  "WR_GadgetReceiver": {
+   "name": "Gadget",
+   "abilities": [
+    {
+     "name": "Side Step",
+     "rating": "JukeMoveRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Juke moves"
+    },
+    {
+     "name": "Shifty",
+     "rating": "ChangeOfDirectionRating",
+     "rating2": "AccelerationRating",
+     "tiers": [
+      [
+       94,
+       90
+      ],
+      [
+       95,
+       91
+      ],
+      [
+       96,
+       93
+      ],
+      [
+       97,
+       96
+      ]
+     ],
+     "description": "Better at changing direction"
+    },
+    {
+     "name": "Dot!",
+     "rating": "ThrowAccuracyDeepRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Increased accuracy in pocket for open receivers"
+    },
+    {
+     "name": "Cutter",
+     "rating": "MediumRouteRunningRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved cut moves"
+    },
+    {
+     "name": "Extender",
+     "rating": "BreakSackRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved break sack ability"
+    }
+   ]
+  },
+  "WR_Physical": {
+   "name": "Contested Specialist",
+   "abilities": [
+    {
+     "name": "50/50",
+     "rating": "SpectacularCatchRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Improved jump ball ability"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Balanced",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       82,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Protection from hit sticks"
+    },
+    {
+     "name": "Headfirst",
+     "rating": "TruckingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved Truck moves"
+    },
+    {
+     "name": "Downhill",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       88,
+       0
+      ]
+     ],
+     "description": "Break tackles at max speed"
+    }
+   ]
+  },
+  "WR_PhysicalBlocker": {
+   "name": "Gritty Possession",
+   "abilities": [
+    {
+     "name": "Second Level",
+     "rating": "ImpactBlockingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ]
+     ],
+     "description": "Improved 2nd level blocking"
+    },
+    {
+     "name": "Outside Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       69,
+       0
+      ],
+      [
+       70,
+       0
+      ],
+      [
+       72,
+       0
+      ],
+      [
+       78,
+       0
+      ]
+     ],
+     "description": "Improved double teams on outside runs"
+    },
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Sure Hands",
+     "rating": "CatchInTrafficRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Increased reception chance for WR and TE"
+    }
+   ]
+  },
+  "WR_PhysicalRouteRunner": {
+   "name": "Physical Route Runner",
+   "abilities": [
+    {
+     "name": "Downhill",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       88,
+       0
+      ]
+     ],
+     "description": "Break tackles at max speed"
+    },
+    {
+     "name": "Press Pro",
+     "rating": "ReleaseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Improved beat press ability"
+    },
+    {
+     "name": "Sure Hands",
+     "rating": "CatchInTrafficRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Increased reception chance for WR and TE"
+    },
+    {
+     "name": "50/50",
+     "rating": "SpectacularCatchRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Improved jump ball ability"
+    },
+    {
+     "name": "Cutter",
+     "rating": "MediumRouteRunningRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved cut moves"
+    }
+   ]
+  },
+  "WR_Playmaker": {
+   "name": "Route Artist",
+   "abilities": [
+    {
+     "name": "Cutter",
+     "rating": "MediumRouteRunningRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved cut moves"
+    },
+    {
+     "name": "Lay Out",
+     "rating": "SpectacularCatchRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved dive catches"
+    },
+    {
+     "name": "Recoup",
+     "rating": "StaminaRating",
+     "rating2": null,
+     "tiers": [
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Improved fatigue recovery"
+    },
+    {
+     "name": "Double Dip",
+     "rating": "DeepRouteRunningRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Improved double move routes"
+    },
+    {
+     "name": "Sure Hands",
+     "rating": "CatchInTrafficRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Increased reception chance for WR and TE"
+    }
+   ]
+  },
+  "WR_ShiftyRouteRunner": {
+   "name": "Elusive Route Runner",
+   "abilities": [
+    {
+     "name": "360",
+     "rating": "SpinMoveRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       89,
+       0
+      ]
+     ],
+     "description": "Improved spin moves"
+    },
+    {
+     "name": "Cutter",
+     "rating": "MediumRouteRunningRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved cut moves"
+    },
+    {
+     "name": "Double Dip",
+     "rating": "DeepRouteRunningRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Improved double move routes"
+    },
+    {
+     "name": "Recoup",
+     "rating": "StaminaRating",
+     "rating2": null,
+     "tiers": [
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Improved fatigue recovery"
+    },
+    {
+     "name": "Side Step",
+     "rating": "JukeMoveRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Juke moves"
+    }
+   ]
+  },
+  "TE_Blocking": {
+   "name": "Pure Blocker",
+   "abilities": [
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Quick Drop",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       89,
+       0
+      ]
+     ],
+     "description": "Improved pass block movement"
+    },
+    {
+     "name": "Outside Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       69,
+       0
+      ],
+      [
+       70,
+       0
+      ],
+      [
+       72,
+       0
+      ],
+      [
+       78,
+       0
+      ]
+     ],
+     "description": "Improved double teams on outside runs"
+    },
+    {
+     "name": "Pocket Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       69,
+       0
+      ],
+      [
+       71,
+       0
+      ],
+      [
+       73,
+       0
+      ],
+      [
+       75,
+       0
+      ]
+     ],
+     "description": "Improved pass blocking"
+    },
+    {
+     "name": "Second Level",
+     "rating": "ImpactBlockingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved 2nd level blocking"
+    }
+   ]
+  },
+  "TE_PhysicalRouteRunner": {
+   "name": "Physical Route Runner",
+   "abilities": [
+    {
+     "name": "Balanced",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Protection from hit sticks"
+    },
+    {
+     "name": "50/50",
+     "rating": "SpectacularCatchRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved jump ball ability"
+    },
+    {
+     "name": "Cutter",
+     "rating": "MediumRouteRunningRating",
+     "rating2": null,
+     "tiers": [
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Improved cut moves"
+    },
+    {
+     "name": "Downhill",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       88,
+       0
+      ]
+     ],
+     "description": "Break tackles at max speed"
+    },
+    {
+     "name": "Sure Hands",
+     "rating": "CatchInTrafficRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Increased reception chance for WR and TE"
+    }
+   ]
+  },
+  "TE_Possession": {
+   "name": "Pure Possession",
+   "abilities": [
+    {
+     "name": "Sure Hands",
+     "rating": "CatchInTrafficRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Increased reception chance for WR and TE"
+    },
+    {
+     "name": "Wear Down",
+     "rating": "PassBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Pass Block wins fatigue defender"
+    },
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       99,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Outside Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       69,
+       0
+      ],
+      [
+       70,
+       0
+      ],
+      [
+       72,
+       0
+      ],
+      [
+       78,
+       0
+      ]
+     ],
+     "description": "Improved double teams on outside runs"
+    },
+    {
+     "name": "Balanced",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Protection from hit sticks"
+    }
+   ]
+  },
+  "TE_PossessionBlocking": {
+   "name": "Gritty Possession",
+   "abilities": [
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Sure Hands",
+     "rating": "CatchInTrafficRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Increased reception chance for WR and TE"
+    },
+    {
+     "name": "Outside Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       69,
+       0
+      ],
+      [
+       70,
+       0
+      ],
+      [
+       72,
+       0
+      ],
+      [
+       78,
+       0
+      ]
+     ],
+     "description": "Improved double teams on outside runs"
+    },
+    {
+     "name": "Battering Ram",
+     "rating": "ToughnessRating",
+     "rating2": "AwarenessRating",
+     "tiers": [
+      [
+       90,
+       88
+      ],
+      [
+       91,
+       89
+      ],
+      [
+       92,
+       90
+      ],
+      [
+       94,
+       91
+      ]
+     ],
+     "description": "Increased Wear and Tear damage to defenders when being tackled"
+    }
+   ]
+  },
+  "TE_VerticalThreat": {
+   "name": "Vertical Threat",
+   "abilities": [
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Balanced",
+     "rating": "BreakTackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Protection from hit sticks"
+    },
+    {
+     "name": "Takeoff",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Quicker release off line when not pressed"
+    },
+    {
+     "name": "Recoup",
+     "rating": "StaminaRating",
+     "rating2": null,
+     "tiers": [
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Improved fatigue recovery"
+    },
+    {
+     "name": "50/50",
+     "rating": "SpectacularCatchRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved jump ball ability"
+    }
+   ]
+  },
+  "C_Agile": {
+   "name": "Agile",
+   "abilities": [
+    {
+     "name": "Screen Enforcer",
+     "rating": "ImpactBlockingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved Screen blocking"
+    },
+    {
+     "name": "Quick Step",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       79,
+       0
+      ],
+      [
+       81,
+       0
+      ],
+      [
+       83,
+       0
+      ],
+      [
+       84,
+       0
+      ]
+     ],
+     "description": "Improved movement as a pull blocker"
+    },
+    {
+     "name": "Option Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Option blocking"
+    },
+    {
+     "name": "Outside Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on outside runs"
+    },
+    {
+     "name": "Quick Drop",
+     "rating": "AccelerationRating",
+     "rating2": "SpeedRating",
+     "tiers": [
+      [
+       82,
+       68
+      ],
+      [
+       82,
+       69
+      ],
+      [
+       83,
+       69
+      ],
+      [
+       84,
+       70
+      ]
+     ],
+     "description": "Improved pass block movement"
+    }
+   ]
+  },
+  "C_PassProtector": {
+   "name": "Pass Protector",
+   "abilities": [
+    {
+     "name": "Pocket Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved pass blocking"
+    },
+    {
+     "name": "Quick Drop",
+     "rating": "AccelerationRating",
+     "rating2": "SpeedRating",
+     "tiers": [
+      [
+       82,
+       68
+      ],
+      [
+       82,
+       69
+      ],
+      [
+       83,
+       69
+      ],
+      [
+       84,
+       70
+      ]
+     ],
+     "description": "Improved pass block movement"
+    },
+    {
+     "name": "PA Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved Play Action blocking"
+    },
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Wear Down",
+     "rating": "PassBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Pass Block wins fatigue defender"
+    }
+   ]
+  },
+  "C_Power": {
+   "name": "Raw Strength",
+   "abilities": [
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Second Level",
+     "rating": "ImpactBlockingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved 2nd level blocking"
+    },
+    {
+     "name": "Inside Shield",
+     "rating": "RunBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on inside runs"
+    },
+    {
+     "name": "Ground N Pound",
+     "rating": "RunBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ]
+     ],
+     "description": "Run block wins fatigue defender"
+    }
+   ]
+  },
+  "C_WellRounded": {
+   "name": "Well Rounded",
+   "abilities": [
+    {
+     "name": "Pocket Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved pass blocking"
+    },
+    {
+     "name": "Outside Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on outside runs"
+    },
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Option Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Option blocking"
+    },
+    {
+     "name": "Inside Shield",
+     "rating": "RunBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on inside runs"
+    }
+   ]
+  },
+  "G_Agile": {
+   "name": "Agile",
+   "abilities": [
+    {
+     "name": "Screen Enforcer",
+     "rating": "ImpactBlockingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved Screen blocking"
+    },
+    {
+     "name": "Quick Step",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       79,
+       0
+      ],
+      [
+       81,
+       0
+      ],
+      [
+       83,
+       0
+      ],
+      [
+       84,
+       0
+      ]
+     ],
+     "description": "Improved movement as a pull blocker"
+    },
+    {
+     "name": "Option Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Option blocking"
+    },
+    {
+     "name": "Quick Drop",
+     "rating": "AccelerationRating",
+     "rating2": "SpeedRating",
+     "tiers": [
+      [
+       82,
+       68
+      ],
+      [
+       82,
+       69
+      ],
+      [
+       83,
+       69
+      ],
+      [
+       84,
+       70
+      ]
+     ],
+     "description": "Improved pass block movement"
+    },
+    {
+     "name": "Outside Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on outside runs"
+    }
+   ]
+  },
+  "G_PassProtector": {
+   "name": "Pass Protector",
+   "abilities": [
+    {
+     "name": "Pocket Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved pass blocking"
+    },
+    {
+     "name": "Quick Drop",
+     "rating": "AccelerationRating",
+     "rating2": "SpeedRating",
+     "tiers": [
+      [
+       82,
+       68
+      ],
+      [
+       82,
+       69
+      ],
+      [
+       83,
+       69
+      ],
+      [
+       84,
+       70
+      ]
+     ],
+     "description": "Improved pass block movement"
+    },
+    {
+     "name": "PA Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved Play Action blocking"
+    },
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Wear Down",
+     "rating": "PassBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Pass Block wins fatigue defender"
+    }
+   ]
+  },
+  "G_Power": {
+   "name": "Raw Strength",
+   "abilities": [
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Second Level",
+     "rating": "ImpactBlockingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved 2nd level blocking"
+    },
+    {
+     "name": "Inside Shield",
+     "rating": "RunBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on inside runs"
+    },
+    {
+     "name": "Ground N Pound",
+     "rating": "RunBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ]
+     ],
+     "description": "Run block wins fatigue defender"
+    }
+   ]
+  },
+  "G_WellRounded": {
+   "name": "Well Rounded",
+   "abilities": [
+    {
+     "name": "Pocket Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved pass blocking"
+    },
+    {
+     "name": "Outside Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on outside runs"
+    },
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Option Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Option blocking"
+    },
+    {
+     "name": "Inside Shield",
+     "rating": "RunBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on inside runs"
+    }
+   ]
+  },
+  "OT_Agile": {
+   "name": "Agile",
+   "abilities": [
+    {
+     "name": "Screen Enforcer",
+     "rating": "ImpactBlockingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved Screen blocking"
+    },
+    {
+     "name": "Quick Step",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       79,
+       0
+      ],
+      [
+       81,
+       0
+      ],
+      [
+       83,
+       0
+      ],
+      [
+       84,
+       0
+      ]
+     ],
+     "description": "Improved movement as a pull blocker"
+    },
+    {
+     "name": "Option Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Option blocking"
+    },
+    {
+     "name": "Outside Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on outside runs"
+    },
+    {
+     "name": "Quick Drop",
+     "rating": "AccelerationRating",
+     "rating2": "SpeedRating",
+     "tiers": [
+      [
+       82,
+       68
+      ],
+      [
+       82,
+       69
+      ],
+      [
+       83,
+       69
+      ],
+      [
+       84,
+       70
+      ]
+     ],
+     "description": "Improved pass block movement"
+    }
+   ]
+  },
+  "OT_PassProtector": {
+   "name": "Pass Protector",
+   "abilities": [
+    {
+     "name": "Pocket Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved pass blocking"
+    },
+    {
+     "name": "Quick Drop",
+     "rating": "AccelerationRating",
+     "rating2": "SpeedRating",
+     "tiers": [
+      [
+       82,
+       68
+      ],
+      [
+       82,
+       69
+      ],
+      [
+       83,
+       69
+      ],
+      [
+       84,
+       70
+      ]
+     ],
+     "description": "Improved pass block movement"
+    },
+    {
+     "name": "PA Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved Play Action blocking"
+    },
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Wear Down",
+     "rating": "PassBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Pass Block wins fatigue defender"
+    }
+   ]
+  },
+  "OT_Power": {
+   "name": "Raw Strength",
+   "abilities": [
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Second Level",
+     "rating": "ImpactBlockingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved 2nd level blocking"
+    },
+    {
+     "name": "Inside Shield",
+     "rating": "RunBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on inside runs"
+    },
+    {
+     "name": "Ground N Pound",
+     "rating": "RunBlockRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ]
+     ],
+     "description": "Run block wins fatigue defender"
+    }
+   ]
+  },
+  "OT_WellRounded": {
+   "name": "Well Rounded",
+   "abilities": [
+    {
+     "name": "Pocket Shield",
+     "rating": "PassBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved pass blocking"
+    },
+    {
+     "name": "Outside Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on outside runs"
+    },
+    {
+     "name": "Strong Grip",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral shed prevention on runs"
+    },
+    {
+     "name": "Option Shield",
+     "rating": "RunBlockFinesseRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved Option blocking"
+    },
+    {
+     "name": "Inside Shield",
+     "rating": "RunBlockPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved double teams on inside runs"
+    }
+   ]
+  },
+  "DE_PowerRusher": {
+   "name": "Power Rusher",
+   "abilities": [
+    {
+     "name": "Pocket Disruptor",
+     "rating": "PowerMovesRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Boost against pass blocks on 3rd/4th & long"
+    },
+    {
+     "name": "Duress",
+     "rating": "PowerMovesRating",
+     "rating2": "FinesseMovesRating",
+     "tiers": [
+      [
+       88,
+       88
+      ],
+      [
+       89,
+       89
+      ],
+      [
+       91,
+       91
+      ],
+      [
+       94,
+       94
+      ]
+     ],
+     "description": "Increases pressure effects on QB"
+    },
+    {
+     "name": "Grip Breaker",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral sheds on runs"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Take Down",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved sack attempts"
+    }
+   ]
+  },
+  "DE_PurePower": {
+   "name": "Pure Power",
+   "abilities": [
+    {
+     "name": "Grip Breaker",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral sheds on runs"
+    },
+    {
+     "name": "Pocket Disruptor",
+     "rating": "PowerMovesRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Boost against pass blocks on 3rd/4th & long"
+    },
+    {
+     "name": "Inside Disruptor",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved shedding on inside runs"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Hammer",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved hit stick attempts"
+    }
+   ]
+  },
+  "DE_RunStopper": {
+   "name": "Edge Setter",
+   "abilities": [
+    {
+     "name": "Grip Breaker",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral sheds on runs"
+    },
+    {
+     "name": "Inside Disruptor",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved shedding on inside runs"
+    },
+    {
+     "name": "Outside Disruptor",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved shedding on outside runs"
+    },
+    {
+     "name": "Option Disruptor",
+     "rating": "PlayRecognitionRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved shedding on option runs"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    }
+   ]
+  },
+  "DE_SmallerSpeedRusher": {
+   "name": "Speed Rusher",
+   "abilities": [
+    {
+     "name": "Quick Jump",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Quicker jump off the snap when pass rushing"
+    },
+    {
+     "name": "Duress",
+     "rating": "PowerMovesRating",
+     "rating2": "FinesseMovesRating",
+     "tiers": [
+      [
+       88,
+       88
+      ],
+      [
+       89,
+       89
+      ],
+      [
+       91,
+       91
+      ],
+      [
+       94,
+       94
+      ]
+     ],
+     "description": "Increases pressure effects on QB"
+    },
+    {
+     "name": "Take Down",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       82,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Improved sack attempts"
+    },
+    {
+     "name": "Pocket Disruptor",
+     "rating": "FinesseMovesRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Boost against pass blocks on 3rd/4th & long"
+    },
+    {
+     "name": "Recoup",
+     "rating": "StaminaRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved fatigue recovery"
+    }
+   ]
+  },
+  "DT_NoseTackle": {
+   "name": "Gap Specialist",
+   "abilities": [
+    {
+     "name": "Grip Breaker",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral sheds on runs"
+    },
+    {
+     "name": "Inside Disruptor",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved shedding on inside runs"
+    },
+    {
+     "name": "Outside Disruptor",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved shedding on outside runs"
+    },
+    {
+     "name": "Option Disruptor",
+     "rating": "PlayRecognitionRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved shedding on option runs"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    }
+   ]
+  },
+  "DT_PowerRusher": {
+   "name": "Power Rusher",
+   "abilities": [
+    {
+     "name": "Pocket Disruptor",
+     "rating": "PowerMovesRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Boost against pass blocks on 3rd/4th & long"
+    },
+    {
+     "name": "Duress",
+     "rating": "PowerMovesRating",
+     "rating2": "FinesseMovesRating",
+     "tiers": [
+      [
+       88,
+       88
+      ],
+      [
+       89,
+       89
+      ],
+      [
+       91,
+       91
+      ],
+      [
+       94,
+       94
+      ]
+     ],
+     "description": "Increases pressure effects on QB"
+    },
+    {
+     "name": "Grip Breaker",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       99,
+       0
+      ]
+     ],
+     "description": "Boost to lateral sheds on runs"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Take Down",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved sack attempts"
+    }
+   ]
+  },
+  "DT_PurePower": {
+   "name": "Pure Power",
+   "abilities": [
+    {
+     "name": "Grip Breaker",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Boost to lateral sheds on runs"
+    },
+    {
+     "name": "Pocket Disruptor",
+     "rating": "PowerMovesRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Boost against pass blocks on 3rd/4th & long"
+    },
+    {
+     "name": "Inside Disruptor",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved shedding on inside runs"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Hammer",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved hit stick attempts"
+    }
+   ]
+  },
+  "DT_SpeedRusher": {
+   "name": "Speed Rusher",
+   "abilities": [
+    {
+     "name": "Duress",
+     "rating": "PowerMovesRating",
+     "rating2": "FinesseMovesRating",
+     "tiers": [
+      [
+       88,
+       88
+      ],
+      [
+       89,
+       89
+      ],
+      [
+       91,
+       91
+      ],
+      [
+       94,
+       94
+      ]
+     ],
+     "description": "Increases pressure effects on QB"
+    },
+    {
+     "name": "Quick Jump",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Quicker jump off the snap when pass rushing"
+    },
+    {
+     "name": "Take Down",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved sack attempts"
+    },
+    {
+     "name": "Pocket Disruptor",
+     "rating": "FinesseMovesRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       89,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Boost against pass blocks on 3rd/4th & long"
+    },
+    {
+     "name": "Recoup",
+     "rating": "StaminaRating",
+     "rating2": null,
+     "tiers": [
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ],
+      [
+       98,
+       0
+      ]
+     ],
+     "description": "Improved fatigue recovery"
+    }
+   ]
+  },
+  "MLB_FieldGeneral": {
+   "name": "Signal Caller",
+   "abilities": [
+    {
+     "name": "Take Down",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved sack attempts"
+    },
+    {
+     "name": "Wrap Up",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved wrap tackles"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Blow Up",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       82,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ]
+     ],
+     "description": "Improved impact block resistance"
+    },
+    {
+     "name": "Hammer",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved hit stick attempts"
+    }
+   ]
+  },
+  "MLB_PassCoverage": {
+   "name": "Lurker",
+   "abilities": [
+    {
+     "name": "Knockout",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved catch knockouts in coverage"
+    },
+    {
+     "name": "House Call",
+     "rating": "CatchingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       71,
+       0
+      ],
+      [
+       73,
+       0
+      ],
+      [
+       75,
+       0
+      ],
+      [
+       78,
+       0
+      ]
+     ],
+     "description": "Improved catch chance INT attempts"
+    },
+    {
+     "name": "Robber",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       91,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved movement in zone coverage"
+    },
+    {
+     "name": "Bouncer",
+     "rating": "ZoneCoverageRating",
+     "rating2": null,
+     "tiers": [
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Zone chucks fatigue receiver"
+    },
+    {
+     "name": "Wrap Up",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved wrap tackles"
+    }
+   ]
+  },
+  "MLB_RunStopper": {
+   "name": "Thumper",
+   "abilities": [
+    {
+     "name": "Grip Breaker",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Boost to lateral sheds on runs"
+    },
+    {
+     "name": "Wrap Up",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved wrap tackles"
+    },
+    {
+     "name": "Aftershock",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Big hits produce increased wear and tear"
+    },
+    {
+     "name": "Blow Up",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       82,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ]
+     ],
+     "description": "Improved impact block resistance"
+    },
+    {
+     "name": "Hammer",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved hit stick attempts"
+    }
+   ]
+  },
+  "OLB_PowerRusher": {
+   "name": "Signal Caller",
+   "abilities": [
+    {
+     "name": "Take Down",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved sack attempts"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    },
+    {
+     "name": "Blow Up",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       82,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ]
+     ],
+     "description": "Improved impact block resistance"
+    },
+    {
+     "name": "Wrap Up",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved wrap tackles"
+    },
+    {
+     "name": "Hammer",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved hit stick attempts"
+    }
+   ]
+  },
+  "OLB_PassCoverage": {
+   "name": "Lurker",
+   "abilities": [
+    {
+     "name": "House Call",
+     "rating": "CatchingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       71,
+       0
+      ],
+      [
+       73,
+       0
+      ],
+      [
+       75,
+       0
+      ],
+      [
+       78,
+       0
+      ]
+     ],
+     "description": "Improved catch chance INT attempts"
+    },
+    {
+     "name": "Knockout",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved catch knockouts in coverage"
+    },
+    {
+     "name": "Bouncer",
+     "rating": "ZoneCoverageRating",
+     "rating2": null,
+     "tiers": [
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ]
+     ],
+     "description": "Zone chucks fatigue receiver"
+    },
+    {
+     "name": "Robber",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       91,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Improved movement in zone coverage"
+    },
+    {
+     "name": "Wrap Up",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved wrap tackles"
+    }
+   ]
+  },
+  "OLB_RunStopper": {
+   "name": "Thumper",
+   "abilities": [
+    {
+     "name": "Wrap Up",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved wrap tackles"
+    },
+    {
+     "name": "Aftershock",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Big hits produce increased wear and tear"
+    },
+    {
+     "name": "Blow Up",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       80,
+       0
+      ],
+      [
+       82,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ]
+     ],
+     "description": "Improved impact block resistance"
+    },
+    {
+     "name": "Hammer",
+     "rating": "BlockSheddingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       83,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       89,
+       0
+      ]
+     ],
+     "description": "Improved hit stick attempts"
+    },
+    {
+     "name": "Grip Breaker",
+     "rating": "StrengthRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Boost to lateral sheds on runs"
+    }
+   ]
+  },
+  "CB_HybridCorner": {
+   "name": "Field",
+   "abilities": [
+    {
+     "name": "Wrap Up",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved wrap tackles"
+    },
+    {
+     "name": "Robber",
+     "rating": "ChangeOfDirectionRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved movement in zone coverage"
+    },
+    {
+     "name": "Knockout",
+     "rating": "ZoneCoverageRating",
+     "rating2": "ManCoverageRating",
+     "tiers": [
+      [
+       86,
+       86
+      ],
+      [
+       88,
+       88
+      ],
+      [
+       90,
+       90
+      ],
+      [
+       94,
+       94
+      ]
+     ],
+     "description": "Improved catch knockouts in coverage"
+    },
+    {
+     "name": "Blanket Coverage",
+     "rating": "ManCoverageRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved man coverage"
+    },
+    {
+     "name": "Ballhawk",
+     "rating": "AwarenessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved break on passes"
+    }
+   ]
+  },
+  "CB_MantoMan": {
+   "name": "Bump and Run",
+   "abilities": [
+    {
+     "name": "Blanket Coverage",
+     "rating": "ManCoverageRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved man coverage"
+    },
+    {
+     "name": "Jammer",
+     "rating": "PressRating",
+     "rating2": null,
+     "tiers": [
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ]
+     ],
+     "description": "Improved press technique"
+    },
+    {
+     "name": "House Call",
+     "rating": "CatchingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       75,
+       0
+      ],
+      [
+       78,
+       0
+      ],
+      [
+       81,
+       0
+      ],
+      [
+       83,
+       0
+      ]
+     ],
+     "description": "Improved catch chance INT attempts"
+    },
+    {
+     "name": "Ballhawk",
+     "rating": "AwarenessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved break on passes"
+    },
+    {
+     "name": "Knockout",
+     "rating": "ZoneCoverageRating",
+     "rating2": "ManCoverageRating",
+     "tiers": [
+      [
+       86,
+       86
+      ],
+      [
+       88,
+       88
+      ],
+      [
+       90,
+       90
+      ],
+      [
+       94,
+       94
+      ]
+     ],
+     "description": "Improved catch knockouts in coverage"
+    }
+   ]
+  },
+  "CB_Slot": {
+   "name": "Boundary",
+   "abilities": [
+    {
+     "name": "Jammer",
+     "rating": "PressRating",
+     "rating2": null,
+     "tiers": [
+      [
+       82,
+       0
+      ],
+      [
+       84,
+       0
+      ],
+      [
+       87,
+       0
+      ],
+      [
+       91,
+       0
+      ]
+     ],
+     "description": "Improved press technique"
+    },
+    {
+     "name": "Blanket Coverage",
+     "rating": "ManCoverageRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       92,
+       0
+      ]
+     ],
+     "description": "Improved man coverage"
+    },
+    {
+     "name": "Lay Out",
+     "rating": "SpectacularCatchRating",
+     "rating2": null,
+     "tiers": [
+      [
+       72,
+       0
+      ],
+      [
+       74,
+       0
+      ],
+      [
+       77,
+       0
+      ],
+      [
+       80,
+       0
+      ]
+     ],
+     "description": "Improved dive catches"
+    },
+    {
+     "name": "Wrap Up",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved wrap tackles"
+    },
+    {
+     "name": "Quick Jump",
+     "rating": "AccelerationRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Quicker jump off the snap when pass rushing"
+    }
+   ]
+  },
+  "CB_Zone": {
+   "name": "Zone",
+   "abilities": [
+    {
+     "name": "Knockout",
+     "rating": "ZoneCoverageRating",
+     "rating2": "ManCoverageRating",
+     "tiers": [
+      [
+       86,
+       86
+      ],
+      [
+       88,
+       88
+      ],
+      [
+       90,
+       90
+      ],
+      [
+       94,
+       94
+      ]
+     ],
+     "description": "Improved catch knockouts in coverage"
+    },
+    {
+     "name": "Lay Out",
+     "rating": "SpectacularCatchRating",
+     "rating2": null,
+     "tiers": [
+      [
+       72,
+       0
+      ],
+      [
+       74,
+       0
+      ],
+      [
+       77,
+       0
+      ],
+      [
+       80,
+       0
+      ]
+     ],
+     "description": "Improved dive catches"
+    },
+    {
+     "name": "House Call",
+     "rating": "CatchingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       75,
+       0
+      ],
+      [
+       78,
+       0
+      ],
+      [
+       81,
+       0
+      ],
+      [
+       83,
+       0
+      ]
+     ],
+     "description": "Improved catch chance INT attempts"
+    },
+    {
+     "name": "Ballhawk",
+     "rating": "AwarenessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved break on passes"
+    },
+    {
+     "name": "Bouncer",
+     "rating": "ZoneCoverageRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Zone chucks fatigue receiver"
+    }
+   ]
+  },
+  "S_Hybrid": {
+   "name": "Hybrid",
+   "abilities": [
+    {
+     "name": "Wrap Up",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved wrap tackles"
+    },
+    {
+     "name": "Hammer",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved hit stick attempts"
+    },
+    {
+     "name": "Knockout",
+     "rating": "ZoneCoverageRating",
+     "rating2": "ManCoverageRating",
+     "tiers": [
+      [
+       86,
+       86
+      ],
+      [
+       88,
+       88
+      ],
+      [
+       90,
+       90
+      ],
+      [
+       94,
+       94
+      ]
+     ],
+     "description": "Improved catch knockouts in coverage"
+    },
+    {
+     "name": "Aftershock",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Big hits produce increased wear and tear"
+    },
+    {
+     "name": "Blow Up",
+     "rating": "PursuitRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       89,
+       0
+      ]
+     ],
+     "description": "Improved impact block resistance"
+    }
+   ]
+  },
+  "S_RunSupport": {
+   "name": "Box Specialist",
+   "abilities": [
+    {
+     "name": "Aftershock",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Big hits produce increased wear and tear"
+    },
+    {
+     "name": "Wrap Up",
+     "rating": "TackleRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved wrap tackles"
+    },
+    {
+     "name": "Hammer",
+     "rating": "HitPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       88,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved hit stick attempts"
+    },
+    {
+     "name": "Blow Up",
+     "rating": "PursuitRating",
+     "rating2": null,
+     "tiers": [
+      [
+       84,
+       0
+      ],
+      [
+       85,
+       0
+      ],
+      [
+       86,
+       0
+      ],
+      [
+       89,
+       0
+      ]
+     ],
+     "description": "Improved impact block resistance"
+    },
+    {
+     "name": "Workhorse",
+     "rating": "ToughnessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ],
+      [
+       94,
+       0
+      ],
+      [
+       96,
+       0
+      ]
+     ],
+     "description": "Protection from wear and tear impacts"
+    }
+   ]
+  },
+  "S_Zone": {
+   "name": "Coverage Specialist",
+   "abilities": [
+    {
+     "name": "Ballhawk",
+     "rating": "AwarenessRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Improved break on passes"
+    },
+    {
+     "name": "Lay Out",
+     "rating": "SpectacularCatchRating",
+     "rating2": null,
+     "tiers": [
+      [
+       72,
+       0
+      ],
+      [
+       74,
+       0
+      ],
+      [
+       77,
+       0
+      ],
+      [
+       80,
+       0
+      ]
+     ],
+     "description": "Improved dive catches"
+    },
+    {
+     "name": "House Call",
+     "rating": "CatchingRating",
+     "rating2": null,
+     "tiers": [
+      [
+       75,
+       0
+      ],
+      [
+       78,
+       0
+      ],
+      [
+       81,
+       0
+      ],
+      [
+       83,
+       0
+      ]
+     ],
+     "description": "Improved catch chance INT attempts"
+    },
+    {
+     "name": "Robber",
+     "rating": "ChangeOfDirectionRating",
+     "rating2": null,
+     "tiers": [
+      [
+       89,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Improved movement in zone coverage"
+    },
+    {
+     "name": "Knockout",
+     "rating": "ZoneCoverageRating",
+     "rating2": "ManCoverageRating",
+     "tiers": [
+      [
+       86,
+       86
+      ],
+      [
+       88,
+       88
+      ],
+      [
+       90,
+       90
+      ],
+      [
+       94,
+       94
+      ]
+     ],
+     "description": "Improved catch knockouts in coverage"
+    }
+   ]
+  },
+  "KP_Accurate": {
+   "name": "Accurate",
+   "abilities": [
+    {
+     "name": "Chip Shot",
+     "rating": "KickPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       87,
+       0
+      ],
+      [
+       90,
+       0
+      ],
+      [
+       92,
+       0
+      ],
+      [
+       94,
+       0
+      ]
+     ],
+     "description": "Easier Accuracy Timing on Short Field Goals"
+    },
+    {
+     "name": "Deep Range",
+     "rating": "KickPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Easier accuracy timing on 50+ yard FG attempts"
+    },
+    {
+     "name": "Mega Leg",
+     "rating": "KickAccuracyRating",
+     "rating2": null,
+     "tiers": [
+      [
+       93,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Chance to avoid the penalty for overkicking"
+    }
+   ]
+  },
+  "KP_Power": {
+   "name": "Power",
+   "abilities": [
+    {
+     "name": "Deep Range",
+     "rating": "KickPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       86,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       95,
+       0
+      ]
+     ],
+     "description": "Easier accuracy timing on 50+ yard FG attempts"
+    },
+    {
+     "name": "Mega Leg",
+     "rating": "KickAccuracyRating",
+     "rating2": null,
+     "tiers": [
+      [
+       93,
+       0
+      ],
+      [
+       95,
+       0
+      ],
+      [
+       96,
+       0
+      ],
+      [
+       97,
+       0
+      ]
+     ],
+     "description": "Chance to avoid the penalty for overkicking"
+    },
+    {
+     "name": "Coffin Corner",
+     "rating": "KickPowerRating",
+     "rating2": null,
+     "tiers": [
+      [
+       85,
+       0
+      ],
+      [
+       88,
+       0
+      ],
+      [
+       91,
+       0
+      ],
+      [
+       93,
+       0
+      ]
+     ],
+     "description": "Easier accuracy timing on punts from midfield or closer"
+    }
+   ]
+  }
+ }
+}

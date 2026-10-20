@@ -86,10 +86,48 @@
         </label>
         <datalist id="portalList"></datalist>
       </section>
+      <section id="cardBox" class="card" hidden>
+        <div class="card-head">
+          <div class="badges">
+            <div class="badge"><b id="cOvr"></b><span>OVR</span></div>
+            <div class="badge max"><b id="cMax"></b><span>MAX</span></div>
+          </div>
+          <div>
+            <h2 class="pname"><span id="cName"></span> <span id="cJersey" class="muted"></span></h2>
+            <div id="cSub" class="sub"></div>
+            <div id="cChips" class="chips"></div>
+          </div>
+        </div>
+        <div class="panels">
+          <div class="panel">
+            <h3>What he wants</h3>
+            <table class="kv" id="cWants"></table>
+          </div>
+          <div class="panel">
+            <h3>Abilities</h3>
+            <div id="cPhysical"></div>
+            <div id="cMental"></div>
+          </div>
+          <div class="panel">
+            <h3>Skill groups <span class="muted small">level now · cap · group rating now → at cap</span></h3>
+            <div id="cGroups"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Ratings <span class="muted small">now → at his caps</span> <button id="allRatingsBtn" class="link"></button></h3>
+          <div id="cRatings" class="rating-groups"></div>
+          <div id="cOtherRatings" class="rating-groups" hidden></div>
+        </div>
+      </section>
+
       <section id="fitBox" hidden>
-        <h3>Top 10 preview <span id="fitSummary" class="muted"></span></h3>
-        <p class="muted small">★ = in his Top 10: the school meets his dealbreaker grade, the team wants him, and it passes his prestige floor (your team only needs the dealbreaker, and is ranked by his player score; with your coach's transfer perk at his position it also joins his list at #10 when it ranks 11th–18th). Combined = half player score, half team score. Team score = role there × need in his room (×1 to ×2 by drop-off; Stacked ×0.25). Player score = playing time (weighted by year, halved for 80+ OVR) plus his dealbreaker, the other categories of his ideal pitch (Pitch grades), prestige where he'd play, team strength and home state. Only your team's coach perks count. Click a team to see its depth chart with his role there.</p>
-        <table class="grid" id="fitTable"></table>
+        <h2>Top 10 preview <span id="fitSummary" class="muted small"></span></h2>
+        <details class="explain">
+          <summary>How this list is built</summary>
+          <p class="muted small">★ = in his Top 10: the school meets his dealbreaker grade, the team wants him, and it passes his prestige floor (your team only needs the dealbreaker, and is ranked by his player score; with your coach's transfer perk at his position it also joins his list at #10 when it ranks 11th–18th). Combined = half player score, half team score. Team score = role there × need in his room (×1 to ×2 by drop-off; Stacked ×0.25). Player score = playing time (weighted by year, halved for 80+ OVR) plus his dealbreaker, the other categories of his ideal pitch (Pitch grades), prestige where he'd play, team strength and home state. Only your team's coach perks count. Click a team to see its depth chart with his role there.</p>
+        </details>
+        <table class="grid fit" id="fitTable"></table>
+        <button id="moreSchoolsBtn" class="link" hidden></button>
       </section>
     </div>
 
