@@ -327,11 +327,12 @@
       "week-4": 0.7
     },
     "weights": {
-      "favorite": 0.5,
-      "rank": 0.5,
-      "offer": 0.5
+      "favorite": 0,
+      "rank": 1,
+      "offer": 0
     },
     "userTopN": 3,
-    "maxSpot": 10
+    "maxSpot": 10,
+    "softLimits": true
   }
 }
