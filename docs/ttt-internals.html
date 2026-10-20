@@ -139,14 +139,15 @@ td a.code { text-decoration: none; }
         <span class="chip done">Step 2 · draft lock · signed off</span>
         <span class="chip done">Step 3 · depth chart · signed off</span>
         <span class="chip done">Step 4 · ceiling + team side · signed off</span>
-        <span class="chip review">Step 4b · player side + Top 10 · awaiting your review</span>
-        <span class="chip later">Step 5 · Signing Day · next</span>
+        <span class="chip done">Step 4b · player side + Top 10 · signed off</span>
+        <span class="chip review">Step 5 · Signing Day · pieces 1–3 built, preview only</span>
+        <span class="chip later">Weekly commits · designed, next</span>
       </div>
     </header>
 
     <section id="pipeline">
       <div class="sec-head"><h2>The whole pipeline</h2></div>
-      <p>Each box feeds the next. The draft lock is a separate action at the Players Leaving stage; the rest builds the Top 10 preview for every portal player.</p>
+      <p>Each box feeds the next. The draft lock is a separate action at the Players Leaving stage; the rest builds the Top 10 preview for every portal player, and at Signing Day places every uncommitted transfer (section 11; preview only, nothing written yet).</p>
       <div class="flow" role="list">
         <div class="box" role="listitem"><b>Read the save</b><small>Players, teams, recruits, grades, perks, once</small></div>
         <div class="arrow" aria-hidden="true">→</div>
@@ -157,6 +158,8 @@ td a.code { text-decoration: none; }
         <div class="box" role="listitem"><b>Player side</b><small>Playing time, dealbreaker grade, prestige, home</small></div>
         <div class="arrow" aria-hidden="true">→</div>
         <div class="box" role="listitem"><b>Top 10</b><small>Both sides pass, ranked 50/50, perks applied</small></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="box" role="listitem"><b>Signing Day</b><small>Recruit cleanup, every transfer placed on live rosters</small></div>
       </div>
     </section>
 
@@ -187,6 +190,8 @@ td a.code { text-decoration: none; }
           <tr><td><a class="code" href="#T8">T8</a></td><td>Need: succession when all starters are seniors (overrides Stacked)</td><td>fit.succession</td></tr>
           <tr><td><a class="code" href="#T9">T9</a></td><td>Position importance (QB, OT, EDGE)</td><td>fit.positionWeight</td></tr>
           <tr><td><a class="code" href="#T10">T10</a></td><td>Starter level: real starter or stopgap (vs prestige level)</td><td>fit.starterLevel</td></tr>
+          <tr><td><a class="code" href="#T11">T11</a></td><td>Lookalikes: less interest in a second player like one already coming in</td><td>fit.lookalike</td></tr>
+          <tr><td><a class="code" href="#T12">T12</a></td><td>Newcomer limits: beating a newcomer for a start; transfers per room</td><td>fit.newcomerUpgrade, fit.transferLimit</td></tr>
           <tr><td><a class="code" href="#P1">P1</a></td><td>Dealbreaker grade and pass/fail bar; Playing Time dropped below position average</td><td>playerSide.dealbreakerBar, .playingTimeDrop</td></tr>
           <tr><td><a class="code" href="#P2">P2</a></td><td>Player score: year weight (halved for 80+), rest split, jitter</td><td>playerSide.yearWeight, .playingTimeByRating, .rest, .jitter</td></tr>
           <tr><td><a class="code" href="#P3">P3</a></td><td>Prestige floor and fallback</td><td>playerSide.prestigeFloor, .spotOrNeed</td></tr>
@@ -195,6 +200,12 @@ td a.code { text-decoration: none; }
           <tr><td><a class="code" href="#K2">K2</a></td><td>Eligibility (dealbreaker, team wants him, floor)</td><td>—</td></tr>
           <tr><td><a class="code" href="#K3">K3</a></td><td>Order and coach perks (your team only)</td><td>playerSide.perk.full, .userReach</td></tr>
           <tr><td><a class="code" href="#K4">K4</a></td><td>Your-team rule (Kansas in this dynasty)</td><td>userTeam</td></tr>
+          <tr><td><a class="code" href="#SD1">SD1</a></td><td>Signing Day recruit cleanup (un-sign weak recruits)</td><td>signingDay.recruitCleanup</td></tr>
+          <tr><td><a class="code" href="#SD2">SD2</a></td><td>Keep value (who is the weakest link)</td><td>signingDay.placement.yearFactor</td></tr>
+          <tr><td><a class="code" href="#SD3">SD3</a></td><td>Protected real players</td><td>signingDay.placement.protect</td></tr>
+          <tr><td><a class="code" href="#SD4">SD4</a></td><td>Placing transfers on live rosters; best fit</td><td>—</td></tr>
+          <tr><td><a class="code" href="#SD5">SD5</a></td><td>Room and cuts (board, position caps, 85)</td><td>signingDay.placement.caps, .rosterMax, .cutMargin, .cutRoles, .maxRealCuts</td></tr>
+          <tr><td><a class="code" href="#SD6">SD6</a></td><td>Trim to 85; cut players re-placed</td><td>signingDay.placement</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -402,6 +413,15 @@ Need multiplier = max(room need, upgrade, succession); ×0.25 only if the room i
       <p><code>upgrade = his OVR − the weakest starter he'd replace</code>. Equal scores go to the bigger upgrade.</p>
       <h3 id="T9"><span class="code">T9</span>Position importance</h3>
       <p>Teams chase some positions harder: <code>QB ×1.25, OT ×1.1, EDGE ×1.1</code>, others ×1. Every team on one player's list gets the same weight, so it doesn't change the order of his Top 10; the ranking there uses the plain team score. It matters when a team has to choose between players at different positions (Signing Day placement and #1-pick balancing, steps 5 and 6).</p>
+      <h3 id="T11"><span class="code">T11</span>Lookalikes (added Oct 20, 2026, your option 3)</h3>
+      <p>A school is less interested in a player just like one it already has coming in. For each incoming player (transfer or recruit) already in his room with the <b>same year next season</b> and an <b>OVR within 3</b>, the team score is multiplied by <b>×0.25</b> (two lookalikes: ×0.0625). Game commits count, so this also works during the portal weeks.</p>
+      <p><b>Why:</b> the first Signing Day preview sent BYU four rising-senior safeties rated 87–89 (Barnes, Price, Lutmer, Bryant), two of them as backups. Now BYU takes Barnes (89) and Preston EstoEsta (77); Price → Army, Lutmer → Texas Tech, Bryant → Northwestern, all starting. At ×0.5 (your first pick) 11 lookalike pairs still got through, e.g. Cincinnati with two rising-junior QBs 75 and 76; at ×0.25 one does.</p>
+      <h3 id="T12"><span class="code">T12</span>Newcomer limits (added Oct 20, 2026, your option c)</h3>
+      <ul>
+        <li><b>Beating a newcomer:</b> he only takes a starting spot from a transfer already coming in when he is <b>4+ OVR better</b>; otherwise he counts as a Backup there.</li>
+        <li><b>Transfers per room:</b> a school wants at most <b>(starters it lost in that room + 1)</b> transfers per room; past that its team score is 0.</li>
+      </ul>
+      <p><b>Why:</b> FAU signed three QBs (AJ Hill 76 Fr, JJ Kohl 76 Jr, CJ Bailey 84 So) because its QB room still looked weak after each signing. Now Hill comes, Bailey (8 better) takes over, and Kohl goes to Troy (his #1) as the starter. A second QB as a young backup is fine (your call). Schools taking 3+ transfers at one position: 139 → 87, mostly where they lost that many starters (e.g. Alabama EDGE 91/81/80).</p>
     </section>
 
     <section id="player">
@@ -437,10 +457,11 @@ home            = 100 if the school is in his home state, else 0
                   80+ OVR: w is halved (Fr 0.10, So 0.175, Jr 0.25, final year 0.35)
 pitch           = average of the school's values on the other categories of his ideal pitch (P4)
 
-rest            = 0.40 × dealbreaker value + 0.20 × pitch
-                + 0.25 × prestige + 0.10 × team strength + 0.05 × home
+rest            = 0.45 × dealbreaker value + 0.30 × pitch
+                + 0.15 × prestige + 0.05 × team strength + 0.05 × home
 player score    = w × playing time + (1 − w) × rest + jitter (fixed per player, school, season; within ±3)</pre>
       <p><b>Why w is halved for 80+ (Oct 20, 2026, your option C):</b> good players were picking low-prestige schools only because they'd start everywhere. Week 1: 80–84 players with a prestige ≤3 #1 went from 37 to 12 (with P4 and the K3 change); the five 80–84 Playing Time outliers (Samuel Singleton Jr. → James Madison, Kevin Riley → Sam Houston…) are gone; Singleton's #1 is now Duke (prestige 6).</p>
+      <p><b>Reweighted Oct 20, 2026 (fifth session, your call):</b> his dealbreaker and pitch categories now weigh more: dealbreaker 40% → 45%, each pitch category 10% → 15%, prestige 25% → 15%, team strength 10% → 5%, home 5%. Week 1: BYU is #1 for 110 players (was 130); UNLV 126, FLA Atlantic 90; 80–84 players with a prestige ≤3 #1 went from 12 to 28; still 0 empty Top 10s. Hawkins: Illinois, Duke, Virginia (Tennessee slipped from 2nd to 6th); Austin Mack: Indiana, UCLA, Michigan.</p>
 
       <h3 id="P3"><span class="code">P3</span>Prestige floor (85+ OVR only)</h3>
       <div class="tbl"><table>
@@ -454,7 +475,7 @@ player score    = w × playing time + (1 − w) × rest + jitter (fixed per play
       <p>His old school is always allowed. The game itself sent 8 transfers back to their old school at Signing Day.</p>
 
       <h3 id="P4"><span class="code">P4</span>Ideal pitch: his two secondary categories</h3>
-      <p>Every player has an ideal recruiting pitch (<code>IdealRecruitingPitch</code>), and each pitch covers three categories. His dealbreaker is always one of them; the other two are things he cares about that aren't dealbreakers. They add to his player score (20% of the rest between them, normally 10% each, P2) using the same school grades as P1; Playing Time = his role there, Proximity = home state. They never block a school.</p>
+      <p>Every player has an ideal recruiting pitch (<code>IdealRecruitingPitch</code>), and each pitch covers three categories. His dealbreaker is always one of them; the other two are things he cares about that aren't dealbreakers. They add to his player score (30% of the rest between them, normally 15% each, P2; 10% each until Oct 20, 2026) using the same school grades as P1; Playing Time = his role there, Proximity = home state. They never block a school.</p>
       <div class="tbl"><table>
         <thead><tr><th>In-game pitch</th><th>Save name</th><th>Categories</th></tr></thead>
         <tbody>
@@ -480,7 +501,7 @@ player score    = w × playing time + (1 − w) × rest + jitter (fixed per play
           <tr><td>Gym Rat</td><td>WorkHorse</td><td>Athletic Facilities, Championship Contender, Playing Time</td></tr>
         </tbody>
       </table></div>
-      <p><b>Checked against the save:</b> your list (read in-game) is in the save's own order, and for 19 of 20 pitches every player's dealbreaker is one of its three categories. Gym Rat is the exception: its players' dealbreakers in the save are Pro Potential or Brand Exposure, so for them all three Gym Rat categories count, sharing the same 20%. Example: Nate Sheppard (HB 93, Gym Rat, dealbreaker Pro Potential): Texas, Tennessee, USC, Miami, Auburn.</p>
+      <p><b>Checked against the save:</b> your list (read in-game) is in the save's own order, and for 19 of 20 pitches every player's dealbreaker is one of its three categories. Gym Rat is the exception: its players' dealbreakers in the save are Pro Potential or Brand Exposure, so for them all three Gym Rat categories count, sharing the same 30%. Example: Nate Sheppard (HB 93, Gym Rat, dealbreaker Pro Potential): Texas, Tennessee, USC, Miami, Auburn.</p>
       <p><b>Examples (Week 1):</b> Caleb Hawkins (Standard Bearer: Playing Style + Coach Prestige, Conference Prestige): Tennessee moves up to 2nd. Austin Mack (Primetime Player: Playing Time + Brand Exposure, Championship Contender): Indiana and Michigan now ahead of UCLA. Braeden Wisloski (Conference Legend: Contender + Conference Prestige, home): Pittsburgh, in his home state, moves up to 2nd. Pitches change about 1 in 4 #1 picks but don't spread them out: teams with many open spots still win most close calls (step 6 balancing).</p>
     </section>
 
@@ -507,7 +528,7 @@ your team: combined = player score                            you decide your ow
       </table></div>
       <p>The tool reads these from whatever save is open, so it uses your current values once they're unlocked (you have every group now). In these test saves Kansas lacks the RB/FB and WR/TE perks, so HB, FB, WR and TE players don't get the extra reach here.</p>
       <h3 id="K4"><span class="code">K4</span>Your-team rule (Kansas in this dynasty)</h3>
-      <p>Your team is whatever <code>userTeam</code> in settings says; the tool works for any dynasty. Your team skips the team side and the prestige floor: it's eligible whenever it meets his dealbreaker, and it's ranked by his player score. <b>On Week 1:</b> in 330 of 1,891 Top 10s (17.5%), 128 of them through your perk (e.g., Brandon Finney Jr. CB 91, Jehiem Oatis DT 90, Quincy Rhodes Jr. LE 90); top 2 in 25. <b>Signing Day:</b> 249 of 1,310 (19.0%), 76 through the perk.</p>
+      <p>Your team is whatever <code>userTeam</code> in settings says; the tool works for any dynasty. Your team skips the team side and the prestige floor: it's eligible whenever it meets his dealbreaker, and it's ranked by his player score. <b>On Week 1 (after the P2 reweight):</b> in 357 of 1,891 Top 10s (18.9%), 127 of them through your perk (e.g., Brandon Finney Jr. CB 91, Jehiem Oatis DT 90, Quincy Rhodes Jr. LE 90); top 2 in 33.</p>
     </section>
 
     <section id="example">
@@ -535,20 +556,71 @@ your team: combined = player score                            you decide your ow
             <div class="row"><span>Prestige 6, he'd start</span><span>60</span></div>
             <div class="row"><span>Team strength: starters average 74.3 (league 69.1–86.6)</span><span>30</span></div>
             <div class="row"><span>Home: Illinois isn't in Oklahoma</span><span>0</span></div>
-            <div class="row"><span>rest = 0.4×92 + 0.1×67 + 0.1×100 + 0.25×60 + 0.1×30 + 0.05×0</span><span>71.5</span></div>
-            <div class="row"><span>0.175×100 + 0.825×71.5 = 76.5, plus jitter ≈ +1.5</span><span>78</span></div>
+            <div class="row"><span>rest = 0.45×92 + 0.15×67 + 0.15×100 + 0.15×60 + 0.05×30 + 0.05×0</span><span>77.0</span></div>
+            <div class="row"><span>0.175×100 + 0.825×77.0 = 81.0, plus jitter ≈ +1.4</span><span>82</span></div>
           </div>
         </div>
       </div>
       <div class="calc">
         <div class="row"><span>Prestige floor: 93 OVR prefers prestige 6+, and 6+ schools have a spot for him. Illinois is 6</span><span>pass</span></div>
-        <div class="row total"><span>Combined = 0.5 × 78 + 0.5 × (200 ÷ 2)</span><span>89 → #1 in his list</span></div>
+        <div class="row total"><span>Combined = 0.5 × 82 + 0.5 × (200 ÷ 2)</span><span>91 → #1 in his list</span></div>
       </div>
-      <p>His full Top 10 now: Illinois, Tennessee, Duke, Virginia, USC, Arizona, Miami, Iowa, Alabama, Arizona State. Tennessee (Coach Prestige A−, Conference Prestige A+) rose to 2nd through his pitch (P4). Kansas ranks 13th; in these saves Kansas has no RB/FB perk, so it doesn't join (with the perk it would come in at #10). Oklahoma State fails his dealbreaker (Playing Style C+, he needs B−).</p>
+      <p>His full Top 10 now: Illinois, Duke, Virginia, Arizona, USC, Tennessee, Iowa, Miami, Arizona State, Alabama. Tennessee (prestige 8) slipped from 2nd to 6th when prestige started counting less (P2 reweight). Kansas ranks 11th; in these saves Kansas has no RB/FB perk, so it doesn't join (with the perk it would come in at #10). Oklahoma State fails his dealbreaker (Playing Style C+, he needs B−). At Signing Day (SD4) he lands at Duke, his #1 by then.</p>
+    </section>
+
+    <section id="signingday">
+      <div class="sec-head"><span class="sec-num">11</span><h2>Signing Day roster build</h2><span class="where">lib/signing-day.mjs, lib/live-league.mjs · step 5</span></div>
+      <p>At Signing Day the tool builds every CPU school's roster so the game's rollover has nothing left to cut or delete. Your team is never changed. <b>Preview only so far</b>: the edits were proven in-game (un-sign, cut, commit), but writing them is piece 4.</p>
+      <h3 id="SD1"><span class="code">SD1</span>Recruit cleanup</h3>
+      <p>Every signed HS/JUCO recruit at a CPU school <b>under 60 OVR</b> is un-signed, unless his dev trait is <b>Star, Elite or Impact</b> and his max overall reaches the league's average next-season starter at his position. Signing Day copy: 3,913 signed, 1,685 under 60; <b>1,535 un-signed</b>, <b>150 kept</b> (Impact 131, Elite 11, Star 8). Example: Liberty un-signs 15 (e.g. Adrian Hinojosa MLB 59) and keeps Andrew McQuillan (RG 56, Impact, max 78 vs the 74.9 average OG starter).</p>
+      <h3 id="SD2"><span class="code">SD2</span>Keep value</h3>
+      <pre class="formula">keep value = OVR + (max − OVR) × year factor      next season: Fr 0.5 · So 0.35 · Jr 0.2 · Sr 0</pre>
+      <p>Applies to everyone (returning players, transfers, recruits). Young players with a ceiling outlast topped-out upperclassmen.</p>
+      <h3 id="SD3"><span class="code">SD3</span>Protected real players</h3>
+      <p>Never cut and never left unplaced: <b>Juniors and Seniors 77+</b>, and <b>Freshmen and Sophomores 72+ with a max of 77+</b> (school year as shown in-game at Signing Day). Recruits are never protected.</p>
+      <h3 id="SD4"><span class="code">SD4</span>Placing transfers on live rosters</h3>
+      <ol class="steps">
+        <li>Uncommitted transfers go one at a time, <b>best max overall first</b>.</li>
+        <li>He goes to the first school in his <b>live</b> Top 10 that has room (SD5). "Live": after every signing or cut the school's depth chart and needs are recomputed, so each later player's Top 10 sees the new rosters (a filled room stops pulling; T11 and T12 kick in).</li>
+        <li>If no school on his list has room: <b>best fit</b>, the school with room he likes most by his player score (schools that meet his dealbreaker first).</li>
+        <li>Players the game already committed stay where they are and count as that school's transfers in.</li>
+      </ol>
+      <h3 id="SD5"><span class="code">SD5</span>Room and cuts</h3>
+      <p>A school has room when it has a free slot on its committed-players board (35), is under the position cap, and is under 85. Otherwise it may make <b>one cut</b> for him, only of a player whose keep value is <b>5+</b> below his, who'd be <b>Backup or Buried once he arrives</b>, <b>recruits first</b>, and at most <b>5 real players per school</b>; never a protected player.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Cap</th><th class="n">QB</th><th class="n">HB</th><th class="n">FB</th><th class="n">WR</th><th class="n">TE</th><th class="n">OT</th><th class="n">OG</th><th class="n">C</th><th class="n">EDGE</th><th class="n">DT</th><th class="n">LB</th><th class="n">CB</th><th class="n">S</th><th class="n">K</th><th class="n">P</th><th class="n">Total</th></tr></thead>
+        <tbody><tr><td>Players next season</td><td class="n">5</td><td class="n">6</td><td class="n">1</td><td class="n">11</td><td class="n">5</td><td class="n">8</td><td class="n">8</td><td class="n">4</td><td class="n">8</td><td class="n">8</td><td class="n">12</td><td class="n">9</td><td class="n">8</td><td class="n">2</td><td class="n">2</td><td class="n">97</td></tr></tbody>
+      </table></div>
+      <p><b>Why the limits (Oct 20, 2026, your call):</b> unchecked "cut the weakest link" cut 482 real players (20 rated 75+; BYU cut 22). Now 150 real players are cut, 4 rated 75+.</p>
+      <h3 id="SD6"><span class="code">SD6</span>After placement</h3>
+      <ul>
+        <li><b>Trim to 85:</b> schools still over 85 (the game would cut its own way) cut recruits first, then the lowest keep value bench players.</li>
+        <li><b>Cut real players are placed again:</b> schools that want him first, then by his player score; only those with nowhere to go are left for the game to delete.</li>
+      </ul>
+      <h3>Results on the Signing Day copy</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>What</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Uncommitted transfers placed</td><td>1,310 of 1,310 (0 left over); 1,004 at their #1, 25 by best fit; 1,094 start, 178 rotation</td></tr>
+          <tr><td>Real players cut</td><td>150 (4 rated 75+): 137 moved to another school, 13 deleted</td></tr>
+          <tr><td>Recruits un-signed</td><td>1,535 by SD1 + 674 to make room; 150 kept under 60</td></tr>
+          <tr><td>Rosters</td><td>64–85, none over 85; no board over 35</td></tr>
+          <tr><td>Best transfer classes (avg OVR in)</td><td>Texas 86.0, Oklahoma 85.3, Penn State 84.8</td></tr>
+          <tr><td>Named players</td><td>Austin Simmons → Arizona (#1), Caleb Hawkins → Duke (#1), Khalil Barnes → BYU (#1)</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Planned: weekly commits (designed Oct 20, 2026; codes come when built)</h3>
+      <p><b>How the game commits a transfer</b> (measured on the Week 4 copy): when a school that has <b>offered</b> him reaches his <b>CommitScore</b> (125–350) in influence. 170 of the game's 172 Week 4 commits fit; none of the 1,719 uncommitted did. CPU schools barely recruit the portal: only 559 of 1,891 transfers are on any school's board, so about 1,300 pile up until Signing Day.</p>
+      <ul>
+        <li>The tool commits players itself each week, back-loaded: 10% / 25% / 45% / 70% of all portal transfers committed by the end of Weeks 1 / 2 / 3 / 4, the rest at Signing Day. The game's own commits count.</li>
+        <li>Who first: clear favorites, boosted for higher-ranked players and single-offer players whose school is close to his CommitScore.</li>
+        <li>Where: a school that offered him in-game if it's in his Top 10; otherwise his live #1 with room. Never while your team is in his top 3. No cuts until Signing Day.</li>
+        <li>Next: a write test on a copy (direct commit vs. the game's own trigger) before building it.</li>
+      </ul>
     </section>
 
     <section id="settings">
-      <div class="sec-head"><span class="sec-num">11</span><h2>Every tuning value</h2><span class="where">settings.json</span></div>
+      <div class="sec-head"><span class="sec-num">12</span><h2>Every tuning value</h2><span class="where">settings.json</span></div>
       <p>All of these can change without touching code. Each one was your choice or approved by you.</p>
       <div class="tbl"><table>
         <thead><tr><th>Setting</th><th>Value</th><th>Rule</th></tr></thead>
@@ -566,44 +638,53 @@ your team: combined = player score                            you decide your ow
           <tr><td>Succession</td><td>Fr/So with a path or starting; ×2</td><td>T8</td></tr>
           <tr><td>Position importance</td><td>QB ×1.25, OT ×1.1, EDGE ×1.1</td><td>T9</td></tr>
           <tr><td>Starter level</td><td>Within 5 OVR of the prestige level's usual starter, else stopgap (Backup)</td><td>T10</td></tr>
+          <tr><td>Lookalikes</td><td>×0.25 per incoming player with the same next-season year and OVR within 3</td><td>T11</td></tr>
+          <tr><td>Newcomer limits</td><td>4+ OVR better to take a newcomer's start; transfers per room ≤ starters lost + 1</td><td>T12</td></tr>
           <tr><td>Year weights</td><td>Fr 0.20, So 0.35, Jr 0.50, final year 0.70; halved for 80+ OVR</td><td>P2</td></tr>
-          <tr><td>Rest split</td><td>Dealbreaker 40%, pitch categories 10% + 10%, prestige 25%, strength 10%, home 5%</td><td>P2, P4</td></tr>
+          <tr><td>Rest split</td><td>Dealbreaker 45%, pitch categories 15% + 15%, prestige 15%, strength 5%, home 5%</td><td>P2, P4</td></tr>
           <tr><td>Jitter</td><td>±3</td><td>P2</td></tr>
           <tr><td>Dealbreaker bar</td><td>85+ B−, 78–84 C, under 78 D+</td><td>P1</td></tr>
           <tr><td>Playing Time drop</td><td>Below position average starter (seniors: average − 4) → no dealbreaker</td><td>P1</td></tr>
           <tr><td>Prestige floor</td><td>90+: 6+ → 4+; 85–89: 4+ → 2+; spot = team score 100+</td><td>P3</td></tr>
           <tr><td>Combine</td><td>50% player, 50% team</td><td>K1</td></tr>
           <tr><td>Full perk (your team)</td><td>10 or more; joins his list from as low as 18th (in at #10)</td><td>K3</td></tr>
-          <tr><td>Position caps (Signing Day)</td><td>QB 5, HB 6, FB 1, WR 11, TE 5, OT 8, OG 8, C 4, EDGE 8, DT 8, LB 12, CB 9, S 8, K 2, P 2 = 97</td><td>Step 5 (not built yet)</td></tr>
+          <tr><td>Recruit cleanup</td><td>Under 60 un-signed; keep Star/Elite/Impact whose max reaches the average starter</td><td>SD1</td></tr>
+          <tr><td>Keep value year factor</td><td>Fr 0.5, So 0.35, Jr 0.2, Sr 0 (next season)</td><td>SD2</td></tr>
+          <tr><td>Protection</td><td>Jr/Sr 77+; Fr/So 72+ with max 77+</td><td>SD3</td></tr>
+          <tr><td>Position caps (Signing Day)</td><td>QB 5, HB 6, FB 1, WR 11, TE 5, OT 8, OG 8, C 4, EDGE 8, DT 8, LB 12, CB 9, S 8, K 2, P 2 = 97</td><td>SD5</td></tr>
+          <tr><td>Roster limit, cut margin</td><td>85; keep value 5+ below the newcomer</td><td>SD5</td></tr>
+          <tr><td>Who can be cut</td><td>Backup/Buried once he arrives; recruits first; max 5 real players per school</td><td>SD5</td></tr>
         </tbody>
       </table></div>
     </section>
 
     <section id="checks">
-      <div class="sec-head"><span class="sec-num">12</span><h2>How it was checked</h2></div>
+      <div class="sec-head"><span class="sec-num">13</span><h2>How it was checked</h2></div>
       <ul>
         <li><b>Open and save:</b> all test saves detected correctly; saving with no changes produced 0 differences in the player, team, recruit, Top 10 and leaving tables.</li>
         <li><b>Draft lock:</b> the saved file differed from its backup only in the 141 draft records, only in the two fields; verified in-game at Week 2.</li>
         <li><b>Depth chart:</b> every count matches the step 1–2 numbers on all six saves; projecting all 138 teams takes about 30 ms.</li>
         <li><b>Team-side roles:</b> the fast role calculation matches the depth chart for all 260,958 player-school pairs on Week 1, 0 mismatches.</li>
         <li><b>Ceiling:</b> 98.2–98.4% of stored overalls reproduced exactly; Crawford matches Maxi's tooltip.</li>
-        <li><b>Speed:</b> the whole portal (1,891 players × 138 schools, both sides) scores in about 0.25 s.</li>
+        <li><b>Speed:</b> the whole portal (1,891 players × 138 schools, both sides) scores in about 0.25 s; the full Signing Day preview (SD1–SD6, rescoring every player on live rosters) takes about 0.8 s.</li>
+        <li><b>Signing Day preview:</b> 0 protected players cut or left over, 0 schools over 85, 0 boards over 35, every real-player cut a Backup/Buried player once the newcomer arrives, at most 5 per school.</li>
         <li><b>Real save facts used for tuning:</b> the game's own 90+ transfer commits all went to prestige 6+; 85–89 never below 4; uncommitted transfers at Signing Day mostly get deleted at rollover (1,042 of 1,310).</li>
       </ul>
     </section>
 
     <section id="open">
-      <div class="sec-head"><span class="sec-num">13</span><h2>Not built yet, and known limits</h2></div>
+      <div class="sec-head"><span class="sec-num">14</span><h2>Not built yet, and known limits</h2></div>
       <ul>
-        <li><b>#1 picks bunch up.</b> Week 1: BYU is #1 for 130 players, UNLV 120, Utah 93. Spreading #1 picks by open starter slots is part of the Week 1 generator (step 6), and Signing Day needs it too.</li>
+        <li><b>#1 picks bunch up.</b> Week 1 (after the P2 reweight): UNLV is #1 for 126 players, BYU 110, FLA Atlantic 90. At Signing Day the live rosters (SD4, T11, T12) already spread them. Spreading #1 picks by open starter slots is part of the Week 1 generator (step 6), and Signing Day needs it too.</li>
         <li><b>Roles use current OVR,</b> not next season's progression.</li>
         <li><b>Strict position rooms.</b> A 3-4 team's extra DTs show as Buried; they don't count at EDGE.</li>
         <li><b>Home pull is same-state only;</b> only 1 transfer has Proximity to Home as his dealbreaker.</li>
-        <li><b>Position caps and the 85 limit</b> aren't applied anywhere yet; they come in step 5 (Signing Day). Capacity check on the Signing Day copy: AI teams have only 194 spots under 85 as the save stands; after the planned recruit cleanup they have 1,656 for 1,310 uncommitted transfers, and with caps of 97 every position fits (WR is tight: 301 transfers for 303 spots).</li>
+        <li><b>Signing Day isn't written yet.</b> SD1–SD6 are a preview; writing it to a copy is step 5 piece 4. Moving a cut returning player to another school still needs its own in-game test.</li>
+        <li><b>Leftovers go by player score</b> (SD4 best fit), so prestige can beat playing time for younger players (Christian Clark HB 80 So → Texas, buried #3). Open for your call.</li>
         <li><b>Nothing is written to Top 10s yet.</b> Everything in sections 5–9 is a read-only preview until step 6.</li>
         <li><b>NIL expectation isn't modeled.</b> The save has each player's NIL value (5–325) and each team's NIL spending and budget, but how the game uses them to block a CPU school isn't known yet.</li>
         <li><b>Lists change during the portal.</b> By Signing Day, 313 players' lists had gained 455 schools not on their Week 1 list, and 265 of the 581 Signing Day commits went to such a school. Every commit was to a school on his list at that time. So the Week 1 list is a starting point; the weekly refresh (step 7) and Signing Day (step 5) matter at least as much.</li>
-        <li><b>Open question for step 5:</b> confirm on a copy that un-signing a recruit at Signing Day makes the game remove him at rollover.</li>
+        <li><b>Proven in-game (step 5 piece 1):</b> un-signing a recruit, cutting a returning player and committing a transfer at Signing Day all work through the rollover.</li>
       </ul>
     </section>
   </main>
