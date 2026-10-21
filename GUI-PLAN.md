@@ -53,7 +53,7 @@ Accents from the save: `Team.TEAM_BACKGROUNDCOLORR/G/B` (primary) and `TEAM_BACK
 | Page title (h1) | IBM Plex Mono | 35px / 600 (team name 38px) |
 | Section title (h2) | IBM Plex Mono | 24px / 600 |
 | Labels, menu, breadcrumbs, tabs, status tags | IBM Plex Mono, UPPERCASE, letter-spacing .08em | 15px / 600 (column headers 14px) |
-| Numbers in tables | IBM Plex Mono, `font-variant-numeric: tabular-nums`, right-aligned with right-aligned headers | 17px / 500 |
+| Numbers in tables | IBM Plex Mono, `font-variant-numeric: tabular-nums`, left-aligned like every column | 17px / 500 |
 | Scoreboard numbers | IBM Plex Mono, in the card's status color with a soft glow | 60px / 700 |
 | Buttons | IBM Plex Sans | 17px / 600, height 46px, padding 0 20px (row buttons 38px) |
 
@@ -69,7 +69,7 @@ Line height 1.5.
 - **Button:** primary (fill `--accent`, text `--accent-ink`), secondary (1px `--border` outline on `--surface`), danger (`--out` outline).
 - **ActionBar:** buttons joined edge to edge in one bordered strip; exactly one primary.
 - **StatCard:** mono label above a scoreboard number; 4px colored left edge, number in the same color: placed `--in`, dropped `--warn`, un-signed `--orange`, deleted `--out`, moved `--moved`.
-- **Table:** header row `--surface-2` with mono labels; rows 46px (52px with buttons); 1px `--divider`; hover `--surface-2`; numbers right-aligned.
+- **Table:** header row `--surface-2` with mono labels; rows 46px (52px with buttons); 1px `--divider`; hover `--surface-2`; every column (headers, numbers, buttons) left-aligned.
 - **Tabs:** mono labels with a count pill, e.g. `CHANGED 132`; active tab underlined 3px `--accent-2`, its count pill filled `--accent-2`.
 - **TeamMark:** the school's logo, 42px; else a MonogramTile: 42px square, fill = that team's own primary color (contrast-adjusted against its text), `Team.ShortName` (e.g. `KU`, `BAMA`) in mono 15px/700.
 - **StatusTag:** mono `[ REVIEWED ]` (`--in`), `[ CHANGED ]` (`--moved`), `[ RE-CHECK ]` (`--warn`), `[ KEPT ]` (`--text-2`), `[ SIGNED COMMIT ]` (`--orange`).
