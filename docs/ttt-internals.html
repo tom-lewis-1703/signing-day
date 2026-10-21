@@ -1,0 +1,696 @@
+<title>Inside Tom's Transfer Tools</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky contents rail beside one reading column; stacks to a single column on phones.
+   Look: a coach's playbook binder. Condensed scoreboard numerals for step labels, plain sans text, mono for formulas. */
+:root {
+  --bg: #f6f7f9;
+  --paper: #ffffff;
+  --ink: #1b2330;
+  --muted: #5a6577;
+  --line: #dde2ea;
+  --accent: #1f4fa3;
+  --accent-soft: #e6edf9;
+  --amber: #a65f00;
+  --amber-soft: #fbf0df;
+  --good: #1d7a3a;
+  --bad: #b3261e;
+  --code-bg: #eef1f6;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --paper: #171c25; --ink: #e4e8ef; --muted: #9aa4b5; --line: #2a3240;
+    --accent: #7ea6f0; --accent-soft: #1e2a40; --amber: #e7a54a; --amber-soft: #2d2416;
+    --good: #5cc27e; --bad: #f08a80; --code-bg: #1f2633; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --paper: #171c25; --ink: #e4e8ef; --muted: #9aa4b5; --line: #2a3240;
+  --accent: #7ea6f0; --accent-soft: #1e2a40; --amber: #e7a54a; --amber-soft: #2d2416;
+  --good: #5cc27e; --bad: #f08a80; --code-bg: #1f2633; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font: 15.5px/1.6 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+}
+.wrap { max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; }
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); align-self: start; font-size: 13.5px; }
+nav.toc .label { font: 600 12px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+nav.toc a { display: grid; grid-template-columns: 26px 1fr; gap: 6px; color: var(--ink); text-decoration: none; padding: 4px 8px; border-radius: 6px; }
+nav.toc a:hover, nav.toc a:focus-visible { background: var(--accent-soft); outline: none; }
+nav.toc a span { font: 700 14px/1.5 var(--font-display); color: var(--accent); }
+main { min-width: 0; display: grid; gap: 22px; }
+header.top { display: grid; gap: 10px; padding-bottom: 6px; }
+.eyebrow { font: 600 12px/1 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 700 44px/1.02 var(--font-display); letter-spacing: .005em; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 68ch; margin: 0; }
+.status { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip { font-size: 12.5px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; background: var(--paper); white-space: nowrap; }
+.chip.done { border-color: color-mix(in srgb, var(--good) 45%, var(--line)); color: var(--good); }
+.chip.review { border-color: color-mix(in srgb, var(--amber) 55%, var(--line)); color: var(--amber); }
+.chip.later { color: var(--muted); }
+section { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 22px 26px; display: grid; gap: 12px; scroll-margin-top: 16px; }
+section > * { margin: 0; }
+.sec-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.sec-num { font: 700 30px/1 var(--font-display); color: var(--accent); min-width: 28px; }
+h2 { font: 700 26px/1.1 var(--font-display); letter-spacing: .01em; text-wrap: balance; }
+.where { font: 12.5px/1.4 var(--font-mono); color: var(--muted); margin-left: auto; }
+h3 { font: 600 15.5px/1.35 var(--font-body); margin-top: 6px; }
+p, li { max-width: 72ch; }
+ul, ol.steps { padding-left: 20px; display: grid; gap: 4px; }
+code { font: 13.5px/1.5 var(--font-mono); background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre.formula { font: 13.5px/1.65 var(--font-mono); background: var(--code-bg); border-radius: 8px; padding: 12px 14px; overflow-x: auto; white-space: pre; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; width: 100%; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; font-size: 12.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+td.n, th.n { text-align: right; }
+.note { border-left: 3px solid var(--amber); background: var(--amber-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 14.5px; }
+.note b { color: var(--amber); }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.flow .box { flex: 1 1 150px; min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); display: grid; gap: 2px; }
+.flow .box b { font: 700 16px/1.2 var(--font-display); letter-spacing: .02em; }
+.flow .box small { color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+.flow .arrow { align-self: center; color: var(--muted); font-size: 18px; }
+.calc { display: grid; gap: 6px; }
+.calc .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.calc .row:last-child { border-bottom: 0; }
+.calc .row span:last-child { font: 500 14px/1.5 var(--font-mono); text-align: right; white-space: nowrap; }
+.calc .total span:last-child { color: var(--accent); font-weight: 600; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.two > div { min-width: 0; display: grid; gap: 8px; align-content: start; }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+a { color: var(--accent); }
+.code { display: inline-block; font: 600 12.5px/1.6 var(--font-mono); color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 0 7px; margin-right: 8px; vertical-align: 1px; }
+h3[id], pre[id] { scroll-margin-top: 16px; }
+td a.code { text-decoration: none; }
+.idx td:nth-child(3) { font: 12.5px/1.5 var(--font-mono); color: var(--muted); }
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  nav.toc { position: static; }
+  nav.toc ol { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+  .two { grid-template-columns: minmax(0, 1fr); }
+  section { padding: 18px 16px; }
+  h1 { font-size: 36px; }
+  .where { margin-left: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <div class="label">Contents</div>
+    <ol>
+      <li><a href="#pipeline"><span>·</span>The whole pipeline</a></li>
+      <li><a href="#index"><span>·</span>Rule index</a></li>
+      <li><a href="#read"><span>1</span>Reading the save</a></li>
+      <li><a href="#stage"><span>2</span>Stage detection</a></li>
+      <li><a href="#save"><span>3</span>Saving safely</a></li>
+      <li><a href="#draft"><span>4</span>Draft lock</a></li>
+      <li><a href="#depth"><span>5</span>Next-season depth chart</a></li>
+      <li><a href="#ceiling"><span>6</span>Ceiling (max overall)</a></li>
+      <li><a href="#team"><span>7</span>Team side: would they want him?</a></li>
+      <li><a href="#player"><span>8</span>Player side: would he go?</a></li>
+      <li><a href="#top10"><span>9</span>Building the Top 10</a></li>
+      <li><a href="#example"><span>10</span>Worked example</a></li>
+      <li><a href="#settings"><span>11</span>Every tuning value</a></li>
+      <li><a href="#checks"><span>12</span>How it was checked</a></li>
+      <li><a href="#open"><span>13</span>Not built yet</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="top">
+      <div class="eyebrow">CFB 27 dynasty · Kansas · as of Oct 20, 2026 · updated with T7–T10</div>
+      <h1>Inside Tom's Transfer Tools</h1>
+      <p class="lede">Every piece built so far, in the order it runs, with the exact rules and formulas. Numbers come from the test copies of your saves (mostly the Week 1 portal save). Only the draft lock writes to a save; everything else is read-only so far.</p>
+      <div class="status">
+        <span class="chip done">Step 1 · app skeleton · signed off</span>
+        <span class="chip done">Step 2 · draft lock · signed off</span>
+        <span class="chip done">Step 3 · depth chart · signed off</span>
+        <span class="chip done">Step 4 · ceiling + team side · signed off</span>
+        <span class="chip done">Step 4b · player side + Top 10 · signed off</span>
+        <span class="chip review">Step 5 · Signing Day · pieces 1–3 built, preview only</span>
+        <span class="chip later">Weekly commits · designed, next</span>
+      </div>
+    </header>
+
+    <section id="pipeline">
+      <div class="sec-head"><h2>The whole pipeline</h2></div>
+      <p>Each box feeds the next. The draft lock is a separate action at the Players Leaving stage; the rest builds the Top 10 preview for every portal player, and at Signing Day places every uncommitted transfer (section 11; preview only, nothing written yet).</p>
+      <div class="flow" role="list">
+        <div class="box" role="listitem"><b>Read the save</b><small>Players, teams, recruits, grades, perks, once</small></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="box" role="listitem"><b>Next-season rosters</b><small>Who's back, who's coming, roles by room</small></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="box" role="listitem"><b>Team side</b><small>Need in his room × his role there</small></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="box" role="listitem"><b>Player side</b><small>Playing time, dealbreaker grade, prestige, home</small></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="box" role="listitem"><b>Top 10</b><small>Both sides pass, ranked 50/50, perks applied</small></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="box" role="listitem"><b>Signing Day</b><small>Recruit cleanup, every transfer placed on live rosters</small></div>
+      </div>
+    </section>
+
+    <section id="index">
+      <div class="sec-head"><h2>Rule index</h2></div>
+      <p>Every rule has a short code. Point at one ("make T3 stricter", "P2 feels off for linemen") and we'll tune just that piece. The third column is where its numbers live in <code>settings.json</code>.</p>
+      <div class="tbl"><table class="idx">
+        <thead><tr><th>Code</th><th>Rule</th><th>Setting</th></tr></thead>
+        <tbody>
+          <tr><td><a class="code" href="#R1">R1</a></td><td>What the tool works out for each player (leaving, transfer, destination, next year)</td><td>—</td></tr>
+          <tr><td><a class="code" href="#S1">S1</a></td><td>Stage from the save</td><td>—</td></tr>
+          <tr><td><a class="code" href="#V1">V1</a></td><td>Saving: backup, write, verify, replace</td><td>—</td></tr>
+          <tr><td><a class="code" href="#L1">L1</a></td><td>Draft lock: who gets locked</td><td>userTeam</td></tr>
+          <tr><td><a class="code" href="#D1">D1</a></td><td>Who counts on next season's roster</td><td>—</td></tr>
+          <tr><td><a class="code" href="#D2">D2</a></td><td>Position rooms and starters by scheme</td><td>starters</td></tr>
+          <tr><td><a class="code" href="#D3">D3</a></td><td>Roles: Starter, Rotation, Backup, Buried</td><td>roles.rotation, roles.olSwing</td></tr>
+          <tr><td><a class="code" href="#D4">D4</a></td><td>Path to start</td><td>—</td></tr>
+          <tr><td><a class="code" href="#D5">D5</a></td><td>Starters lost, replaced, open</td><td>—</td></tr>
+          <tr><td><a class="code" href="#C1">C1</a></td><td>Overall and max overall formulas</td><td>data file (Maxi's method)</td></tr>
+          <tr><td><a class="code" href="#C2">C2</a></td><td>Raising a skill group to its cap</td><td>—</td></tr>
+          <tr><td><a class="code" href="#T1">T1</a></td><td>Role score and path-to-start bonus</td><td>fit.roleScore, fit.pathToStartBonus</td></tr>
+          <tr><td><a class="code" href="#T2">T2</a></td><td>Need: drop-off</td><td>fit.need.maxMult, fit.need.fullDropOff</td></tr>
+          <tr><td><a class="code" href="#T3">T3</a></td><td>Need: weak starters</td><td>fit.need.weakFrom, fit.need.weakFull</td></tr>
+          <tr><td><a class="code" href="#T4">T4</a></td><td>Need: stacked room</td><td>fit.need.stacked, fit.stackedBackupBar</td></tr>
+          <tr><td><a class="code" href="#T5">T5</a></td><td>Level check (max overall vs weakest starter)</td><td>fit.levelBar</td></tr>
+          <tr><td><a class="code" href="#T6">T6</a></td><td>Tie-break: upgrade</td><td>—</td></tr>
+          <tr><td><a class="code" href="#T7">T7</a></td><td>Need: upgrade over the current starter (overrides Stacked)</td><td>fit.upgrade</td></tr>
+          <tr><td><a class="code" href="#T8">T8</a></td><td>Need: succession when all starters are seniors (overrides Stacked)</td><td>fit.succession</td></tr>
+          <tr><td><a class="code" href="#T9">T9</a></td><td>Position importance (QB, OT, EDGE)</td><td>fit.positionWeight</td></tr>
+          <tr><td><a class="code" href="#T10">T10</a></td><td>Starter level: real starter or stopgap (vs prestige level)</td><td>fit.starterLevel</td></tr>
+          <tr><td><a class="code" href="#T11">T11</a></td><td>Lookalikes: less interest in a second player like one already coming in</td><td>fit.lookalike</td></tr>
+          <tr><td><a class="code" href="#T12">T12</a></td><td>Newcomer limits: beating a newcomer for a start; transfers per room</td><td>fit.newcomerUpgrade, fit.transferLimit</td></tr>
+          <tr><td><a class="code" href="#P1">P1</a></td><td>Dealbreaker grade and pass/fail bar; Playing Time dropped below position average</td><td>playerSide.dealbreakerBar, .playingTimeDrop</td></tr>
+          <tr><td><a class="code" href="#P2">P2</a></td><td>Player score: year weight (halved for 80+), rest split, jitter</td><td>playerSide.yearWeight, .playingTimeByRating, .rest, .jitter</td></tr>
+          <tr><td><a class="code" href="#P3">P3</a></td><td>Prestige floor and fallback</td><td>playerSide.prestigeFloor, .spotOrNeed</td></tr>
+          <tr><td><a class="code" href="#P4">P4</a></td><td>Ideal pitch: his two secondary categories</td><td>playerSide.rest.secondary, lib/data/pitches.json</td></tr>
+          <tr><td><a class="code" href="#P5">P5</a></td><td>Never back to the school he left (Signing Day last resort only)</td><td>—</td></tr>
+          <tr><td><a class="code" href="#K1">K1</a></td><td>Combined score</td><td>playerSide.playerWeight</td></tr>
+          <tr><td><a class="code" href="#K2">K2</a></td><td>Eligibility (dealbreaker, team wants him, floor, not his old school)</td><td>—</td></tr>
+          <tr><td><a class="code" href="#K3">K3</a></td><td>Order and coach perks (your team only)</td><td>playerSide.perk.full, .userReach</td></tr>
+          <tr><td><a class="code" href="#K4">K4</a></td><td>Your-team rule (Kansas in this dynasty)</td><td>userTeam</td></tr>
+          <tr><td><a class="code" href="#SD1">SD1</a></td><td>Signing Day recruit cleanup (un-sign weak recruits)</td><td>signingDay.recruitCleanup</td></tr>
+          <tr><td><a class="code" href="#SD2">SD2</a></td><td>Keep value (who is the weakest link)</td><td>signingDay.placement.yearFactor</td></tr>
+          <tr><td><a class="code" href="#SD3">SD3</a></td><td>Protected real players</td><td>signingDay.placement.protect</td></tr>
+          <tr><td><a class="code" href="#SD4">SD4</a></td><td>Placing transfers on live rosters; best fit</td><td>—</td></tr>
+          <tr><td><a class="code" href="#SD5">SD5</a></td><td>Room and cuts (board, position caps, 85)</td><td>signingDay.placement.caps, .rosterMax, .cutMargin, .cutRoles, .maxRealCuts</td></tr>
+          <tr><td><a class="code" href="#SD6">SD6</a></td><td>Trim to 85; cut players re-placed</td><td>signingDay.placement</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="read">
+      <div class="sec-head"><span class="sec-num">1</span><h2>Reading the save</h2><span class="where">lib/dynasty.mjs</span></div>
+      <p>The tool opens the save with the madden-franchise library and reads only the fields it uses, once (about 0.65 s). Then it builds lookups so nothing scans the whole player table twice.</p>
+      <h3>Tables it reads</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Table</th><th>What it gives us</th></tr></thead>
+        <tbody>
+          <tr><td>Player</td><td>Name, team, previous team, position, OVR, year, redshirt, dev trait, archetype, dealbreaker, ideal recruiting pitch, home state, skill caps, every rating</td></tr>
+          <tr><td>Team</td><td>Name, offense and defense scheme, prestige (0–10), Signing Day board, links to school grades and coach perks</td></tr>
+          <tr><td>Recruit</td><td>Recruit class (high school, JUCO, transfer), recruit stage, link to his Top 10</td></tr>
+          <tr><td>Top 10 lists</td><td>Each recruit's 10 schools and influence (high-school recruits and transfers use different tables; the tool follows each link)</td></tr>
+          <tr><td>Leaving players</td><td>Early-draft and portal decisions</td></tr>
+          <tr><td>Transfer queue</td><td>Who the game is processing into the portal</td></tr>
+          <tr><td>School grades</td><td>Each school's dealbreaker grades (A+ to F), Pro Potential by position group, Playing Style by archetype</td></tr>
+          <tr><td>Coach talent effects</td><td>Each coach's transfer-interest perk and dealbreaker-threshold perk, by position group</td></tr>
+        </tbody>
+      </table></div>
+      <h3 id="R1"><span class="code">R1</span>What it works out for each player</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Field</th><th>Rule</th></tr></thead>
+        <tbody>
+          <tr><td>Out of eligibility</td><td>Senior and not redshirting this year</td></tr>
+          <tr><td>Leaving for the draft</td><td>Any early-draft record set to Leaving (or Unknown with none Staying)</td></tr>
+          <tr><td>Entering portal</td><td>Has a transfer leaving record that is in the game's transfer queue</td></tr>
+          <tr><td>Transfer</td><td>His recruit row's class starts with "Transfer"</td></tr>
+          <tr><td>Incoming recruit</td><td>Has a recruit row, isn't a transfer, and has no team yet</td></tr>
+          <tr><td>Destination</td><td>Transfers: the team whose Signing Day board holds him, otherwise his #1 school if he is Signed or Hard Committed. Recruits: #1 school if Signed or Hard Committed</td></tr>
+          <tr><td>Next season's year</td><td>One year up, unless redshirting this year; JUCO recruits keep their JUCO year; high-school recruits are freshmen</td></tr>
+        </tbody>
+      </table></div>
+      <p>The school's home state comes from a fixed list of the 138 schools, because the save's location field points at game data that isn't stored in the save.</p>
+    </section>
+
+    <section id="stage">
+      <div class="sec-head"><span class="sec-num">2</span><h2>Stage detection</h2><span class="where">lib/stage.mjs</span></div>
+      <h3 id="S1"><span class="code">S1</span>Stage from the save</h3>
+      <p>The stage comes from <code>SeasonInfo.CurrentOffseasonStage</code>. The tool only offers an action at a stage it knows.</p>
+      <div class="tbl"><table>
+        <thead><tr><th class="n">Value</th><th>Stage</th><th>Tool action</th></tr></thead>
+        <tbody>
+          <tr><td class="n">2</td><td>Players Leaving</td><td>Draft Lock</td></tr>
+          <tr><td class="n">3</td><td>Week 1 (portal opens)</td><td>Generate Top 10s (step 6)</td></tr>
+          <tr><td class="n">4</td><td>Week 2</td><td>Weekly upkeep (step 7)</td></tr>
+          <tr><td class="n">5</td><td>Week 3 (inferred, no test save yet)</td><td>Weekly upkeep (step 7)</td></tr>
+          <tr><td class="n">6</td><td>Week 4 (portal closes)</td><td>Weekly upkeep (step 7)</td></tr>
+          <tr><td class="n">7</td><td>Signing Day</td><td>Review commits + commit remaining (step 5)</td></tr>
+          <tr><td class="n">—</td><td>Preseason or in-season</td><td>No action</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="save">
+      <div class="sec-head"><span class="sec-num">3</span><h2>Saving safely</h2><span class="where">lib/safe-save.mjs</span></div>
+      <h3 id="V1"><span class="code">V1</span>Backup, write, verify, replace</h3>
+      <p>Opening never changes the file. Only the Save button writes, in four steps; if any step fails, the original is untouched.</p>
+      <ol class="steps">
+        <li>Copy the save to a <b>TTT Backups</b> folder next to it, with a timestamp, and check the copy byte for byte (SHA-1).</li>
+        <li>Write the changed save to a temporary file.</li>
+        <li>Reopen the temporary file and check that the stage and the player count are unchanged.</li>
+        <li>Replace the original with the temporary file. Backups are never deleted automatically.</li>
+      </ol>
+    </section>
+
+    <section id="draft">
+      <div class="sec-head"><span class="sec-num">4</span><h2>Draft lock</h2><span class="where">lib/draft-lock.mjs · step 2</span></div>
+      <h3 id="L1"><span class="code">L1</span>Who gets locked</h3>
+      <p>Runs on the Players Leaving save. Only players out of eligibility may leave early for the NFL.</p>
+      <ul>
+        <li><b>Locked:</b> every player with an early-draft record who is not out of eligibility and not on Kansas.</li>
+        <li><b>What it writes:</b> each of his early-draft records gets <code>LeaveStatus = Staying</code> and <code>PersuadeAttempts ≥ 1</code>, the same values the game writes when you persuade a player.</li>
+        <li><b>Left alone:</b> graduating players, Kansas players, and every portal decision.</li>
+        <li><b>Self-check:</b> after applying, it re-reads every locked player and confirms nobody is still leaving and no graduate or Kansas player changed.</li>
+      </ul>
+      <p><b>Result on your test save:</b> 141 players locked at 57 teams (86 juniors, 55 sophomores; Texas 11, Notre Dame 9, LSU 7). 82 graduates still left. Checked in-game at Week 2: all 99 locked players not headed to the portal were still on their teams.</p>
+    </section>
+
+    <section id="depth">
+      <div class="sec-head"><span class="sec-num">5</span><h2>Next-season depth chart</h2><span class="where">lib/depth-chart.mjs · step 3</span></div>
+      <h3 id="D1"><span class="code">D1</span>Who counts on next season's roster</h3>
+      <p>The current roster, minus players who are graduating, leaving for the draft or entering the portal, plus committed transfers and signed recruits. Uncommitted transfers belong to no team.</p>
+      <h3 id="D2"><span class="code">D2</span>Position rooms and starters</h3>
+      <p>Players only count at their listed position. Rooms: EDGE = LE + RE, DT = DT + NT, LB = LOLB + MLB + ROLB, S = FS + SS, OT = LT + RT, OG = LG + RG. Every team starts QB 1, OT 2, OG 2, C 1, K 1, P 1; the rest depends on the scheme:</p>
+      <div class="two">
+        <div class="tbl"><table>
+          <thead><tr><th>Offense</th><th class="n">HB</th><th class="n">FB</th><th class="n">WR</th><th class="n">TE</th></tr></thead>
+          <tbody>
+            <tr><td>Spread, Power Spread, Spread Option, Multiple, Pistol</td><td class="n">1</td><td class="n">0</td><td class="n">3</td><td class="n">1</td></tr>
+            <tr><td>Air Raid, Veer &amp; Shoot, Run &amp; Shoot</td><td class="n">1</td><td class="n">0</td><td class="n">4</td><td class="n">0</td></tr>
+            <tr><td>Pro Style</td><td class="n">1</td><td class="n">0</td><td class="n">2</td><td class="n">2</td></tr>
+            <tr><td>Option</td><td class="n">1</td><td class="n">1</td><td class="n">2</td><td class="n">1</td></tr>
+          </tbody>
+        </table></div>
+        <div class="tbl"><table>
+          <thead><tr><th>Defense</th><th class="n">EDGE</th><th class="n">DT</th><th class="n">LB</th><th class="n">CB</th><th class="n">S</th></tr></thead>
+          <tbody>
+            <tr><td>4-2-5, Multiple</td><td class="n">2</td><td class="n">2</td><td class="n">2</td><td class="n">3</td><td class="n">2</td></tr>
+            <tr><td>4-3 (base, multiple)</td><td class="n">2</td><td class="n">2</td><td class="n">3</td><td class="n">2</td><td class="n">2</td></tr>
+            <tr><td>3-4 (base, multiple)</td><td class="n">2</td><td class="n">1</td><td class="n">4</td><td class="n">2</td><td class="n">2</td></tr>
+            <tr><td>3-3-5, 3-3-5 Tite</td><td class="n">2</td><td class="n">1</td><td class="n">3</td><td class="n">2</td><td class="n">3</td></tr>
+            <tr><td>3-2-6</td><td class="n">2</td><td class="n">1</td><td class="n">2</td><td class="n">3</td><td class="n">3</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <h3 id="D3"><span class="code">D3</span>Roles inside a room</h3>
+      <p>Each room is sorted by current OVR, then older first, then name. With <b>S</b> = the room's starter count:</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Role</th><th>Who</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill">Starter</span></td><td>The top S players</td></tr>
+          <tr><td><span class="pill">Rotation</span></td><td>The next 1 player at HB, WR, TE, EDGE, DT, LB, CB, S; plus one swing lineman, the best non-starter across OT, OG and C</td></tr>
+          <tr><td><span class="pill">Backup</span></td><td>Everyone else down to rank 2 × S (or S + rotation, whichever is larger)</td></tr>
+          <tr><td><span class="pill">Buried</span></td><td>Everyone below that</td></tr>
+        </tbody>
+      </table></div>
+      <h3 id="D4"><span class="code">D4</span>Path to start</h3>
+      <p>A non-starter who isn't in his final year has a path to start when fewer than S players ahead of him will still be there the year after (players ahead of him who are seniors next season leave after it).</p>
+      <h3 id="D5"><span class="code">D5</span>Starters lost and replaced</h3>
+      <p>The tool also ranks this season's roster the same way. A <b>lost starter</b> is one of this season's starters who won't be back. <b>Replaced</b> means a transfer or recruit projects as a starter next season. <b>Open</b> = lost − replaced. That feeds the League Needs tab.</p>
+    </section>
+
+    <section id="ceiling">
+      <div class="sec-head"><span class="sec-num">6</span><h2>Ceiling (max overall)</h2><span class="where">lib/ratings-model.mjs · step 4</span></div>
+      <p>This follows the method in Maxi's Dynasty Progression Monitor, rewritten in our own code. The weights were extracted once into our data file.</p>
+      <h3 id="C1"><span class="code">C1</span>Overall and max overall formulas</h3>
+      <pre class="formula">Overall     = archetype intercept + Σ (rating × archetype weight)
+              rounded (halves round down), kept inside the archetype's floor and ceiling
+
+Skill group = 6 per archetype, in the same order as SkillGroupCap1–6
+  group rating = weighted average of its ratings
+                 primary ×15, secondary ×3 (+10 each), tertiary ×1 (+20 each)
+  group level  = 1 + number of level thresholds the group rating reaches
+  cap          = SkillGroupCapN (the most the group can ever reach)
+
+Max overall = Overall with every group raised to its cap</pre>
+      <h3 id="C2"><span class="code">C2</span>Raising a group to its cap</h3>
+      <p> the target is the threshold for the cap level. The tool adds +1 to the group's ratings in turn until the group rating reaches the target, starting from each rating in turn, and uses the midpoint of the results for each rating. Then it recomputes Overall.</p>
+      <p><b>Accuracy:</b> the Overall formula reproduces 98.2–98.4% of the game's stored overalls exactly (the rest are off by 1). Examples: Kameryn Crawford 86 → 89 (matches Maxi's tooltip), Keisean Henderson 88 → 97, Matt Zollers 74 → 98, Julian Sayin 95 → 97.</p>
+      <p class="note"><b>Generous by design.</b> Max overall assumes every upgrade gets bought. That's why it's only used for "could he ever crack their lineup" and the Star/Elite recruit check, never as a prediction.</p>
+    </section>
+
+    <section id="team">
+      <div class="sec-head"><span class="sec-num">7</span><h2>Team side: would they want him?</h2><span class="where">lib/fit.mjs · step 4</span></div>
+      <p>For one player at one team: <code>team score = role score × need multiplier</code>, or 0 if he fails the level check (0 to 200). Position importance (T9) is applied on top only when comparing players at different positions.</p>
+
+      <h3 id="T1"><span class="code">T1</span>His role there</h3>
+      <p>The tool slots him into that team's next-season room using the same sort and cutoffs as section 5, without rebuilding the room.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Role there</th><th class="n">Role score</th><th>Path-to-start bonus (by his year next season)</th></tr></thead>
+        <tbody>
+          <tr><td>Starter</td><td class="n">100</td><td rowspan="4">Freshman or Sophomore +30, Junior +15, Senior 0</td></tr>
+          <tr><td>Rotation</td><td class="n">60</td></tr>
+          <tr><td>Backup</td><td class="n">30</td></tr>
+          <tr><td>Buried</td><td class="n">0</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Need in his room (AI teams only; Kansas's need is never used)</h3>
+      <p>The room's need is the stronger of <a class="code" href="#T2">T2</a> drop-off and <a class="code" href="#T3">T3</a> weakness, or <a class="code" href="#T4">T4</a> stacked. Then, for each player, <a class="code" href="#T7">T7</a> upgrade and <a class="code" href="#T8">T8</a> succession can raise it further, and they override Stacked.</p>
+      <pre class="formula" id="T2">T2 Drop-off  = this season's starters vs next season's, slot by slot (best vs best, …)
+            each slot: (this season OVR − next season OVR), kept between −10 and +10
+            an empty slot next season counts as +10
+            averaged over the slots, never below 0
+            multiplier = 1 + drop-off / 10            (×1 … ×2 at a 10+ drop)
+
+<span id="T3">T3 Weakness</span>  = expected level − average OVR of next season's starters
+            expected level = league average starter in this room
+                             + how far the team's other starters sit above/below their league averages
+            fewer starters than slots counts as 10
+            counts only at 5 or more:  multiplier = 1 + min(weakness, 10) / 10   (×1.5 … ×2)
+
+<span id="T4">T4 Stacked</span>   = no starter lost, no newcomer starting, not weak,
+            and the best backup is within 3 OVR of the weakest starter
+            multiplier = ×0.25 (replaces the other two)
+
+Room need = Stacked ? (stacked) : max(drop-off multiplier, weakness multiplier)
+
+<span id="T7">T7 Upgrade</span>     raw upgrade = his OVR − the room's weakest starter (WR, DT, … use their lowest starter)
+               level factor = 1 + 0.05 × (league average starter in this room − weakest starter)
+                              kept between 0.25 and 1.5
+               weighted upgrade = raw upgrade × level factor
+               he'd start and the weighted upgrade is 4+:
+               multiplier = 1 + 0.5 × min(weighted − 4, 6) / 6     (×1 at +4 … ×1.5 at +10)
+
+<span id="T8">T8 Succession</span>  every starter is in his final year next season,
+               and he's a freshman or sophomore next season who'd start or has a path to start
+               multiplier = ×2
+
+Need multiplier = max(room need, upgrade, succession); ×0.25 only if the room is Stacked
+                  and neither upgrade nor succession applies</pre>
+      <p>Labels you'll see: <span class="pill">Drop-off</span> <span class="pill">Weak</span> <span class="pill">Steady</span> (×1) <span class="pill">Stacked</span> <span class="pill">Upgrade</span> <span class="pill">Succession</span>. Rooms on Week 1: 1,368 drop-off, 332 steady, 167 stacked, 39 weak.</p>
+      <p><b>T7 examples:</b> Ohio State's WRs are 99/87/87, so Wisloski (83) is measured against the 87, wouldn't start, and Ohio State scores 8. At Utah (WRs 78/71/69) he's +14 over the 69, which counts as +19.4 because that room sits below the league's 76.7 average. Hawkins (HB 93) at Boise State (starter 86, league HB average 79.9): +7 counts as only +4.9. At Air Force (starter 75): +18 counts as +22.4.</p>
+      <p><b>Why T7 and T8 exist:</b> a team with every starter back can still want a better player (your Kansas QB situation). Before them, 1,402 cases on Week 1 where a portal player would start as a +10 upgrade in a "stacked" room scored only 25. Jide Abasiri (DT 88) at Duke, Louisville, Minnesota and Miami (OH) now scores 150 instead of 25. Stacked now only holds when he isn't a real upgrade (14,545 player-school pairs, down from 20,147). 51 of the 167 stacked rooms have only seniors starting next season; T8 covers those, e.g. Vernon Allen III (WR 78) at Ole Miss scores 120 as a backup with a path to start.</p>
+
+      <h3 id="T10"><span class="code">T10</span>Starter level: real starter or stopgap?</h3>
+      <p>At Week 1 every next-season room is emptied out by graduates and the portal, so weak players look like starters at schools that will refill the spot with better players. A projected starter only counts as one when his OVR is within <b>5</b> of the usual starter at his position for schools of the same prestige (the average of this season's starters at every school with that prestige). Below that he's a <b>stopgap</b>: both sides treat the job as a Backup (with a path to start if he isn't in his final year), he gets no upgrade boost (T7), and the team's ceiling check (T5) compares his max overall to that usual level.</p>
+      <p><b>Example:</b> Christopher Clark-Jolivet (DT 70, max 77) "started" at BYU and USC because BYU lost Keanu Tuvasa (88) and Justin Kirkland (84) and only has a 65 freshman left. Prestige-7 schools usually start an 82 DT, so he's a stopgap there and his ceiling is too low: BYU and USC now score 0. His list is now rotation jobs at prestige 3–7 schools. League effect (Week 1): Top 10 average prestige by rating 85+ 6.8, 80–84 5.7, 75–79 4.3, under 75 3.4 (was 6.4 / 5.5 / 5.1 / 4.5); Utah's #1 picks 230 → 87.</p>
+      <h3 id="T5"><span class="code">T5</span>Level check</h3>
+      <p>If he wouldn't start there, the team only wants him when his <b>max overall</b> reaches their weakest projected starter minus 3. Otherwise the team score is 0 ("ceiling too low").</p>
+
+      <h3 id="T6"><span class="code">T6</span>Tie-break: upgrade</h3>
+      <p><code>upgrade = his OVR − the weakest starter he'd replace</code>. Equal scores go to the bigger upgrade.</p>
+      <h3 id="T9"><span class="code">T9</span>Position importance</h3>
+      <p>Teams chase some positions harder: <code>QB ×1.25, OT ×1.1, EDGE ×1.1</code>, others ×1. Every team on one player's list gets the same weight, so it doesn't change the order of his Top 10; the ranking there uses the plain team score. It matters when a team has to choose between players at different positions (Signing Day placement and #1-pick balancing, steps 5 and 6).</p>
+      <h3 id="T11"><span class="code">T11</span>Lookalikes (added Oct 20, 2026, your option 3)</h3>
+      <p>A school is less interested in a player just like one it already has coming in. For each incoming player (transfer or recruit) already in his room with the <b>same year next season</b> and an <b>OVR within 3</b>, the team score is multiplied by <b>×0.25</b> (two lookalikes: ×0.0625). Game commits count, so this also works during the portal weeks.</p>
+      <p><b>Why:</b> the first Signing Day preview sent BYU four rising-senior safeties rated 87–89 (Barnes, Price, Lutmer, Bryant), two of them as backups. Now BYU takes Barnes (89) and Preston EstoEsta (77); Price → Army, Lutmer → Texas Tech, Bryant → Northwestern, all starting. At ×0.5 (your first pick) 11 lookalike pairs still got through, e.g. Cincinnati with two rising-junior QBs 75 and 76; at ×0.25 one does.</p>
+      <h3 id="T12"><span class="code">T12</span>Newcomer limits (added Oct 20, 2026, your option c)</h3>
+      <ul>
+        <li><b>Beating a newcomer:</b> he never takes a starting spot from a transfer already coming in who is at the school's starter level (T10: within 5 of the usual starter for its prestige), e.g. Drake Lindsey (QB 84) at Auburn (prestige 7, level 84.6) keeps Nico Iamaleava (89) off. Exception for a star: <b>8+ OVR better</b> than the newcomer, or a <b>top-5 transfer at his position</b> (game's position rank), still takes the spot (Yhonzae Pierre RE 91 over Julian Walker 80 at Alabama; KaMario Taylor, QB #1, over Lindsey). A newcomer below that level is a stopgap: he loses his spot to anyone <b>4+ OVR better</b> (UCF: Emory Williams 74 → Micah Alejado 82 would start). In rooms with several starters this only protects the newcomer's own spot. Otherwise he counts as a Backup there.</li>
+        <li><b>Transfers per room:</b> a school wants at most <b>(starters it lost in that room + 1)</b> transfers per room; past that its team score is 0.</li>
+      </ul>
+      <p><b>Why:</b> FAU signed three QBs (AJ Hill 76 Fr, JJ Kohl 76 Jr, CJ Bailey 84 So) because its QB room still looked weak after each signing. Now Hill comes, Bailey (8 better) takes over, and Kohl goes to Troy (his #1) as the starter. A second QB as a young backup is fine (your call). Schools taking 3+ transfers at one position: 139 → 87, mostly where they lost that many starters (e.g. Alabama EDGE 91/81/80).</p>
+    </section>
+
+    <section id="player">
+      <div class="sec-head"><span class="sec-num">8</span><h2>Player side: would he go?</h2><span class="where">lib/destinations.mjs · step 4b</span></div>
+      <h3 id="P1"><span class="code">P1</span>Dealbreaker, using the game's school grades</h3>
+      <p>Every portal player has one dealbreaker. Each school's grade for it comes straight from the save. Letter grades become numbers in 13 equal steps:</p>
+      <div class="tbl"><table>
+        <thead><tr><th>F</th><th>D−</th><th>D</th><th>D+</th><th>C−</th><th>C</th><th>C+</th><th>B−</th><th>B</th><th>B+</th><th>A−</th><th>A</th><th>A+</th></tr></thead>
+        <tbody><tr><td>0</td><td>8</td><td>17</td><td>25</td><td>33</td><td>42</td><td>50</td><td>58</td><td>67</td><td>75</td><td>83</td><td>92</td><td>100</td></tr></tbody>
+      </table></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Dealbreaker (Week 1 transfers)</th><th>Measured by</th><th>Passes when</th></tr></thead>
+        <tbody>
+          <tr><td>Championship Contender (439)</td><td>School's Contender grade</td><td rowspan="5">Grade reaches his bar: <b>B−</b> if he's 85+ OVR, <b>C</b> at 78–84, <b>D+</b> under 78. Your coach's threshold perk lowers the bar one step per point at your school; AI schools' perks don't count.</td></tr>
+          <tr><td>Playing Style (418)</td><td>School's Playing Style grade for his archetype</td></tr>
+          <tr><td>Pro Potential (398)</td><td>School's Pro Potential grade for his position group</td></tr>
+          <tr><td>Brand Exposure (354)</td><td>School's Brand Exposure grade</td></tr>
+          <tr><td>Conference / Coach Prestige (137 / 5)</td><td>School's grade</td></tr>
+          <tr><td>Playing Time (139)</td><td>His role there (role score)</td><td>He'd be a Starter or Rotation player</td></tr>
+          <tr><td>Proximity to Home (1)</td><td>100 if the school is in his home state, else 0</td><td>School is in his home state</td></tr>
+        </tbody>
+      </table></div>
+      <p>A school that fails his dealbreaker can't be in his Top 10. That's how it works in the base game too.</p>
+      <p><b>Playing Time is dropped for players who haven't earned it:</b> a player rated below the league average starter at his position (this season's starters: QB 82.0, HB 84.5, WR 81.4, TE 77.4, OT 78.7, OG 78.0, C 77.6, EDGE 79.4, DT 80.0, LB 77.6, CB 80.1, S 79.6) has no dealbreaker; if he'll be a senior next season, only when he's more than 4 below it. A dropped dealbreaker never blocks a school and scores neutral (50). Week 1: dropped for 96 of 139 Playing Time players; the 8 young QBs whose lists were empty (e.g., Angelo Renda QB 72) now have lists. Only the preview changes so far; nothing is written to the save.</p>
+
+      <h3 id="P2"><span class="code">P2</span>Player score (0–100)</h3>
+      <pre class="formula">year weight w   = Freshman 0.20 · Sophomore 0.35 · Junior 0.50 · Senior (final year) 0.70
+playing time    = role score there, max 100
+prestige        = school prestige × 10, but only if he'd start, rotate or has a path to start; else 0
+team strength   = average OVR of the school's projected starters, scaled 0–100 across the league
+home            = 100 if the school is in his home state, else 0
+
+                  80+ OVR: w is halved (Fr 0.10, So 0.175, Jr 0.25, final year 0.35)
+pitch           = average of the school's values on the other categories of his ideal pitch (P4)
+
+rest            = 0.45 × dealbreaker value + 0.30 × pitch
+                + 0.15 × prestige + 0.05 × team strength + 0.05 × home
+player score    = w × playing time + (1 − w) × rest + jitter (fixed per player, school, season; within ±3)</pre>
+      <p><b>Why w is halved for 80+ (Oct 20, 2026, your option C):</b> good players were picking low-prestige schools only because they'd start everywhere. Week 1: 80–84 players with a prestige ≤3 #1 went from 37 to 12 (with P4 and the K3 change); the five 80–84 Playing Time outliers (Samuel Singleton Jr. → James Madison, Kevin Riley → Sam Houston…) are gone; Singleton's #1 is now Duke (prestige 6).</p>
+      <p><b>Reweighted Oct 20, 2026 (fifth session, your call):</b> his dealbreaker and pitch categories now weigh more: dealbreaker 40% → 45%, each pitch category 10% → 15%, prestige 25% → 15%, team strength 10% → 5%, home 5%. Week 1: BYU is #1 for 110 players (was 130); UNLV 126, FLA Atlantic 90; 80–84 players with a prestige ≤3 #1 went from 12 to 28; still 0 empty Top 10s. Hawkins: Illinois, Duke, Virginia (Tennessee slipped from 2nd to 6th); Austin Mack: Indiana, UCLA, Michigan.</p>
+
+      <h3 id="P3"><span class="code">P3</span>Prestige floor (85+ OVR only)</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>His OVR</th><th>Preferred schools</th><th>Fallback</th></tr></thead>
+        <tbody>
+          <tr><td>90+</td><td>Prestige 6+</td><td>Prestige 4+, only when no 6+ school has a team score of 100+ for him</td></tr>
+          <tr><td>85–89</td><td>Prestige 4+</td><td>Prestige 2+, only when no 4+ school has a team score of 100+</td></tr>
+          <tr><td>Under 85</td><td colspan="2">No floor; prestige only affects the score</td></tr>
+        </tbody>
+      </table></div>
+      <p>His old school gets no exemption from the floor (P5). The game itself sent 8 transfers back to their old school at Signing Day.</p>
+
+      <h3 id="P4"><span class="code">P4</span>Ideal pitch: his two secondary categories</h3>
+      <p>Every player has an ideal recruiting pitch (<code>IdealRecruitingPitch</code>), and each pitch covers three categories. His dealbreaker is always one of them; the other two are things he cares about that aren't dealbreakers. They add to his player score (30% of the rest between them, normally 15% each, P2; 10% each until Oct 20, 2026) using the same school grades as P1; Playing Time = his role there, Proximity = home state. They never block a school.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>In-game pitch</th><th>Save name</th><th>Categories</th></tr></thead>
+        <tbody>
+          <tr><td>College Experience</td><td>CollegeExperience</td><td>Academic Prestige, Campus Lifestyle, Stadium Atmosphere</td></tr>
+          <tr><td>Team Player</td><td>TeamPlayer</td><td>Coach Stability, Playing Style, Proximity</td></tr>
+          <tr><td>Campus Personality</td><td>CampusPersonality</td><td>Playing Time, Playing Style, Campus Lifestyle</td></tr>
+          <tr><td>Gamer</td><td>ItsGameTime</td><td>Conference Prestige, Playing Style, Pro Potential</td></tr>
+          <tr><td>Standard Bearer</td><td>Prestigious</td><td>Coach Prestige, Conference Prestige, Playing Style</td></tr>
+          <tr><td>Student of the Game</td><td>StudentOfTheGame</td><td>Academic Prestige, Coach Prestige, Proximity</td></tr>
+          <tr><td>Hometown Hero</td><td>HometownHero</td><td>Championship Contender, Program Tradition, Proximity</td></tr>
+          <tr><td>Status Seeker</td><td>ProveYourself</td><td>Brand Exposure, Coach Prestige, Conference Prestige</td></tr>
+          <tr><td>The Clutch</td><td>TheClutch</td><td>Coach Stability, Playing Style, Playing Time</td></tr>
+          <tr><td>Primetime Player</td><td>TVTime</td><td>Brand Exposure, Championship Contender, Playing Time</td></tr>
+          <tr><td>Coach Connection</td><td>CoachsFavorite</td><td>Athletic Facilities, Coach Prestige, Proximity</td></tr>
+          <tr><td>Aspirational Goals</td><td>Aspirational</td><td>Championship Contender, Coach Prestige, Conference Prestige</td></tr>
+          <tr><td>House Call</td><td>ToTheHouse</td><td>Brand Exposure, Championship Contender, Coach Prestige</td></tr>
+          <tr><td>Football Influencer</td><td>FootballInfluencer</td><td>Brand Exposure, Playing Time, Pro Potential</td></tr>
+          <tr><td>Clocked In</td><td>TimeToGetToWork</td><td>Playing Style, Playing Time, Pro Potential</td></tr>
+          <tr><td>Star Search</td><td>Starter</td><td>Brand Exposure, Playing Time, Proximity</td></tr>
+          <tr><td>Grassroots Traditionalist</td><td>Grassroots</td><td>Program Tradition, Proximity, Stadium Atmosphere</td></tr>
+          <tr><td>Conference Legend</td><td>ConferenceSpotlight</td><td>Championship Contender, Conference Prestige, Proximity</td></tr>
+          <tr><td>Sunday Player</td><td>SundayBound</td><td>Championship Contender, Conference Prestige, Pro Potential</td></tr>
+          <tr><td>Gym Rat</td><td>WorkHorse</td><td>Athletic Facilities, Championship Contender, Playing Time</td></tr>
+        </tbody>
+      </table></div>
+      <p><b>Checked against the save:</b> your list (read in-game) is in the save's own order, and for 19 of 20 pitches every player's dealbreaker is one of its three categories. Gym Rat is the exception: its players' dealbreakers in the save are Pro Potential or Brand Exposure, so for them all three Gym Rat categories count, sharing the same 30%. Example: Nate Sheppard (HB 93, Gym Rat, dealbreaker Pro Potential): Texas, Tennessee, USC, Miami, Auburn.</p>
+      <p><b>Examples (Week 1):</b> Caleb Hawkins (Standard Bearer: Playing Style + Coach Prestige, Conference Prestige): Tennessee moves up to 2nd. Austin Mack (Primetime Player: Playing Time + Brand Exposure, Championship Contender): Indiana and Michigan now ahead of UCLA. Braeden Wisloski (Conference Legend: Contender + Conference Prestige, home): Pittsburgh, in his home state, moves up to 2nd. Pitches change about 1 in 4 #1 picks but don't spread them out: teams with many open spots still win most close calls (step 6 balancing).</p>
+      <h3 id="P5"><span class="code">P5</span>Never back to the school he left</h3>
+      <p>The school a transfer left (<code>PrevTeamIndex</code>) is never on his Top 10, so no weekly commit or Signing Day Top 10 pick sends him back. At Signing Day it comes last in the "best fit" fallback, used only when no other school has room, so a real player is never deleted because of this rule. (Oct 20, 2026, your option A, ninth session: Yhonzae Pierre RE 91 had Alabama, the school he left, as #1 at Signing Day because it skipped his prestige floor and has his home state and A+ Pro Potential; he now goes to Ohio State, Top 10 #1, as a starter.)</p>
+      <p>Effect: Week 2, his old school was in 162 of 1,890 Top 10s (#1 for 12) and got 4 of 377 weekly commits; now 0. Signing Day: 14 placed back at their old school, now 0; real cuts 146 → 151 and deleted 14 → 15 (all FB/TE 56–68, e.g. Aiden Arias TE 58, NC State).</p>
+    </section>
+
+    <section id="top10">
+      <div class="sec-head"><span class="sec-num">9</span><h2>Building the Top 10</h2><span class="where">lib/destinations.mjs · step 4b</span></div>
+      <h3 id="K1"><span class="code">K1</span>Combined score</h3>
+      <pre class="formula">combined = 0.5 × player score + 0.5 × (team score ÷ 2)       team score ÷ 2 puts it on 0–100
+your team: combined = player score                            you decide your own needs</pre>
+      <h3 id="K2"><span class="code">K2</span>A school is eligible for his list when all four hold</h3>
+      <ol class="steps">
+        <li>It meets his <b>dealbreaker</b> (P1).</li>
+        <li>The <b>team wants him</b>: team score above 0. Your team always counts.</li>
+        <li>It passes his <b>prestige floor</b>. Your team always counts.</li>
+        <li>It isn't the school he left (P5).</li>
+      </ol>
+      <h3 id="K3"><span class="code">K3</span>Order and coach perks (your team only)</h3>
+      <ol class="steps">
+        <li>Eligible schools first, then by combined score, then by upgrade, then by name. The first 10 are his Top 10.</li>
+        <li><b>Only your coach's perks count</b> (changed Oct 20, 2026). AI schools' transfer and threshold perks are ignored.</li>
+        <li><b>Your transfer perk</b> (order QB, RB/FB, WR/TE, OL, DL, LB, DB, K/P): with 10 or more at his group, your team also joins his list when it ranks 11th–18th among his eligible schools. It goes in at #10 (the school at #10 drops out). It doesn't move your team up a list it's already on.</li>
+      </ol>
+      <div class="tbl"><table>
+        <thead><tr><th>Kansas perk in these saves</th><th class="n">QB</th><th class="n">RB/FB</th><th class="n">WR/TE</th><th class="n">OL</th><th class="n">DL</th><th class="n">LB</th><th class="n">DB</th><th class="n">K/P</th></tr></thead>
+        <tbody><tr><td>Transfer interest</td><td class="n">10</td><td class="n">0</td><td class="n">4</td><td class="n">10</td><td class="n">10</td><td class="n">10</td><td class="n">12</td><td class="n">10</td></tr></tbody>
+      </table></div>
+      <p>The tool reads these from whatever save is open, so it uses your current values once they're unlocked (you have every group now). In these test saves Kansas lacks the RB/FB and WR/TE perks, so HB, FB, WR and TE players don't get the extra reach here.</p>
+      <h3 id="K4"><span class="code">K4</span>Your-team rule (Kansas in this dynasty)</h3>
+      <p>Your team is whatever <code>userTeam</code> in settings says; the tool works for any dynasty. Your team skips the team side and the prestige floor: it's eligible whenever it meets his dealbreaker, and it's ranked by his player score. <b>On Week 1 (after the P2 reweight):</b> in 357 of 1,891 Top 10s (18.9%), 127 of them through your perk (e.g., Brandon Finney Jr. CB 91, Jehiem Oatis DT 90, Quincy Rhodes Jr. LE 90); top 2 in 33.</p>
+    </section>
+
+    <section id="example">
+      <div class="sec-head"><span class="sec-num">10</span><h2>Worked example: Caleb Hawkins at Illinois</h2><span class="where">Week 1 save</span></div>
+      <p>Hawkins: HB 93, max 96, sophomore next season, from Oklahoma State, home Oklahoma, dealbreaker Playing Style, pitch Standard Bearer (also cares about Coach Prestige and Conference Prestige), archetype Elusive Back. Illinois: Multiple offense (1 HB starter), prestige 6.</p>
+      <div class="two">
+        <div>
+          <h3>Team side</h3>
+          <div class="calc">
+            <div class="row"><span>Illinois HB next season: Barnett 74, Randall 74, Wheeler 72. Hawkins 93 ranks #1</span><span>Starter = 100</span></div>
+            <div class="row"><span>Their HB starter this season, Ca'Lil Valentine 86, left in the portal. Drop-off 86 − 74 = 12, capped at 10</span><span>×2.0</span></div>
+            <div class="row"><span>Weakness 5.5 (×1.55) and upgrade +19 (×1.5) are smaller, so drop-off wins</span><span>×2.0</span></div>
+            <div class="row"><span>Level check: not needed, he'd start</span><span>pass</span></div>
+            <div class="row total"><span>Team score = 100 × 2.0</span><span>200</span></div>
+            <div class="row"><span>Upgrade (tie-break) = 93 − 74</span><span>+19</span></div>
+          </div>
+        </div>
+        <div>
+          <h3>Player side</h3>
+          <div class="calc">
+            <div class="row"><span>Year weight (sophomore next season 0.35, halved: he's 80+)</span><span>0.175</span></div>
+            <div class="row"><span>Playing time (Starter)</span><span>100</span></div>
+            <div class="row"><span>Dealbreaker: Illinois Playing Style grade for Elusive Backs = A (needs B−, he's 93)</span><span>92 · pass</span></div>
+            <div class="row"><span>Pitch: Illinois Coach Prestige B, Conference Prestige A+</span><span>67, 100</span></div>
+            <div class="row"><span>Prestige 6, he'd start</span><span>60</span></div>
+            <div class="row"><span>Team strength: starters average 74.3 (league 69.1–86.6)</span><span>30</span></div>
+            <div class="row"><span>Home: Illinois isn't in Oklahoma</span><span>0</span></div>
+            <div class="row"><span>rest = 0.45×92 + 0.15×67 + 0.15×100 + 0.15×60 + 0.05×30 + 0.05×0</span><span>77.0</span></div>
+            <div class="row"><span>0.175×100 + 0.825×77.0 = 81.0, plus jitter ≈ +1.4</span><span>82</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="calc">
+        <div class="row"><span>Prestige floor: 93 OVR prefers prestige 6+, and 6+ schools have a spot for him. Illinois is 6</span><span>pass</span></div>
+        <div class="row total"><span>Combined = 0.5 × 82 + 0.5 × (200 ÷ 2)</span><span>91 → #1 in his list</span></div>
+      </div>
+      <p>His full Top 10 now: Illinois, Duke, Virginia, Arizona, USC, Tennessee, Iowa, Miami, Arizona State, Alabama. Tennessee (prestige 8) slipped from 2nd to 6th when prestige started counting less (P2 reweight). Kansas ranks 11th; in these saves Kansas has no RB/FB perk, so it doesn't join (with the perk it would come in at #10). Oklahoma State fails his dealbreaker (Playing Style C+, he needs B−). At Signing Day (SD4) he lands at Duke, his #1 by then.</p>
+    </section>
+
+    <section id="signingday">
+      <div class="sec-head"><span class="sec-num">11</span><h2>Signing Day roster build</h2><span class="where">lib/signing-day.mjs, lib/live-league.mjs · step 5</span></div>
+      <p>At Signing Day the tool builds every CPU school's roster so the game's rollover has nothing left to cut or delete. Your team is never changed. <b>Preview only so far</b>: the edits were proven in-game (un-sign, cut, commit), but writing them is piece 4.</p>
+      <h3 id="SD1"><span class="code">SD1</span>Recruit cleanup</h3>
+      <p>Every signed HS/JUCO recruit at a CPU school <b>under 60 OVR</b> is un-signed, unless his dev trait is <b>Star, Elite or Impact</b> and his max overall reaches the league's average next-season starter at his position. Signing Day copy: 3,913 signed, 1,685 under 60; <b>1,535 un-signed</b>, <b>150 kept</b> (Impact 131, Elite 11, Star 8). Example: Liberty un-signs 15 (e.g. Adrian Hinojosa MLB 59) and keeps Andrew McQuillan (RG 56, Impact, max 78 vs the 74.9 average OG starter).</p>
+      <h3 id="SD2"><span class="code">SD2</span>Keep value</h3>
+      <pre class="formula">keep value = OVR + (max − OVR) × year factor      next season: Fr 0.5 · So 0.35 · Jr 0.2 · Sr 0</pre>
+      <p>Applies to everyone (returning players, transfers, recruits). Young players with a ceiling outlast topped-out upperclassmen.</p>
+      <h3 id="SD3"><span class="code">SD3</span>Protected real players</h3>
+      <p>Never cut and never left unplaced: <b>Juniors and Seniors 77+</b>, and <b>Freshmen and Sophomores 72+ with a max of 77+</b> (school year as shown in-game at Signing Day). Recruits are never protected.</p>
+      <h3 id="SD4"><span class="code">SD4</span>Placing transfers on live rosters</h3>
+      <ol class="steps">
+        <li>Uncommitted transfers go one at a time, <b>best max overall first</b>.</li>
+        <li>He goes to the first school in his <b>live</b> Top 10 that has room (SD5). "Live": after every signing or cut the school's depth chart and needs are recomputed, so each later player's Top 10 sees the new rosters (a filled room stops pulling; T11 and T12 kick in).</li>
+        <li>If no school on his list has room: <b>best fit</b>, the school with room he likes most by his player score (schools that meet his dealbreaker first).</li>
+        <li>Players the game already committed stay where they are and count as that school's transfers in.</li>
+      </ol>
+      <h3 id="SD5"><span class="code">SD5</span>Room and cuts</h3>
+      <p>A school has room when it has a free slot on its committed-players board (35), is under the position cap, and is under 85. Otherwise it may make <b>one cut</b> for him, only of a player whose keep value is <b>5+</b> below his, who'd be <b>Backup or Buried once he arrives</b>, <b>recruits first</b>, and at most <b>5 real players per school</b>; never a protected player.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Cap</th><th class="n">QB</th><th class="n">HB</th><th class="n">FB</th><th class="n">WR</th><th class="n">TE</th><th class="n">OT</th><th class="n">OG</th><th class="n">C</th><th class="n">EDGE</th><th class="n">DT</th><th class="n">LB</th><th class="n">CB</th><th class="n">S</th><th class="n">K</th><th class="n">P</th><th class="n">Total</th></tr></thead>
+        <tbody><tr><td>Players next season</td><td class="n">5</td><td class="n">6</td><td class="n">1</td><td class="n">11</td><td class="n">5</td><td class="n">8</td><td class="n">8</td><td class="n">4</td><td class="n">8</td><td class="n">8</td><td class="n">12</td><td class="n">9</td><td class="n">8</td><td class="n">2</td><td class="n">2</td><td class="n">97</td></tr></tbody>
+      </table></div>
+      <p><b>Why the limits (Oct 20, 2026, your call):</b> unchecked "cut the weakest link" cut 482 real players (20 rated 75+; BYU cut 22). Now 150 real players are cut, 4 rated 75+.</p>
+      <h3 id="SD6"><span class="code">SD6</span>After placement</h3>
+      <ul>
+        <li><b>Trim to 85:</b> schools still over 85 (the game would cut its own way) cut recruits first, then the lowest keep value bench players.</li>
+        <li><b>Cut real players are placed again:</b> schools that want him first, then by his player score; only those with nowhere to go are left for the game to delete.</li>
+      </ul>
+      <h3>Results on the Signing Day copy</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>What</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Uncommitted transfers placed</td><td>1,310 of 1,310 (0 left over); 1,004 at their #1, 25 by best fit; 1,094 start, 178 rotation</td></tr>
+          <tr><td>Real players cut</td><td>150 (4 rated 75+): 137 moved to another school, 13 deleted</td></tr>
+          <tr><td>Recruits un-signed</td><td>1,535 by SD1 + 674 to make room; 150 kept under 60</td></tr>
+          <tr><td>Rosters</td><td>64–85, none over 85; no board over 35</td></tr>
+          <tr><td>Best transfer classes (avg OVR in)</td><td>Texas 86.0, Oklahoma 85.3, Penn State 84.8</td></tr>
+          <tr><td>Named players</td><td>Austin Simmons → Arizona (#1), Caleb Hawkins → Duke (#1), Khalil Barnes → BYU (#1)</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Planned: weekly commits (designed Oct 20, 2026; codes come when built)</h3>
+      <p><b>How the game commits a transfer</b> (measured on the Week 4 copy): when a school that has <b>offered</b> him reaches his <b>CommitScore</b> (125–350) in influence. 170 of the game's 172 Week 4 commits fit; none of the 1,719 uncommitted did. CPU schools barely recruit the portal: only 559 of 1,891 transfers are on any school's board, so about 1,300 pile up until Signing Day.</p>
+      <ul>
+        <li>The tool commits players itself each week, back-loaded: 10% / 25% / 45% / 70% of all portal transfers committed by the end of Weeks 1 / 2 / 3 / 4, the rest at Signing Day. The game's own commits count.</li>
+        <li>Who first: clear favorites, boosted for higher-ranked players and single-offer players whose school is close to his CommitScore.</li>
+        <li>Where: a school that offered him in-game if it's in his Top 10; otherwise his live #1 with room. Never while your team is in his top 3. No cuts until Signing Day.</li>
+        <li>Next: a write test on a copy (direct commit vs. the game's own trigger) before building it.</li>
+      </ul>
+    </section>
+
+    <section id="settings">
+      <div class="sec-head"><span class="sec-num">12</span><h2>Every tuning value</h2><span class="where">settings.json</span></div>
+      <p>All of these can change without touching code. Each one was your choice or approved by you.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Setting</th><th>Value</th><th>Rule</th></tr></thead>
+        <tbody>
+          <tr><td>Your team</td><td>Kansas (any team works)</td><td>L1, K4</td></tr>
+          <tr><td>Starters by scheme</td><td>Tables in section 5</td><td>D2</td></tr>
+          <tr><td>Rotation players</td><td>1 at HB, WR, TE, EDGE, DT, LB, CB, S; 1 OL swing</td><td>D3</td></tr>
+          <tr><td>Role scores</td><td>Starter 100, Rotation 60, Backup 30, Buried 0</td><td>T1, P2</td></tr>
+          <tr><td>Path-to-start bonus</td><td>Fr/So +30, Jr +15</td><td>T1, P2</td></tr>
+          <tr><td>Drop-off scale</td><td>×1 → ×2 at 10 OVR</td><td>T2</td></tr>
+          <tr><td>Weakness</td><td>From 5 OVR below (×1.5) to 10 (×2)</td><td>T3</td></tr>
+          <tr><td>Stacked</td><td>×0.25; backup within 3 OVR</td><td>T4</td></tr>
+          <tr><td>Level bar</td><td>Max overall ≥ weakest starter − 3</td><td>T5</td></tr>
+          <tr><td>Upgrade</td><td>Weighted by the starter's level (±5% per OVR from the league average, 0.25–1.5); from +4 (×1) to +10 (×1.5)</td><td>T7</td></tr>
+          <tr><td>Succession</td><td>Fr/So with a path or starting; ×2</td><td>T8</td></tr>
+          <tr><td>Position importance</td><td>QB ×1.25, OT ×1.1, EDGE ×1.1</td><td>T9</td></tr>
+          <tr><td>Starter level</td><td>Within 5 OVR of the prestige level's usual starter, else stopgap (Backup)</td><td>T10</td></tr>
+          <tr><td>Lookalikes</td><td>×0.25 per incoming player with the same next-season year and OVR within 3</td><td>T11</td></tr>
+          <tr><td>Newcomer limits</td><td>never take a start from a newcomer at the starter level (unless 8+ better or a top-5 transfer at his position), 4+ OVR better for one below it; transfers per room ≤ starters lost + 1</td><td>T12</td></tr>
+          <tr><td>Year weights</td><td>Fr 0.20, So 0.35, Jr 0.50, final year 0.70; halved for 80+ OVR</td><td>P2</td></tr>
+          <tr><td>Rest split</td><td>Dealbreaker 45%, pitch categories 15% + 15%, prestige 15%, strength 5%, home 5%</td><td>P2, P4</td></tr>
+          <tr><td>Jitter</td><td>±3</td><td>P2</td></tr>
+          <tr><td>Dealbreaker bar</td><td>85+ B−, 78–84 C, under 78 D+</td><td>P1</td></tr>
+          <tr><td>Playing Time drop</td><td>Below position average starter (seniors: average − 4) → no dealbreaker</td><td>P1</td></tr>
+          <tr><td>Prestige floor</td><td>90+: 6+ → 4+; 85–89: 4+ → 2+; spot = team score 100+</td><td>P3</td></tr>
+          <tr><td>Combine</td><td>50% player, 50% team</td><td>K1</td></tr>
+          <tr><td>Full perk (your team)</td><td>10 or more; joins his list from as low as 18th (in at #10)</td><td>K3</td></tr>
+          <tr><td>Recruit cleanup</td><td>Under 60 un-signed; keep Star/Elite/Impact whose max reaches the average starter</td><td>SD1</td></tr>
+          <tr><td>Keep value year factor</td><td>Fr 0.5, So 0.35, Jr 0.2, Sr 0 (next season)</td><td>SD2</td></tr>
+          <tr><td>Protection</td><td>Jr/Sr 77+; Fr/So 72+ with max 77+</td><td>SD3</td></tr>
+          <tr><td>Position caps (Signing Day)</td><td>QB 5, HB 6, FB 1, WR 11, TE 5, OT 8, OG 8, C 4, EDGE 8, DT 8, LB 12, CB 9, S 8, K 2, P 2 = 97</td><td>SD5</td></tr>
+          <tr><td>Roster limit, cut margin</td><td>85; keep value 5+ below the newcomer</td><td>SD5</td></tr>
+          <tr><td>Who can be cut</td><td>Backup/Buried once he arrives; recruits first; max 5 real players per school</td><td>SD5</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="checks">
+      <div class="sec-head"><span class="sec-num">13</span><h2>How it was checked</h2></div>
+      <ul>
+        <li><b>Open and save:</b> all test saves detected correctly; saving with no changes produced 0 differences in the player, team, recruit, Top 10 and leaving tables.</li>
+        <li><b>Draft lock:</b> the saved file differed from its backup only in the 141 draft records, only in the two fields; verified in-game at Week 2.</li>
+        <li><b>Depth chart:</b> every count matches the step 1–2 numbers on all six saves; projecting all 138 teams takes about 30 ms.</li>
+        <li><b>Team-side roles:</b> the fast role calculation matches the depth chart for all 260,958 player-school pairs on Week 1, 0 mismatches.</li>
+        <li><b>Ceiling:</b> 98.2–98.4% of stored overalls reproduced exactly; Crawford matches Maxi's tooltip.</li>
+        <li><b>Speed:</b> the whole portal (1,891 players × 138 schools, both sides) scores in about 0.25 s; the full Signing Day preview (SD1–SD6, rescoring every player on live rosters) takes about 0.8 s.</li>
+        <li><b>Signing Day preview:</b> 0 protected players cut or left over, 0 schools over 85, 0 boards over 35, every real-player cut a Backup/Buried player once the newcomer arrives, at most 5 per school.</li>
+        <li><b>Real save facts used for tuning:</b> the game's own 90+ transfer commits all went to prestige 6+; 85–89 never below 4; uncommitted transfers at Signing Day mostly get deleted at rollover (1,042 of 1,310).</li>
+      </ul>
+    </section>
+
+    <section id="open">
+      <div class="sec-head"><span class="sec-num">14</span><h2>Not built yet, and known limits</h2></div>
+      <ul>
+        <li><b>#1 picks bunch up.</b> Week 1 (after the P2 reweight): UNLV is #1 for 126 players, BYU 110, FLA Atlantic 90. At Signing Day the live rosters (SD4, T11, T12) already spread them. Spreading #1 picks by open starter slots is part of the Week 1 generator (step 6), and Signing Day needs it too.</li>
+        <li><b>Roles use current OVR,</b> not next season's progression.</li>
+        <li><b>Strict position rooms.</b> A 3-4 team's extra DTs show as Buried; they don't count at EDGE.</li>
+        <li><b>Home pull is same-state only;</b> only 1 transfer has Proximity to Home as his dealbreaker.</li>
+        <li><b>Signing Day isn't written yet.</b> SD1–SD6 are a preview; writing it to a copy is step 5 piece 4. Moving a cut returning player to another school still needs its own in-game test.</li>
+        <li><b>Leftovers go by player score</b> (SD4 best fit), so prestige can beat playing time for younger players (Christian Clark HB 80 So → Texas, buried #3). Open for your call.</li>
+        <li><b>Nothing is written to Top 10s yet.</b> Everything in sections 5–9 is a read-only preview until step 6.</li>
+        <li><b>NIL expectation isn't modeled.</b> The save has each player's NIL value (5–325) and each team's NIL spending and budget, but how the game uses them to block a CPU school isn't known yet.</li>
+        <li><b>Lists change during the portal.</b> By Signing Day, 313 players' lists had gained 455 schools not on their Week 1 list, and 265 of the 581 Signing Day commits went to such a school. Every commit was to a school on his list at that time. So the Week 1 list is a starting point; the weekly refresh (step 7) and Signing Day (step 5) matter at least as much.</li>
+        <li><b>Proven in-game (step 5 piece 1):</b> un-signing a recruit, cutting a returning player and committing a transfer at Signing Day all work through the rollover.</li>
+      </ul>
+    </section>
+  </main>
+</div>

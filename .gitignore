@@ -1,0 +1,13 @@
+# Big or machine-specific
+node_modules/
+runtime/
+
+# Test outputs and backups (test saves themselves live in test_saves/ and are tracked)
+test_runs/
+TTT Backups/
+*.bak
+*.tmp
+*.saving.tmp
+*.draft-lock.json
+*.png
+*.log
