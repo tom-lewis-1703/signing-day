@@ -9,7 +9,6 @@ TTT Backups/
 *.bak
 *.tmp
 *.saving.tmp
-*.draft-lock.json
 *.png
 *.log
 

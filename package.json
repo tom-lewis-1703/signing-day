@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Personal CFB 27 dynasty utility: draft lock, need-based transfer destinations, Signing Day commitments.",
+  "description": "Personal CFB 27 dynasty utility: need-based transfer destinations, Signing Day commitments.",
   "dependencies": {
     "madden-franchise": "4.3.1"
   },

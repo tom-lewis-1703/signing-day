@@ -24,12 +24,12 @@ None.
 Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3.1; `sharp` 0.35.5 (devDependency, only `tools/copy-art.mjs`).
 
 ### 4.2 Stages
-`lib/stage.mjs` `readStage` reads `SeasonInfo`. With `CurrentStage` = `OffSeason`, `CurrentOffseasonStage` 2–7 maps to the stage ids `players-leaving`, `week-1` (portal opens), `week-2`, `week-3`, `week-4` (portal closes), `signing-day`; the week stages have no action. Anything else is `unsupported`, labelled e.g. `Preseason (no action at this stage)`.
+`lib/stage.mjs` `readStage` reads `SeasonInfo`. With `CurrentStage` = `OffSeason`, `CurrentOffseasonStage` 2–7 maps to the stage ids `players-leaving`, `week-1` (portal opens), `week-2`, `week-3`, `week-4` (portal closes), `signing-day`; only `signing-day` has an action. Anything else is `unsupported`, labelled e.g. `Preseason (no action at this stage)`.
 
 ### 4.3 Code map
 | File | Role | Main exports |
 |---|---|---|
-| `lib/session.mjs` | The entry point for `gui.mjs` and `tools/`: open (refuses when no user team is named, and a save that doesn't contain the team picked in the GUI, or for `tools/`, `settings.json` → `testSavesTeam`), plans, edits, save | `Session`: `peek`, `open(path, {userTeam})`, `signingDayPlan(locks)`, `applySigningDay(locks)`, `edits()`, `getLeague()`, `save()`, `previewDraftLock`, `applyDraftLock`; read-only helpers `depthTeams`, `depthTeam`, `leagueSummary`, `portalPlayers`, `roleAt`, `whoWantsHim`, `destinations` |
+| `lib/session.mjs` | The entry point for `gui.mjs` and `tools/`: open (refuses when no user team is named, and a save that doesn't contain the team picked in the GUI, or for `tools/`, `settings.json` → `testSavesTeam`), plans, edits, save | `Session`: `peek`, `open(path, {userTeam})`, `signingDayPlan(locks)`, `applySigningDay(locks)`, `edits()`, `getLeague()`, `save()`; read-only helpers `depthTeams`, `depthTeam`, `leagueSummary`, `portalPlayers`, `roleAt`, `whoWantsHim`, `destinations` |
 | `lib/dynasty.mjs` | Read layer: every field read once in `Dynasty.load` (save trap, `CLAUDE.md`); teams, players, boards, offers, indexes | `Dynasty`, `openFranchise`, `NO_TEAM` (255), `ZERO`, `nextClass`, `classRank`, `GRADES`, `gradeValue` |
 | `lib/stage.mjs` | Stage from `SeasonInfo` (§4.2) | `readStage` |
 | `lib/settings.mjs` | Tuning values: `DEFAULTS` (every tuning key commented). No user team; `testSavesTeam` (no default; Kansas in `settings.json`) names it for the `tools/` scripts. `settings.json` overrides key by key at every level; lists replace whole; a missing `settings.json` is written from `DEFAULTS` | `DEFAULTS`, `loadSettings` |
@@ -41,13 +41,12 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 | `lib/signing-day.mjs` | Signing Day plan: recruit cleanup, then placement | `planRecruitCleanup`, `planPlacement`, `BOARD_SLOTS` (35), `keepValue`, `isProtected` |
 | `lib/roster-edits.mjs` | Save writer (§4.4) | `RosterEdits`, `changedRecords`, `COMMIT_INFLUENCE_BONUS` (10) |
 | `lib/safe-save.mjs` | Backup, write, verify, replace (§4.4) | `safeSave`, `backupSave`, `BACKUP_DIR_NAME` (`TTT Backups`) |
-| `lib/draft-lock.mjs` | Draft lock (Players Leaving): only players out of eligibility may leave early for the NFL | `planDraftLock`, `applyDraftLock` |
 | `lib/gui-plan.mjs` | The GUI's Plan, locks file, saves list, team art | `GUI-PLAN.md` §4.3 |
 | `lib/C27_486_1.gz` | `madden-franchise` schema 486.1 for CFB 27 | |
 
 ### 4.4 Save writes
 - "Board" below = a school's Signing Day board, `Team.CommittedPlayers` (`BOARD_SLOTS` 35; read into `d.boardTeamByPlayerRef`), not its `RecruitingBoard`.
-- Only two writers: `RosterEdits` (`lib/roster-edits.mjs`, through `session.edits()`) and `applyDraftLock` (`lib/draft-lock.mjs`). `RosterEdits` logs every field it writes (`writes`); `applyDraftLock` writes records directly (not in `writes`).
+- The only writer: `RosterEdits` (`lib/roster-edits.mjs`, through `session.edits()`). It logs every field it writes (`writes`).
 - Every `RosterEdits` method is proven in-game. `CLAUDE.md`: change these formulas only with an in-game re-test.
 
 | Edit | Writes | Used by |
@@ -56,7 +55,6 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 | `unsignRecruit(p)` | `Top10`, 0 offers, off the school's board | Signing Day |
 | `cutPlayer(p)` | `TeamIndex` 255, `PrevTeamIndex` = his school, off its roster list and every depth chart slot; the game deletes him at the rollover (in-game check, git `a9ebb41`) | Signing Day |
 | `movePlayer(p, t)` | The cut, then `TeamIndex` = the new school and onto its roster list; left off its depth chart | Signing Day |
-| `applyDraftLock` | Players with early-draft (`EarlyNFL_*`) rows who are not out of eligibility (Senior not redshirting), not on the user team and not already all Staying: every such row `LeaveStatus` = `Staying`, `PersuadeAttempts` ≥ 1 (what the game writes on a persuade) | `tools/step2-test.mjs` only (not in the GUI) |
 
 - `applySigningDay` order: un-sign (frees board slots), cuts and moves, commits.
 - Save (`session.save()` → `lib/safe-save.mjs` `safeSave`):
@@ -65,13 +63,12 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
   3. `Session.verifySaved`: reopens; same stage; same named-player count; when `RosterEdits` made edits, every written field reads back and no record changed that no edit wrote (byte compare with the backup, `changedRecords`).
   4. Rename the temp file over the original.
 
-  If the backup's SHA-1 check fails, the backup is deleted and nothing is written. On any later failure the original is unchanged and the temp file deleted; the backup stays. After a draft lock, `<name>__<YYYY-MM-DD_HHMMSS>.draft-lock.json` beside the backup records who was locked.
+  If the backup's SHA-1 check fails, the backup is deleted and nothing is written. On any later failure the original is unchanged and the temp file deleted; the backup stays.
 
 ### 4.5 Tools and docs
 Usage is in each file's first lines.
 - Read-only reports: `capacity-check`, `list-journey`, `offers-report`, `step3-report` (depth charts), `step4-report` (team side), `step4b-report` (player side + Top 10), `step5-report` (recruit cleanup).
-- Tests on copies: `step1-test` (open, stage, back up and save each test save in a work folder), `step2-test` (draft lock on a copy, saved).
-- Read-only check: `step2-check` (a `.draft-lock.json` and a later save: are the locked players still on their teams).
+- Tests on copies: `step1-test` (open, stage, back up and save each test save in a work folder).
 - `extract-ratings-model`: one-time; writes `lib/data/ratings-model.json` from Maxi's Dynasty Progression Monitor & Planner page.
 - `gui-mockup-data` (`GUI-PLAN.md` §8.1); `copy-art` (`GUI-PLAN.md` §2.7; Tom's PC).
 
