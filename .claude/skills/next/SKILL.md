@@ -7,7 +7,7 @@ disable-model-invocation: true
 Tom typed `/next` to start a new chat. One task per chat. Be token-efficient.
 
 1. **Branch.** Cloud: work on this session's designated branch; if it doesn't exist yet, create it from `main`. Tom's PC: create `claude/<short-task-name>` from `main`. If the branch is behind `main`, merge `main` in first.
-2. **Read only what you need.** `CLAUDE.md` is already loaded. In `PLAN.md` read "Where we are and what's next" and "Task list". Read other sections, code or the walkthrough page only where the task needs them.
+2. **Read only what you need.** `CLAUDE.md` is already loaded. In `PLAN.md` read "Where we are and what's next" and "Task list". Read other sections or code only where the task needs them.
 3. **Take the top task that isn't done** in "Task list" and has no `(builder: …)` tag (a builder session is on it). Reply to Tom in plain words, short:
    - the task in one or two sentences, and why it's next;
    - exactly what you'll change (files, settings, screens) and what you won't;

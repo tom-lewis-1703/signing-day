@@ -16,9 +16,8 @@ One chat per task. `[ ]` open, `[x]` done.
 ## 3. Open questions for Tom
 1. **Draft lock isn't in the GUI.** Only `tools/step2-test.mjs` applies it (`Session.applyDraftLock`, on a work copy); `Session.open` runs `planDraftLock` read-only for its `draftCheck` counts; the GUI refuses a Players Leaving save. Intended?
 2. **Stale code comments** (a code task; these docs follow git history): `lib/roster-edits.mjs` line 2 calls `movePlayer` "not yet proven", but it was proven in-game (§4.4); `lib/signing-day.mjs` line 1 says "writing comes later", but `Session.applySigningDay` writes the plan; `lib/stage.mjs` `action` and `buildStep` labels are stale and unused.
-3. **Walkthrough page out of date:** `docs/ttt-internals.html` line 454 says prestige counts only if he'd start, rotate or has a path to start; since git `17c12de`, `lib/destinations.mjs` counts it whatever his role. Its weekly-commit parts describe the removed portal-week mode (§5). Update the page (and republish) at the next `/handoff`?
-4. **Keeping §4 current:** §4 is now the home of commands, files, exports, save writes and baseline numbers, but `/handoff` step 3 sends a changed "file, command, setting behavior or save fact" to `CLAUDE.md`. Point the skill and the brief template's Finish at `PLAN.md` §4 as well?
-5. **GUI:** `GUI-PLAN.md` §9.7 (player card) and §10 Q1–4 (built GUI vs spec, code defects).
+3. **Keeping §4 current:** §4 is now the home of commands, files, exports, save writes and baseline numbers, but `/handoff` step 3 sends a changed "file, command, setting behavior or save fact" to `CLAUDE.md`. Point the skill and the brief template's Finish at `PLAN.md` §4 as well?
+4. **GUI:** `GUI-PLAN.md` §9.7 (player card) and §10 Q1–4 (built GUI vs spec, code defects).
 
 ## 4. What's built
 
@@ -81,7 +80,6 @@ Usage is in each file's first lines.
 - Read-only check: `step2-check` (a `.draft-lock.json` and a later save: are the locked players still on their teams).
 - `extract-ratings-model`: one-time; writes `lib/data/ratings-model.json` from Maxi's Dynasty Progression Monitor & Planner page.
 - `gui-mockup-data` (`GUI-PLAN.md` §8.1); `copy-art` (`GUI-PLAN.md` §2.7; Tom's PC).
-- `docs/ttt-internals.html`: the rule walkthrough page (published); `/handoff` updates and republishes it when a rule changes.
 
 ### 4.6 Baseline numbers
 Stock `test_saves/DYNASTY-SIGNINGDAYCOPY` (copy), user team Kansas, no GUI locks, `settings.json` as of this commit (a settings change moves them):
