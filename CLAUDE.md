@@ -14,6 +14,7 @@ Docs: `PLAN.md` (status, task list, what's built), `GUI-PLAN.md` (GUI spec). Cha
 - Before acting, list exactly what you'll do and wait for Tom's "go". Do only that, then stop and show the result.
 - No extras; don't start the next step unprompted.
 - If Tom's idea, decision or code has a mistake or a better alternative, say so right away, briefly and with the reason. Don't wait to be asked.
+- Docs (`PLAN.md`, `GUI-PLAN.md`, `CLAUDE.md`) hold only what an AI needs to work: current facts, rules, open tasks and decisions. No history, proof write-ups or answered questions; git has them.
 
 ## Hard rules
 

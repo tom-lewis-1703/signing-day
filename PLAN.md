@@ -4,14 +4,10 @@
 
 ## 1. Where we are and what's next
 - On `main`: the Signing Day GUI `node gui.mjs` (spec `GUI-PLAN.md` §0–8), the only way to edit a save. It runs Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
-- Portal-week mode removed and the `Kansas` default dropped (git `0593958`): on fresh copies of `DYNASTY-SIGNINGDAYCOPY` the Signing Day plan, every field write and the GUI `/api/plan` are identical to before (only the always-0 `sign unsigned commits` counter is gone); `DYNASTY-WEEK2COPY` and a `settings.json` without `userTeam` are refused in one line.
-- GUI only (hub edit): `ttt.mjs` deleted; the GUI no longer pre-fills a team from `settings.json` (pick per save, remembered in `gui-state.json`); `settings.json` `userTeam` is now `testSavesTeam`, read only when `Session.open` gets no team (the `tools/` scripts); the always-0 `signed` summary counter and the `[ SIGNED COMMIT ]` IN rows are gone. Fresh copy of `DYNASTY-SIGNINGDAYCOPY`: no suggested team on first open, Kansas picked → §4.6 summary unchanged (Missouri IN 16, OUT 22), remembered on reopen; `tools/step5-report` still runs (Kansas skipped, un-signed 1535).
 - Next: Tom starts working on the GUI. Open GUI questions: `GUI-PLAN.md` §9.7 (player card), §10 Q1–4.
 
 ## 2. Task list
 One chat per task. `[ ]` open, `[x]` done.
-- [x] **GUI only** (hub, small edit): delete `ttt.mjs`; `gui.mjs` stops reading `settings.json` for the team (no pre-fill: pick per save, remembered in `gui-state.json`); rename `settings.json` `userTeam` to `testSavesTeam`, read only by `Session.open` when no team is passed (the `tools/` check scripts, which only run on `test_saves/`, Tom's Kansas dynasty); update `CLAUDE.md` (project line, hard rule), §1, §4 and `GUI-PLAN.md` §3.2/§5 to match. Test on a fresh copy of `DYNASTY-SIGNINGDAYCOPY`: the GUI opens it, Kansas is picked, the counts match §4's baseline; one `tools/` script still runs.
-- [x] **Decide (Tom):** remove the GUI's leftover signed-commit code? Yes; removed with the GUI-only edit.
 
 ## 3. Open questions for Tom
 1. **GUI:** `GUI-PLAN.md` §9.7 (player card) and §10 Q1–4 (built GUI vs spec, code defects).
@@ -21,7 +17,7 @@ One chat per task. `[ ]` open, `[x]` done.
 ### 4.1 Commands
 | Command | Does |
 |---|---|
-| `node gui.mjs [--no-open]` | Signing Day GUI (the only save editor; the CLI `ttt.mjs` was removed): `GUI-PLAN.md`. The user team is picked per save. |
+| `node gui.mjs [--no-open]` | Signing Day GUI (the only save editor): `GUI-PLAN.md`. The user team is picked per save. |
 | `node tools/<name>.mjs …` | Reports and test helpers: §4.5. |
 
 Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3.1; `sharp` 0.35.5 (devDependency, only `tools/copy-art.mjs`).
@@ -51,7 +47,7 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 ### 4.4 Save writes
 - "Board" below = a school's Signing Day board, `Team.CommittedPlayers` (`BOARD_SLOTS` 35; read into `d.boardTeamByPlayerRef`), not its `RecruitingBoard`.
 - Only two writers: `RosterEdits` (`lib/roster-edits.mjs`, through `session.edits()`) and `applyDraftLock` (`lib/draft-lock.mjs`). `RosterEdits` refuses the user team and logs every field it writes (`writes`); `applyDraftLock` writes records directly (not in `writes`).
-- Every `RosterEdits` method is proven in-game (git `a9ebb41`, `bc0083a`, `5aa36fe`). `CLAUDE.md`: change these formulas only with an in-game re-test.
+- Every `RosterEdits` method is proven in-game. `CLAUDE.md`: change these formulas only with an in-game re-test.
 
 | Edit | Writes | Used by |
 |---|---|---|
@@ -59,7 +55,7 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 | `unsignRecruit(p)` | `Top10`, 0 offers, off the school's board | Signing Day |
 | `cutPlayer(p)` | `TeamIndex` 255, `PrevTeamIndex` = his school, off its roster list and every depth chart slot; the game deletes him at the rollover (in-game check, git `a9ebb41`) | Signing Day |
 | `movePlayer(p, t)` | The cut, then `TeamIndex` = the new school and onto its roster list; left off its depth chart | Signing Day |
-| `applyDraftLock` (built, signed off; git `5aa36fe` `PLAN.md`) | Players with early-draft (`EarlyNFL_*`) rows who are not out of eligibility (Senior not redshirting), not on the user team and not already all Staying: every such row `LeaveStatus` = `Staying`, `PersuadeAttempts` ≥ 1 (what the game writes on a persuade) | `tools/step2-test.mjs` only (Tom: not in the GUI) |
+| `applyDraftLock` | Players with early-draft (`EarlyNFL_*`) rows who are not out of eligibility (Senior not redshirting), not on the user team and not already all Staying: every such row `LeaveStatus` = `Staying`, `PersuadeAttempts` ≥ 1 (what the game writes on a persuade) | `tools/step2-test.mjs` only (not in the GUI) |
 
 - `applySigningDay` order: un-sign (frees board slots), cuts and moves, commits.
 - Save (`session.save()` → `lib/safe-save.mjs` `safeSave`):
