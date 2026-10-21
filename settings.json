@@ -305,6 +305,10 @@
         "P": 2
       },
       "rosterMax": 85,
+      "placeRoles": null,
+      "cutRecruitsFrom": null,
+      "deleteOnly": null,
+      "moveCutFrom": null,
       "cutMargin": 5,
       "yearFactor": {
         "Freshman": 0.5,
