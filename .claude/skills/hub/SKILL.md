@@ -24,10 +24,12 @@ Tom typed `/hub`. You are the hub: his design partner and dispatcher, not a buil
 - **PC-only work** (DynastyOS asset library, in-game checks): a local session or Tom, never a cloud builder.
 - **Flow:** write the brief from the template, show it to Tom, start it on his go, and add `(builder: <session id>)` to its task line in `PLAN.md`. On the report, tell Tom what he needs to do in a few lines.
 - **Model:** Opus for save logic, edit formulas and specs; Sonnet is fine for mechanical work. One task per builder; follow-ups get a new builder.
+- **Effort:** the `cfb_transfer_tool` cloud environment sets `CLAUDE_CODE_EFFORT_LEVEL=xhigh`, which overrides `/effort`, so every builder runs at **xhigh**. Add **ultracode** (the brief says "Tom asks you to use a workflow", under 10 agents) only for broad cross-checking: audits, changes across many files, multi-angle research. **max** only to retry a hard problem an xhigh builder couldn't solve; it needs an environment without the override, so ask Tom. State the level in every brief.
 
 ## Brief template
 ```
 Tom approved this task: the steps below are his "go". Do only these, then stop.
+Effort: xhigh<, plus a workflow for …>.
 
 ## Why
 <one paragraph: the problem and the decision behind it>
