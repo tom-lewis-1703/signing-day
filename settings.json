@@ -211,6 +211,11 @@
       "mult": 0.25
     },
     "newcomerUpgrade": 4,
+    "newcomerLockAtLevel": true,
+    "lockBreak": {
+      "upgrade": 8,
+      "positionRank": 5
+    },
     "transferLimit": {
       "extra": 1
     }
@@ -318,5 +323,24 @@
         "Buried"
       ]
     }
+  },
+  "weekly": {
+    "pace": {
+      "week-1": 0,
+      "week-2": 0.2,
+      "week-3": 0.4,
+      "week-4": 0.7
+    },
+    "weights": {
+      "favorite": 1,
+      "rank": 2,
+      "offer": 1
+    },
+    "userTopN": 3,
+    "maxSpot": 10,
+    "softLimits": true,
+    "noStopgaps": true,
+    "baseChance": 0.1,
+    "listsFrom": "week-2"
   }
 }
