@@ -64,6 +64,9 @@ const statusTag = s => s ? `<span class="tag ${esc(s)}">[ ${esc(s)} ]</span>` : 
 // Roster next season, before → after the plan.
 const roster = (before, after, large = false) => `<span class="roster${large ? " large" : ""}" aria-label="Roster ${before} before, ${after} after">` +
   `<span class="muted">${before}</span> → <b>${after}</b></span>`;
+// Fixed column widths (px, or "n%" of the table; null = shares the rest), so columns never move
+// with sorting, filters or the team shown.
+const cols = widths => `<colgroup>${widths.map(w => w == null ? "<col>" : `<col style="width:${typeof w === "number" ? `${w}px` : w}">`).join("")}</colgroup>`;
 const btn = (text, attrs = "", cls = "", ic = "") => `<button type="button" class="btn ${cls}" ${attrs}>${ic ? icon(ic) : ""}${esc(text)}</button>`;
 const empty = (ic, sentence, button) => `<div class="empty">${icon(ic, true)}<p>${esc(sentence)}</p>${button}</div>`;
 const fmtTime = iso => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -118,7 +121,7 @@ function shell(ui, active, crumbs, body) {
 function startView(ui) {
   const saves = ui.saves || [];
   const dir = saves[0]?.path.replace(/[\\/][^\\/]*$/, "") ?? "";
-  const list = saves.length ? `<div class="table-wrap"><table>
+  const list = saves.length ? `<div class="table-wrap"><table>${cols([null, 240])}
       <thead><tr><th scope="col">Name</th><th scope="col" class="num">Modified</th></tr></thead>
       <tbody>${saves.map(s => `<tr class="link${ui.opened?.path === s.path ? " selected" : ""}" data-action="open-save" data-path="${esc(s.path)}">
         <td class="name"><a href="#/start" data-action="open-save" data-path="${esc(s.path)}">${esc(s.name)}</a></td><td class="num">${esc(fmtTime(s.modified))}</td></tr>`).join("")}</tbody>
@@ -173,8 +176,9 @@ function teamsView(ui) {
   const rows = listTeams(teams, f);
   const tabs = TEAM_TABS.map(([id, text]) => `<button type="button" class="tab${f.tab === id ? " active" : ""}" role="tab" aria-selected="${f.tab === id}" data-action="teams-tab" data-tab="${id}">${text} <span class="n">${listTeams(teams, { ...f, q: "", chips: [] }, id).length}</span></button>`).join("");
   const chips = CHIPS.map(([id, text]) => `<button type="button" class="chip" aria-pressed="${f.chips.includes(id)}" data-action="chip" data-chip="${id}">${esc(text)}</button>`).join("");
-  const th = (key, text, num = false) => `<th scope="col" class="${num ? "num" : ""}" aria-sort="${f.sort === key ? (f.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-action="sort" data-sort="${key}">${esc(text)}${f.sort === key ? `<span class="dir" aria-hidden="true">${f.dir > 0 ? "▲" : "▼"}</span>` : ""}</button></th>`;
-  const table = rows.length ? `<div class="table-wrap"><table>
+  // The sort arrow's space is kept in every header (hidden when not sorted), so labels never shift.
+  const th = (key, text, num = false) => `<th scope="col" class="${num ? "num" : ""}" aria-sort="${f.sort === key ? (f.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-action="sort" data-sort="${key}">${esc(text)}<span class="dir${f.sort === key ? "" : " off"}" aria-hidden="true">${f.sort === key && f.dir > 0 ? "▲" : "▼"}</span></button></th>`;
+  const table = rows.length ? `<div class="table-wrap"><table>${cols([66, "30%", "10%", "14%", "8%", "8%", "10%", null])}
     <thead><tr><th scope="col"><span class="sr">Logo</span></th>${th("name", "Team")}${th("prestige", "Prestige", true)}${th("roster", "Roster", true)}${th("in", "In", true)}${th("out", "Out", true)}${th("deleted", "Deleted", true)}${th("status", "Status")}</tr></thead>
     <tbody>${rows.map(t => `<tr class="link" data-href="#/team/${t.index}">
       <td class="tile-cell">${tile(t)}</td><td class="name"><a href="#/team/${t.index}">${esc(t.name)}</a></td>
@@ -200,13 +204,13 @@ function teamView(ui, t, nav) {
     : r.result === "Deleted" ? `<span class="res out">${icon("trash")}Deleted</span>` : `<span class="res unsigned">${icon("arrow-up-circle")}Un-signed</span>`;
   const panel = (cls, ic, title, n, hint, body) => `<section class="panel ${cls}" aria-label="${esc(title)}"><header>${icon(ic)}<h2>${esc(title)}</h2><span class="n">${n}</span>${hint ? `<span class="hint">${esc(hint)}</span>` : ""}</header>${body}</section>`;
 
-  const inBody = t.in.length ? `<table class="actions-table">${head([["Player"], ["Pos"], ["OVR", 1], ["From"], ["Role here"]])}<tbody>${t.in.map(r =>
+  const inBody = t.in.length ? `<table class="actions-table">${cols([null, 84, 72, 230, 150, 130])}${head([["Player"], ["Pos"], ["OVR", 1], ["From"], ["Role here"]])}<tbody>${t.in.map(r =>
       `<tr>${player(r, r.kind === "signed" ? ` <span class="tag SIGNED">[ SIGNED COMMIT ]</span>` : "")}<td>${esc(r.from)}</td><td>${esc(r.role ?? "—")}</td><td class="act">${r.kind === "signed" ? "" : undo(r, "in")}</td></tr>`).join("")}</tbody></table>`
     : `<p class="none">No transfers placed here.</p>`;
-  const outBody = t.out.length ? `<table class="actions-table">${head([["Player"], ["Pos"], ["OVR", 1], ["Result"], ["Reason"]])}<tbody>${t.out.map(r =>
+  const outBody = t.out.length ? `<table class="actions-table">${cols([240, 84, 64, 280, null, 130])}${head([["Player"], ["Pos"], ["OVR", 1], ["Result"], ["Reason"]])}<tbody>${t.out.map(r =>
       `<tr>${player(r, r.kind === "Recruit" ? ` <span class="muted">recruit</span>` : "")}<td>${result(r)}</td><td class="muted wrap">${esc(r.reason)}</td><td class="act">${undo(r, "out")}</td></tr>`).join("")}</tbody></table>`
     : `<p class="none">Nobody leaves this team.</p>`;
-  const keptBody = t.kept.length ? `<table class="actions-table">${head([["Player"], ["Pos"], ["OVR", 1], ["Undone"], ["Now"]])}<tbody>${t.kept.map(r =>
+  const keptBody = t.kept.length ? `<table class="actions-table">${cols([null, 84, 72, 300, 360, 150])}${head([["Player"], ["Pos"], ["OVR", 1], ["Undone"], ["Now"]])}<tbody>${t.kept.map(r =>
       `<tr>${player(r)}<td><span class="tag KEPT">[ KEPT ]</span> ${esc(r.undone)}</td><td>${esc(r.now)}</td><td class="act">${btn("Restore", `data-action="restore" data-player="${r.playerIndex}" data-team="${t.index}"${dis}`, "small", "arrow-forward-up")}</td></tr>`).join("")}</tbody></table>`
     : `<p class="none">Nothing undone at this team. Undo a move above and it shows here.</p>`;
 
