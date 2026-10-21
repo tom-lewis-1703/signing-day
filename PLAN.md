@@ -5,11 +5,12 @@
 ## 1. Where we are and what's next
 - On `main`: the CLI `node ttt.mjs "<save copy>"` (Signing Day: the full build; a portal-week save is refused) and the Signing Day GUI `node gui.mjs` (spec `GUI-PLAN.md` §0–8). Both run Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
 - Portal-week mode removed and the `Kansas` default dropped (git `0593958`): on fresh copies of `DYNASTY-SIGNINGDAYCOPY` the Signing Day plan, every field write and the GUI `/api/plan` are identical to before (only the always-0 `sign unsigned commits` counter is gone); `DYNASTY-WEEK2COPY` and a `settings.json` without `userTeam` are refused in one line.
-- Next: no task is set; ask Tom.
+- Next: Tom decided the tool is GUI only (the CLI is retired); the hub does the first task below itself as a small edit.
 
 ## 2. Task list
 One chat per task. `[ ]` open, `[x]` done.
-- None open.
+- [ ] **GUI only** (hub, small edit): delete `ttt.mjs`; `gui.mjs` stops reading `settings.json` for the team (no pre-fill: pick per save, remembered in `gui-state.json`); rename `settings.json` `userTeam` to `testSavesTeam`, read only by `Session.open` when no team is passed (the `tools/` check scripts, which only run on `test_saves/`, Tom's Kansas dynasty); update `CLAUDE.md` (project line, hard rule), §1, §4 and `GUI-PLAN.md` §3.2/§5 to match. Test on a fresh copy of `DYNASTY-SIGNINGDAYCOPY`: the GUI opens it, Kansas is picked, the counts match §4's baseline; one `tools/` script still runs.
+- [ ] **Decide (Tom):** remove the GUI's leftover signed-commit code (the `signed` summary counter, always 0 now, and the `[ SIGNED COMMIT ]` row)? If yes, the hub does it as a small edit.
 
 ## 3. Open questions for Tom
 1. **Draft lock isn't in `ttt.mjs` or the GUI.** Only `tools/step2-test.mjs` applies it (`Session.applyDraftLock`, on a work copy); `Session.open` runs `planDraftLock` read-only for its `draftCheck` counts; `ttt.mjs` prints `No action at this stage.` at Players Leaving. Intended?
