@@ -188,9 +188,9 @@ Line height 1.5.
 - Open decisions, for example the Signing Day defaults in `settings.json` → `signingDay` (`recruitCleanup.underOverall`; `placement.placeRoles`, `placement.cutRecruitsFrom`, `placement.deleteOnly`, `placement.moveCutFrom`); don't change them.
 - `ttt.mjs` stays as a fallback, unchanged.
 
-## 10. Player card (planned; build only after Tom's "go")
+## 10. Player card (not built yet)
 
-Click a player in a team's IN, OUT or KEPT rows (S3) and a card about him opens, with his portrait. Inspiration (Tom's note in `PLAN.md`): The Ringer's NBA Top 100 card, as inspiration only (not its font, voting or photo breaking out of the box): a big name headline with an OVR badge, then small panels. §0–§2 apply as they are (black terminal look, tokens, type sizes, nothing under 14px).
+Click a player in a team's IN, OUT or KEPT rows (S3) and a card about him opens, with his portrait. Inspiration (Tom): The Ringer's NBA Top 100 card, as inspiration only (not its font, voting or photo breaking out of the box): a big name headline with an OVR badge, then small panels. §0–§2 apply as they are (black terminal look, tokens, type sizes, nothing under 14px).
 
 ### 10.1 Portraits
 
