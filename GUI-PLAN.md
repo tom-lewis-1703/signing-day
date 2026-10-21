@@ -4,7 +4,7 @@ Spec of the Signing Day GUI (`node gui.mjs`). §0–8 are **Built** (each part n
 
 ## 0. Constraints
 1. Built for Tom's screen: **2560×1440, 27", Windows scaling 100%, browser full screen.** The sizes in §2 are tuned for it; nothing on screen under 14px.
-2. The GUI doesn't change placement rules. Its only `lib/` changes outside `lib/gui-plan.mjs` are the locks (§6) and reads (§7); the player card adds Player reads and the output-only snapshot (§9.5, Tom OK'd).
+2. The GUI doesn't change placement rules. Its only `lib/` changes outside `lib/gui-plan.mjs` are the locks (§6) and reads (§7); the player card adds Player reads and the output-only snapshot (§9.5).
 3. Works for any dynasty: nothing about one school is hard-coded. The user team is picked per save (§3.2); Signing Day leaves it out.
 
 ## 1. Product (Built)
@@ -316,7 +316,7 @@ A head name that fails `^[A-Za-z0-9_-]{1,32}$` counts as missing. Cases 1 and 2 
 | Body line | `#12 · 5'10" · 167 lb · Baltimore, Maryland` | `JerseyNum`, `Height` (inches), `Weight` (stored as lb − 160), `PLYR_HOME_TOWN`, `p.homeState` | 4 fields |
 | Move strip | `[logo] Oregon State → [logo] Missouri`, StatusTag, role there (`Starter · WR2`) | raw plan entry: `from`, `team`, `role`, `rank` (his place in the room) | |
 | Why | one sentence (§9.3) | raw plan entries, locks | |
-| Info | kind (Transfer, HS recruit, JUCO recruit, Returning); ranks (`#49 overall · WR #9`); his undos (`You undid: transfer in at Missouri`). No NIL: `BaseNILValue`'s unit is unknown | `p.recruitClass`, `p.nationalRank`, `p.positionRank`, the locks | |
+| Info | kind (Transfer, HS recruit, JUCO recruit, Returning); ranks (`#49 overall · WR #9`); his undos (`You undid: transfer in at Missouri`) | `p.recruitClass`, `p.nationalRank`, `p.positionRank`, the locks | |
 | Pitch | his pitch's name; his dealbreaker and pitch categories, each an icon, label and the landing school's grade; dealbreaker met or not | `p.dealbreaker`, `PITCHES[p.pitch]`, `categoryGrade()` (`lib/destinations.mjs`); met from the snapshot | |
 | Ratings | `OVR 87 → MAX 94`; six skill groups, each its name, `LV 15/16` and its ratings with the game's short labels (`SPD 93 ACC 95 STA 90 KR 45`) | `d.skillGroupDetail(p)` | |
 | Top 5 | his list when his turn came: rank, TeamMark, school, `HIS` (player score), `THEIRS` (team score ÷ 2, so 0–100 as in the combined score), `MATCH` (combined), role there. The landing school is tagged `[ HERE ]`, as a 6th row when it isn't in the top 5 (Best fit) | snapshot from the planner (§9.5) | |
@@ -392,7 +392,7 @@ With no `forName` (the 85 trim, a full board), the reason stands alone: `Cut at 
 - **`lib/signing-day.mjs`** (`planPlacement`), output only:
   - Each placed, moved and unplaced entry, and each re-offered cut, keeps the list the planner already computed for him: `top5` (from `w.top10`) and `here` (the landing school's row from `w.teams`, with its list rank or null).
   - Row fields: `teamIndex, team, playerScore, baseScore, combined, role, meets, dealbreakerGrade, pitchGrades`.
-  - No rule change; the rest of the plan stays identical. Besides the reads, this is the one `lib/` change outside §6/§7 (Tom OK'd).
+  - No rule change; the rest of the plan stays identical. Besides the reads, this is the one `lib/` change outside §6/§7.
   - Why: without it, the card can only show his list from before placement, which disagrees with the plan. Jesse Legree's top 5 before placement (`destinations()` on the unchanged league) is Ole Miss, Colorado, Stanford, Texas Tech, TCU (Missouri 11th), but when his turn came Missouri was #1 and he was placed there.
 - **`lib/gui-plan.mjs`:** `playerCard(session, raw, state, playerIndex)` returns `PlayerCard`; `whyLine(…)` (§9.3); `playerPortrait(head)` (§9.1 lookup).
 - **`gui.mjs`:** `GET /api/player?index=<playerIndex>` returns `PlayerCard`, with a 409 when there's no plan and a 404 for an unknown player.
