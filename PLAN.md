@@ -4,13 +4,13 @@
 
 ## 1. Where we are and what's next
 - On `main`: the Signing Day GUI `node gui.mjs` (spec `GUI-PLAN.md` §0–8), the only way to edit a save. It runs Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
-- Next: Tom starts working on the GUI. Open GUI questions: `GUI-PLAN.md` §9.7 (player card), §10 Q1–4.
+- Next: Tom starts working on the GUI. Open GUI questions: `GUI-PLAN.md` §9.7 (player card).
 
 ## 2. Task list
 One chat per task. `[ ]` open, `[x]` done.
 
 ## 3. Open questions for Tom
-1. **GUI:** `GUI-PLAN.md` §9.7 (player card) and §10 Q1–4 (built GUI vs spec, code defects).
+1. **GUI:** `GUI-PLAN.md` §9.7 (player card).
 
 ## 4. What's built
 
@@ -46,7 +46,7 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 
 ### 4.4 Save writes
 - "Board" below = a school's Signing Day board, `Team.CommittedPlayers` (`BOARD_SLOTS` 35; read into `d.boardTeamByPlayerRef`), not its `RecruitingBoard`.
-- Only two writers: `RosterEdits` (`lib/roster-edits.mjs`, through `session.edits()`) and `applyDraftLock` (`lib/draft-lock.mjs`). `RosterEdits` refuses the user team and logs every field it writes (`writes`); `applyDraftLock` writes records directly (not in `writes`).
+- Only two writers: `RosterEdits` (`lib/roster-edits.mjs`, through `session.edits()`) and `applyDraftLock` (`lib/draft-lock.mjs`). `RosterEdits` logs every field it writes (`writes`); `applyDraftLock` writes records directly (not in `writes`).
 - Every `RosterEdits` method is proven in-game. `CLAUDE.md`: change these formulas only with an in-game re-test.
 
 | Edit | Writes | Used by |

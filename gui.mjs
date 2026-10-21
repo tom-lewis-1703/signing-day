@@ -72,6 +72,7 @@ const api = {
     requirePlan();
     const p = Number(playerIndex), t = Number(teamIndex);
     if (!session.d.playerByIndex.has(p)) throw new HttpError(400, "Unknown player.");
+    if (kind === "in" && !session.d.teams.has(t)) throw new HttpError(400, "Unknown team.");
     if (kind === "in") { if (!state.notAt.has(p)) state.notAt.set(p, new Set()); state.notAt.get(p).add(t); }
     else if (kind === "out") state.keep.add(p);
     else throw new HttpError(400, 'kind must be "in" or "out".');

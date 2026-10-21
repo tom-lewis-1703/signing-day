@@ -224,7 +224,7 @@ th .dir { color: var(--text); }
 th .dir.off { visibility: hidden; }
 td { height: 46px; padding: 0 var(--cell); border-bottom: 1px solid var(--divider); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 td.act { overflow: visible; }
-td.num { font-size: 17px; }
+td.num { font-size: 17px; font-weight: 500; }
 tbody tr:last-child td { border-bottom: 0; }
 tbody tr:hover { background: var(--surface-2); }
 tr.link { cursor: pointer; }
