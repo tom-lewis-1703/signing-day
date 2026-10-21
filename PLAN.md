@@ -21,7 +21,7 @@
 5. Build the sim into the tool; review before Save; check script; Tom's full offseason run in-game.
 
 ## Later / undecided
-- GUI player card (click any player): The Ringer's NBA Top 100 card as inspiration only (not its font, voting or photo breaking out of the box). Big name headline with an OVR badge; small panels: info (from → to, role, home state, NIL), ratings (OVR → max, key ratings), traits (dealbreaker and pitch categories as icons with the new school's grades), his top 5 schools' interest, and a one-line "why he landed here". No photos in the save: monogram or jersey number instead.
+- GUI player card (click a player in a team's IN / OUT / KEPT rows): planned in `GUI-PLAN.md` §10. The Ringer's NBA Top 100 card as inspiration only; portraits from the DynastyOS library by each player's head asset (`GenericHeadAssetName`), monogram fallback. Waiting on Tom's answers (§10.7) and "go".
 - Weekly commits and list updates: likely dropped with the sim.
 - AI-run CPU coaches as a layer on top of the sim.
 - Position limits (the game over-recruits RB and WR).
