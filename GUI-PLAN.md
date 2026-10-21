@@ -23,6 +23,8 @@ A simple window to run the Signing Day plan on a save, **review every CPU team's
 
 ## Screens (with Mobbin references)
 
+Mobbin links need a login, and the Mobbin connector can't open a link directly. To see a reference, use the connector's `search_screens` with the app and screen name (e.g. "Firecrawl activity logs"), then pick the result whose `mobbin_url` matches the link.
+
 **1. Overview**
 - Save name, stage, user team.
 - Big stat cards: transfers placed, dropped, recruits un-signed, players deleted, players moved.
@@ -30,7 +32,7 @@ A simple window to run the Signing Day plan on a save, **review every CPU team's
 - References: [Vapi metrics cards](https://mobbin.com/screens/6998a104-0081-42d3-9147-7a433f6f8c5c) (large numbers in colored cards); [Churnkey "Lifetime Performance"](https://mobbin.com/screens/e8cc072e-76d6-4624-b62d-03b58798af3e) (big numbers with one clear primary button).
 
 **2. Teams list**
-- One row per CPU team: name, prestige, roster before → after, transfers in, players out, and a status badge ("Reviewed" / "Changed").
+- One row per CPU team: name, prestige, roster before → after, transfers in, players out, and a status badge ("Reviewed" / "Changed" / "Re-check": reviewed, but a rebuild changed its moves since).
 - Search box, sort by any column, filter (e.g. "teams with deletions").
 - Click a row to open the team.
 - References: [Twingate resources](https://mobbin.com/screens/8f788643-fe7a-4273-81c2-59186cff8008) (large title, roomy rows, search and filter); [Fresha team members](https://mobbin.com/screens/e43c6445-573d-41e8-a121-dcefe5e92db7) (tall, readable rows).
@@ -51,7 +53,8 @@ A simple window to run the Signing Day plan on a save, **review every CPU team's
 - Undo = a lock: "keep this recruit or player" or "don't place this transfer at this school".
 - The plan is rebuilt with all locks; others may shift. For example, a transfer that's undone may land at his next school or drop out.
 - Needs a small change in `lib/signing-day.mjs`: `planRecruitCleanup` and `planPlacement` accept locks (`keep: Set`, `notAt: Map`).
-- Locks live in the page until Save.
+- After each rebuild the server compares every team's moves with the last plan. A reviewed team whose moves changed loses "Reviewed" and shows "Re-check", so an undo at one school can't slip a change past Tom at another.
+- The server keeps the locks and the reviewed teams in `<save copy>.locks.json` (beside the copy, never inside a save), so a refresh or a closed tab loses nothing. Reopening the same copy loads them; a successful Save deletes the file.
 
 ## Build steps (one per check-in with Tom)
 
@@ -59,7 +62,7 @@ A simple window to run the Signing Day plan on a save, **review every CPU team's
 2. **Server and Overview:** `gui.mjs`, opening a save, the overview cards.
 3. **Teams list.**
 4. **Team review,** read-only.
-5. **Undo:** locks in `signing-day.mjs`, then rebuild.
+5. **Undo:** locks in `signing-day.mjs`, then rebuild, "Re-check" badges, and the locks file.
 6. **Save with confirm.**
 7. **Remove `ttt.mjs`'s Signing Day part,** or keep it as a fallback (Tom decides).
 
