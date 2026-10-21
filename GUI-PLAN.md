@@ -1,11 +1,11 @@
 # GUI-PLAN.md: Signing Day GUI spec
 
-Spec of the Signing Day GUI (`node gui.mjs`). §0–8 are **Built** (each part names its file or function); §9 (player card) is **Planned**; §10 holds the open questions on the built GUI (code vs spec, code defects). When the GUI changes, update its section here in the same commit. Cite as `GUI-PLAN §n.m`. Tasks: `PLAN.md`; rules and save facts: `CLAUDE.md`.
+Spec of the Signing Day GUI (`node gui.mjs`). §0–8 are **Built** (each part names its file or function); §9 (player card) is **Planned**. When the GUI changes, update its section here in the same commit. Cite as `GUI-PLAN §n.m`. Tasks: `PLAN.md`; rules and save facts: `CLAUDE.md`.
 
 ## 0. Constraints
 1. Built for Tom's screen: **2560×1440, 27", Windows scaling 100%, browser full screen.** The sizes in §2 are tuned for it; nothing on screen under 14px.
 2. The GUI doesn't change placement rules. Its only `lib/` changes outside `lib/gui-plan.mjs` are the locks (§6) and reads (§7); the player card would add Player reads and the output-only snapshot (§9.5), and the snapshot needs Tom's OK (§9.7 Q2).
-3. Works for any dynasty: nothing about one school is hard-coded. The user team is picked per save (§3.2) and never changed.
+3. Works for any dynasty: nothing about one school is hard-coded. The user team is picked per save (§3.2); Signing Day leaves it out.
 
 ## 1. Product (Built)
 - Local web GUI to: open any CFB 27 dynasty save, pick the user team, build the Signing Day plan, review every CPU team's moves (in and out), undo single moves, save.
@@ -63,7 +63,7 @@ Both fonts (SIL OFL) are self-hosted as woff2 in `gui/fonts/` (weights 400, 500,
 | Panel title (h2 in a Panel header) | IBM Plex Mono, UPPERCASE, letter-spacing .08em | 20px / 600; its count 20px / 700 |
 | Labels, breadcrumbs, tabs, status tags, chips | IBM Plex Mono, UPPERCASE, letter-spacing .08em | 15px / 600 (column headers 14px) |
 | Menu | IBM Plex Mono, UPPERCASE, letter-spacing .06em | 16px / 500 |
-| Numbers in tables | IBM Plex Mono, `font-variant-numeric: tabular-nums`, left-aligned like every column | 17px / 500 (code renders 400: §10 Q1) |
+| Numbers in tables | IBM Plex Mono, `font-variant-numeric: tabular-nums`, left-aligned like every column | 17px / 500 |
 | Roster before → after | IBM Plex Mono, tabular-nums | 17px / 500, after 700; S3 header 30px |
 | Scoreboard numbers | IBM Plex Mono, in the card's status color with a soft glow (text-shadow 0 0 24px, 35% of the color) | 60px / 700 |
 | Buttons | IBM Plex Sans | 17px / 600, height 46px, padding 0 20px; row buttons (`.btn.small`) 16px, height 38px, padding 0 14px |
@@ -71,7 +71,7 @@ Both fonts (SIL OFL) are self-hosted as woff2 in `gui/fonts/` (weights 400, 500,
 Line height 1.5 (body); h1 1.2, h2 1.3, scoreboard numbers 1.
 
 ### 2.5 Layout and app shell (`views.js` `shell`)
-- Spacing: a 4/8px grid was the plan; the CSS sets spacing per component (6, 10, 14, 18, 22px also occur; §10 Q2). Cards: `--surface`, 1px `--border`, radius 4px, padding 22px, no shadows.
+- Spacing: a 4/8px grid for new work (older CSS also uses 6, 10, 14, 18, 22px). Cards: `--surface`, 1px `--border`, radius 4px, padding 22px, no shadows.
 - Content max-width 2240px, left-aligned in the main column (at 2560: 2560 − 270 sidebar − scroll bar gutter ≈ 2275px, so about 35px stays empty on the right). Min window 1600×900 (`body` min-width and min-height). At 1900px wide or less (`max-width: 1900px`) the review panels stack (§3.5) and `--pad` / `--cell` shrink (§2.2).
 - The page always keeps room for its scroll bar (`html { scrollbar-gutter: stable }`). Only the page scrolls: tables have no scroll box of their own, and each table has fixed column widths (`<colgroup>`, `table-layout: fixed`), so columns never shift with sorting, filters or the team shown.
 - Sidebar: 270px, `--surface`, sticky, full height. Top to bottom: brand (`TTT` mark, "Transfer Tools", "SIGNING DAY"); once a plan exists, the save box (user team's TeamMark and name, save file name); menu `Open save`, `Overview`, `Teams`, `Save…` (the last three greyed out without a plan; `Save…` opens S4). Active menu item: 4px `--accent-2` bar on its left plus an `--accent` tint.
@@ -135,7 +135,7 @@ Tabler Icons (MIT, `gui/icons/LICENSE.txt`), stroke 2.25, 21px (30px in empty st
 ### 3.2 S0 Start
 - **Saves list** (`lib/gui-plan.mjs` `listSaves`): `.../Documents/EA SPORTS College Football 27/saves/` under the home folder (Windows: `%USERPROFILE%`), newest first. Columns: Name, Modified. Only `DYNASTY-…` files (profile and playbook files share the folder); hides `*.bak`, `*.tmp`, `*.json` and the `TTT Backups` folder. The folder of the first save shows above the list (none when there are no saves). Click a save to open it; the open save's row is selected. None: EmptyState "No dynasty saves found in the CFB 27 saves folder." with Refresh.
 - **Other saves:** a text box to paste any path (surrounding double quotes are dropped), plus **Open** (or Enter).
-- **User team:** after a save opens, a dropdown "Your team (never changed)" of every school in the save (sorted by name) picks the user team.
+- **User team:** after a save opens, a dropdown "Your team" of every school in the save (sorted by name) picks the user team.
   - Default: the choice remembered for this save path (`gui-state.json`), else empty. `settings.json` names no team.
   - **Continue** is disabled until a team is picked; it builds the plan and opens S1.
   - The choice (team name) is remembered per save path in `gui-state.json` in the app folder (`{"teams": {"<save path>": "<team name>"}}`).
@@ -143,7 +143,7 @@ Tabler Icons (MIT, `gui/icons/LICENSE.txt`), stroke 2.25, 21px (30px in empty st
 
 ### 3.3 S1 Overview
 - **Scoreboard panel** (`--scoreboard`, dot texture) with five StatCards: `TRANSFERS PLACED`, `DROPPED`, `RECRUITS UN-SIGNED`, `PLAYERS DELETED`, `PLAYERS MOVED` (Plan `summary`, §5.2; hyphens don't break).
-- **Line under it:** the save name, stage and user team (TeamMark and name), "(your team, never changed)".
+- **Line under it:** the save name, stage and user team (TeamMark and name), "(your team)".
 - **ActionBar:** `Review teams` (primary, S2), `Save…` (S4).
 
 ### 3.4 S2 Teams list
@@ -227,12 +227,12 @@ Every row has `playerIndex, name, pos, ovr`.
 
 ### 5.4 Built from `session.signingDayPlan(locks)` (`rawPlan`)
 - Recruit cleanup: `unsign`, `underOverall`.
-- Placement: `placed`, `moved`, `cuts` (`kind`, `fate`, `reason`, `forName`), `unplaced`, `committed` (the game's commits; no `sign` field since portal-week mode was removed, §10 Q5), `teams`.
+- Placement: `placed`, `moved`, `cuts` (`kind`, `fate`, `reason`, `forName`), `unplaced`, `committed` (the game's commits; no `sign` field since portal-week mode was removed), `teams`.
 - Cut `reason`: `<room> cap`, `board full`, `<rosterMax> limit`, `trim to <rosterMax>` (rosterMax 85). `fate`: `Un-signed`, `Moved → <school> (<role>)`, `Deleted`.
 
 ### 5.5 Behavior notes
 - `/api/open` drops the open save and plan first (even for the same file, even if the open then fails); `/api/plan` answers 409 until a team is picked again. After a successful save the server forgets the save too.
-- `/api/undo` doesn't check `teamIndex` (§10 Q3); kind `"out"` ignores it.
+- `/api/undo` kind `"in"` refuses an unknown `teamIndex`; kind `"out"` ignores it.
 - `/api/restore` never fails: an unknown player or one without a lock still rebuilds and rewrites the locks file.
 - `/api/review` doesn't rebuild; any truthy `reviewed` counts as yes.
 - The locks file appears on the first undo, restore or review, not when the team is picked.
@@ -247,12 +247,12 @@ Every row has `playerIndex, name, pos, ovr`.
   - `session.signingDayPlan(locks)` and `session.applySigningDay(locks)` pass them through.
   - With no locks, the results are the same as without the locks argument.
 - **Rebuilds:** a `REVIEWED` team stores its moves (`movesOf`: sorted player indexes in and out); after a rebuild, a reviewed team whose moves changed shows `RE-CHECK`. Only the player indexes count: a row changing from Moved to Deleted, or a new destination or role, leaves it `REVIEWED`.
-- **Persistence:** locks and review states live in `<save>.locks.json` beside the save (never inside it): `{save, keep:[…], notAt:{player:[teams]}, reviewed:{team: moves}}`. It's reloaded when the same save path is opened again, whatever team is picked (its `save` field isn't checked; §10 Q4); unreadable: a console warning and no locks. Deleted after a successful Save.
+- **Persistence:** locks and review states live in `<save>.locks.json` beside the save (never inside it): `{save, keep:[…], notAt:{player:[teams]}, reviewed:{team: moves}}`. It's reloaded when the same save path is opened again, whatever team is picked (its `save` field isn't checked); unreadable: a console warning and no locks. Deleted after a successful Save.
 
 ## 7. Reads and the picked user team (Built)
 - **`lib/dynasty.mjs`:** the Team table's first read includes `TEAM_BACKGROUNDCOLORR`, `…G`, `…B`, `…R2`, `…G2`, `…B2`, exposed as `team.colors`; `ShortName` is exposed as `team.short` (`Mascot_AssetName` is empty for 12 of 138 schools; `ShortName` is always filled and unique).
 - **`lib/session.mjs`:** `open(path, {userTeam})` takes the picked team (name or index), and refuses if it isn't in the save. With no team passed it reads `settings.json` → `testSavesTeam` (only the `tools/` scripts, which run on `test_saves` copies); with neither, it refuses. `Session.peek(path)` reads a save's stage and schools (`{index, name, longName, short, colors}`) for S0.
-  - The planners (`signing-day.mjs`, `destinations.mjs`) look the user team up by name in `settings.userTeam`. So the session keeps `this.settings = {...settings, userTeam: <picked team's name>}` in memory (`settings.json` has no `userTeam`), and every planner protects the picked team; `RosterEdits` gets its index.
+  - The planners (`signing-day.mjs`, `destinations.mjs`) look the user team up by name in `settings.userTeam`. So the session keeps `this.settings = {...settings, userTeam: <picked team's name>}` in memory (`settings.json` has no `userTeam`), and every planner leaves the picked team out.
   - The session remembers the pick, so its own reopen after a failed `applySigningDay` keeps the same team.
 
 ## 8. Mockup and checks
@@ -428,9 +428,3 @@ Named players (a copy of `DYNASTY-SIGNINGDAYCOPY`, user team Kansas, no undos, M
 3. **Extras:** keep jersey number, height, weight and hometown? They're four cheap reads.
 4. **No portrait file:** the blank (as planned) or the monogram?
 5. **Moved: who made room?** A moved player's entry also has `cut` (Jackson Hancock: Rodney Geter at West Virginia). Add "… made room." as for placed players?
-
-## 10. Built GUI vs this spec (open questions for Tom)
-1. **Numbers in tables:** §2.4 says 17px / 500, but `gui/styles.css` `.num` sets no weight, so they render at 400 (the Roster numbers are 500). Fix the CSS or the spec?
-2. **Spacing:** keep the 4/8px grid as the rule for new work, or drop it (§2.5)?
-3. **Undo without `teamIndex` corrupts the locks file** (code defect): `gui.mjs` `/api/undo` with kind `"in"` and no `teamIndex` stores `NaN`, saved as `null`, which reloads as team 0 (the player shows in Air Force's KEPT). The GUI always sends it. Validate it?
-4. **Locks follow the save path, not the team:** picking another user team for the same save reuses its undos and reviews (§6). Intended?

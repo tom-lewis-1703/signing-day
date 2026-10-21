@@ -135,7 +135,7 @@ function startView(ui) {
   else {
     const picked = o.teams.find(t => t.index === ui.picked);
     team = `<div class="kv">${label("File")}<span>${esc(o.fileName)}</span>${label("Stage")}<span>${esc(o.stage.label)}</span></div>
-      <label class="field"><span class="label">Your team (never changed)</span>
+      <label class="field"><span class="label">Your team</span>
         <select class="input" id="user-team" data-input="user-team">
           <option value="">Pick your team…</option>
           ${o.teams.map(t => `<option value="${t.index}"${t.index === ui.picked ? " selected" : ""}>${esc(t.name)}</option>`).join("")}
@@ -166,7 +166,7 @@ function overviewView(ui) {
   <section class="scoreboard" aria-label="Plan totals">
     ${stat("Transfers placed", s.placed, "in")}${stat("Dropped", s.dropped, "warn")}${stat("Recruits un-signed", s.unsigned, "orange")}${stat("Players deleted", s.deleted, "out")}${stat("Players moved", s.moved, "moved")}
   </section>
-  <p class="save-line">${icon("file")}<b>${esc(save.fileName)}</b><span class="sep">|</span><span>${esc(save.stage)}</span><span class="sep">|</span>${tile(userTeam)}<b>${esc(userTeam?.name)}</b><span>(your team, never changed)</span></p>
+  <p class="save-line">${icon("file")}<b>${esc(save.fileName)}</b><span class="sep">|</span><span>${esc(save.stage)}</span><span class="sep">|</span>${tile(userTeam)}<b>${esc(userTeam?.name)}</b><span>(your team)</span></p>
   <div><div class="actionbar"><a class="btn primary" href="#/teams">${icon("users")}Review teams</a>${btn("Save…", 'data-action="save-modal"', "", "device-floppy")}</div></div>`;
 }
 
