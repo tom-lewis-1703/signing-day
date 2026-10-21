@@ -102,10 +102,10 @@ Line height 1.5. Nothing on screen under 16px.
 **S3 Team review.**
 - **Header:** tile, team name, prestige, roster StripedBar (before → after).
 - **Tabs:**
-  - `IN n`: transfers placed here. Columns: player, POS, OVR, from, role here, NIL if any.
+  - `IN n`: transfers placed here, plus signed commits (weekly commits the game didn't sign; the tool signs them so the rollover doesn't delete them), tagged `[ SIGNED COMMIT ]` (`--text-2`). Columns: player, POS, OVR, from, role here, NIL if any.
   - `OUT n`: recruits un-signed, players cut and deleted, players moved away (with destination), each with its reason.
   - `KEPT n`: undone items, each with **Restore**.
-- **Undo:** every IN and OUT row has an **Undo** button.
+- **Undo:** every IN and OUT row has an **Undo** button, except signed commits (undoing one would only get him deleted at the rollover).
 - **Footer ActionBar:** `‹ Previous team` · `Mark reviewed` (primary) · `Next team ›`, in teams-list order.
 
 **S4 Save confirm** (modal over S1, S2 or S3):
@@ -136,7 +136,7 @@ Line height 1.5. Nothing on screen under 16px.
 `Plan` = `{summary:{placed, dropped, unsigned, deleted, moved}, userTeam:{index, name, short, colors}, teams:[{index, name, short, colors, prestige, rosterBefore, rosterAfter, in:[…], out:[…], kept:[…], status}], locks}`.
 - **Build it from** `session.signingDayPlan()`:
   - recruit cleanup: `unsign`;
-  - placement: `placed`, `moved`, `cuts` (`kind`, `fate`, `reason`), `unplaced`, `committed`.
+  - placement: `placed`, `moved`, `cuts` (`kind`, `fate`, `reason`), `unplaced`, `committed` (entries with `sign: true` are the signed commits in that team's IN).
 - **`colors`:** `{primary:"#rrggbb", secondary:"#rrggbb"}`.
 
 ## 6. Undo = locks
@@ -158,11 +158,13 @@ Line height 1.5. Nothing on screen under 16px.
 
 - **`lib/dynasty.mjs`:** add `TEAM_BACKGROUNDCOLORR`, `…G`, `…B`, `…R2`, `…G2`, `…B2` and `Mascot_AssetName` to the Team read list, and expose them as `team.colors` and `team.short`. They must be in the first read; see the `CLAUDE.md` save traps.
 - **`lib/session.mjs`:** `open(path, {userTeam})` takes the picked team name or index and uses it instead of `settings.userTeam` (still refusing if it isn't found).
+  - The planners (`signing-day.mjs`, `destinations.mjs`, `weekly-commits.mjs`) look the user team up by name in `settings.userTeam` themselves. So the session keeps `this.settings = {...settings, userTeam: <picked team's name>}`, and every planner protects the picked team. In memory only; `settings.json` is not changed.
+  - The session remembers the pick, so its own reopen after a failed apply (`applySigningDay`) keeps the same team.
 
 ## 8. Build steps and acceptance
 
 1. **Mockup:** `gui/mockup.html`, static, with real data dumped from a copy of `test_saves/DYNASTY-SIGNINGDAYCOPY`. It shows S0, S1, S2 and S3 (for Missouri), using the final CSS. Screenshot each screen at 1440×900 (Playwright, Chromium at `/opt/pw-browsers` in the cloud). **Stop and show Tom.**
-2. **Server, S0 and S1:** opening a copy plus picking a team shows correct overview counts (they match `ttt.mjs` on the same copy).
+2. **Server, S0 and S1:** opening a copy plus picking the `settings.json` team shows correct overview counts (they match `ttt.mjs` on the same copy). Picking a different team: that team has no moves in the plan, and the `settings.json` team is planned like any CPU team.
 3. **S2:** 137 CPU teams listed; search, tabs, sort and filters work.
 4. **S3 read-only:** Missouri's IN and OUT match the plan.
 5. **Locks:**
@@ -176,5 +178,5 @@ Line height 1.5. Nothing on screen under 16px.
 - How to start it: one line.
 - One screenshot per screen.
 - What was simplified or skipped.
-- Open decisions, for example the Signing Day placement defaults in `settings.json` → `signingDay` (`recruitCleanup.underOverall`, `placeRoles`, `cutRecruitsFrom`, `deleteOnly`, `moveCutFrom`); don't change them.
+- Open decisions, for example the Signing Day defaults in `settings.json` → `signingDay` (`recruitCleanup.underOverall`; `placement.placeRoles`, `placement.cutRecruitsFrom`, `placement.deleteOnly`, `placement.moveCutFrom`); don't change them.
 - `ttt.mjs` stays as a fallback, unchanged.
