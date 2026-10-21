@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+  <title>Tom's Transfer Tools</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <b class="title">Tom's Transfer Tools</b>
+    <nav id="nav">
+      <button data-view="stage" class="active">Stage</button>
+      <button data-view="portal" disabled>Portal</button>
+      <button data-view="teams" disabled>Teams</button>
+      <button data-view="signing" disabled>Signing Day</button>
+    </nav>
+    <span id="fileInfo" class="muted">No save open</span>
+    <span id="pending" class="warn"></span>
+    <button id="openBtn">Open Save…</button>
+    <button id="reopenBtn" hidden>Reopen Last</button>
+    <button id="saveBtn" disabled>Save</button>
+  </header>
+
+  <main>
+    <!-- Stage: save facts, Draft Lock, log -->
+    <section id="v-stage">
+      <p id="empty" class="muted">Open a dynasty save to begin. Opening never changes the file; only Save writes (with a backup first).</p>
+      <div id="stageBody" hidden>
+        <table class="kv" id="facts"></table>
+        <h2>Draft Lock</h2>
+        <p id="dlText"></p>
+        <div class="row"><button id="dlPreview" disabled>Preview</button><button id="dlApply" disabled>Apply</button></div>
+        <p id="dlResult"></p>
+        <div class="cols" id="dlTables"></div>
+      </div>
+      <h2>Log</h2>
+      <pre id="log"></pre>
+    </section>
+
+    <!-- Portal: uncommitted transfers → Top 10 preview -->
+    <section id="v-portal" hidden>
+      <div class="split">
+        <div class="side">
+          <div class="row">
+            <input id="pFilter" placeholder="Name, school, position or min OVR" autocomplete="off">
+            <select id="pRoom"></select>
+          </div>
+          <p id="pCount" class="muted small"></p>
+          <div id="pList"></div>
+        </div>
+        <div>
+          <p id="pEmpty" class="muted">Pick a player on the left to see his Top 10 preview.</p>
+          <table class="kv" id="pSummary"></table>
+          <p id="pRole"></p>
+          <div id="pTop"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teams: league needs list → depth chart -->
+    <section id="v-teams" hidden>
+      <div class="split">
+        <div class="side">
+          <input id="tFilter" placeholder="Filter teams" autocomplete="off">
+          <div id="tList"></div>
+        </div>
+        <div>
+          <h2 id="tTitle"></h2>
+          <p id="tInfo" class="muted"></p>
+          <p id="tNeed"></p>
+          <p id="tRole"></p>
+          <div id="tRooms" class="rooms"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Signing Day: overview tiles that open detail pages (built in app.js) -->
+    <section id="v-signing" hidden>
+      <div id="sdBox"></div>
+    </section>
+  </main>
+
+  <footer id="status" class="muted">Ready.</footer>
+  <script src="app.js"></script>
+</body>
+</html>
