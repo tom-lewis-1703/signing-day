@@ -3,15 +3,15 @@
 import path from "node:path";
 import readline from "node:readline/promises";
 import { Session } from "./lib/session.mjs";
-import { planWeekly, planListUpdates } from "./lib/weekly-commits.mjs";
+import { loadSettings } from "./lib/settings.mjs";
 
 const file = process.argv[2];
 if (!file) throw new Error('Usage: node ttt.mjs "<save copy>"');
 if (path.resolve(file).split(path.sep).includes("test_saves")) throw new Error("Refusing to write into test_saves/; copy the save first.");
+if (!loadSettings().userTeam) { console.log('settings.json has no userTeam: add your team, e.g. "userTeam": "<school name>". Nothing was opened.'); process.exit(1); }
 
 const session = new Session();
 const info = await session.open(file);
-const d = session.d;
 console.log(`${info.fileName} · ${info.stage.label} · user team ${info.userTeam?.name ?? "none"}`);
 
 const top10 = moves => {
@@ -22,19 +22,12 @@ const top10 = moves => {
 
 const id = info.stage.id;
 if (/^week-/.test(id)) {
-  const plan = planWeekly(d, session.getLeague(), session.settings);
-  const lists = planListUpdates(d, session.settings, plan);
-  const updates = lists.available ? lists.updates : [];
-  console.log(`commits ${plan.commits.length} (game ${plan.gameCommits}) · list updates ${updates.length}`);
-  if (!plan.commits.length && !updates.length) process.exit(0);
-  top10(plan.commits);
-  const edits = session.edits();
-  for (const e of plan.commits) edits.commitTransfer(d.playerByIndex.get(e.index), e.teamIndex, { weekly: true });
-  for (const u of updates) edits.setTopSchools(d.playerByIndex.get(u.index), u.after);
+  console.log("Portal-week mode was removed (PLAN.md §5); nothing was changed.");
+  process.exit(1);
 } else if (id === "signing-day") {
   const r = await session.applySigningDay();
   const pb = r.plan.placement;
-  console.log(`un-sign ${r.plan.unsign.length} · sign unsigned commits ${pb.committed.filter(e => e.sign).length} · place ${pb.placed.length} of ${pb.transfers} (unplaced ${pb.unplaced.length})`);
+  console.log(`un-sign ${r.plan.unsign.length} · place ${pb.placed.length} of ${pb.transfers} (unplaced ${pb.unplaced.length})`);
   const recruits = pb.cuts.filter(e => e.kind === "Recruit").length;
   console.log(`make room: un-sign ${recruits} recruits, move ${pb.moved.length}, cut ${pb.cuts.length - recruits - pb.moved.length}`);
   if (!r.ok) {
