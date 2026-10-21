@@ -6,14 +6,13 @@ Shortened on Oct 20, 2026 (sixth session). The old long version, with every tuni
 
 ## Where we are and what's next
 
-**Last chat (Oct 20, ninth session):** new rule **P5** (Tom's option A) and task 3 (branch `claude/tender-davinci-i51hoi`).
-- A transfer's old school is never on his Top 10 (so never a weekly commit) and no longer skips his prestige floor; at Signing Day it is last in the "best fit" fallback. Yhonzae Pierre (RE 91) → Ohio State (Top 10 #1, starter) instead of Alabama.
-- Week 2: old school in 162 of 1,890 Top 10s and 4 of 377 weekly commits → 0. Signing Day: 14 back at old school → 0; placed 1,310, 0 unplaced, 0 over 85; real cuts 146 → 151, deleted 14 → 15 (all FB/TE 56–68).
-- The eighth session (task 2: weekly commits + weekly interest update, proven in-game Week 2 → 3) is in git history and under "Weekly commits" below.
+**Last chat (Oct 20–21, tenth session):** task 4 (branch `claude/adoring-meitner-syxx7c`).
+- `node tools/signing-day-run.mjs <Signing Day copy> [--dry]` writes the whole Signing Day plan (all or nothing, Tom's option A: if one edit fails nothing is saved). First test dynasty: 1,310 placed, 2,215 un-signed, 136 moved, 15 cut; in-game Simmons → UCLA, Hawkins → Duke, Barnes → BYU, Bardin moved to New Mexico St. (task 3 now proven).
+- **Run 2 (Tom, from `DYNASTY-NIL`, no draft lock, weekly + Signing Day commands):** the game deleted 948 of our weekly commits at the rollover (326 rated 80+): at Signing Day it only signs a HardCommitted transfer whose school has him on its recruiting board. Fix: the Signing Day write now signs those itself (`signCommitted`, proven form); redone from the Signing Day backup, all 1,936 transfers reached Preseason.
+- **League strength (best-22 average OVR, user team left out):** stock year 1 79.8 · year 2 no tool 79.8 · tool + draft lock 81.4 · tool, no draft lock 81.1 (prestige 9–10: 86.4 / 88.0 / 88.8 / 87.5; whole roster 72.0 / 70.5 / 73.6 / 73.5; game team rating 90+: 7 / 10 / 22 / 21). The draft lock adds only ~0.3; the tool adds ~1.3 at every prestige. **Tom: he doesn't want the tool to make everybody a super team** → task 5 below.
+- Tom: the game's own team rating isn't accurate; judge by player OVR. 98 of the top 104 transfers had committed by Week 4 (ranking counts double in the weekly order); Tom kept it for now.
 
-- Task 3 done: moving a cut player to another school = a direct roster move (`movePlayer`), saved and verified on a copy; not checked in-game (Tom's call).
-
-**Next:** task 4, write the Signing Day plan to the save.
+**Next:** task 5, league strength.
 
 **Goal right now (Tom, sixth session):** one complete test run of a whole offseason on copies, Players Leaving → Preseason, with Tom checking in-game. Be token-efficient: Claude runs the bare minimum tests that prove each piece works; Tom tests the rest in-game. Quality stays the same.
 
@@ -25,11 +24,13 @@ Start a chat with `/next` (takes the top task that isn't done); end it with `/ha
 
 1. ~~**Save writer**~~ **Done (seventh session).** `lib/roster-edits.mjs` + the stronger save check; proven in-game at Liberty and Missouri.
 2. ~~**Weekly commits**~~ **Done (eighth session),** plus the weekly interest update; both proven in-game Week 2 → 3 (design below, "Weekly commits").
-3. ~~**"Cut player moved to another school" write**~~ **Done (ninth session):** none of the 136 moved players has a recruit row, so Tom chose a direct move (`RosterEdits.movePlayer`): the proven cut, then his team = the new school and onto its roster list (100 slots, at most 79 used), left off its depth chart (normal: 105 rostered players have none at Signing Day). Save check passed on a copy (Tagert Bardin → New Mexico St., Ansel Nedore → W. Kentucky, Kortez Rupert → Utah State). **Not checked in-game (Tom: assume it works); check it in the full run.** If it fails: option C, only cut a real player when needed and let the game delete him.
-4. **Signing Day write**: write the existing Signing Day plan to the save.
-5. **App controls, minimal:** a "Run this week" / "Run Signing Day" button in the Stage view, using the existing log and Save. Show Tom a mockup first. Also fix the stale stage labels (review #6). Tom (eighth session): outliers and oddities must be his call, so the app must let him review the plan and change or drop single moves before Save.
-6. **Check script:** one reusable script that runs every stage on fresh copies of the test saves and checks: rosters ≤ 85, every transfer placed, boards ≤ 35, nobody left teamless, the user team untouched, the save reopens, no transfer skipped for an unknown position. This is the app's automated test.
-7. **Tom's full offseason run** (Players Leaving → Preseason, in-game).
+3. ~~**"Cut player moved to another school" write**~~ **Done (ninth session; proven in-game tenth session):** none of the 136 moved players has a recruit row, so Tom chose a direct move (`RosterEdits.movePlayer`): the proven cut, then his team = the new school and onto its roster list (100 slots, at most 79 used), left off its depth chart (normal: 105 rostered players have none at Signing Day). Save check passed on a copy (Tagert Bardin → New Mexico St., Ansel Nedore → W. Kentucky, Kortez Rupert → Utah State).
+4. ~~**Signing Day write**~~ **Done (tenth session),** plus signing the weekly commits the game leaves unsigned; checked in-game (run 2).
+5. **League strength (Tom: not everybody a super team):** year 2 with the tool should end near stock year 1 (best 22 79.8, prestige 9–10 86.4, whole roster 72.0) instead of 81.1. Measure options on run 2's Signing Day save (`TTT Backups\DYNASTY-RUN2-AUTOSAVE__2026-10-20_185746.bak`, Tom's PC; the session's copies were scratch) and Tom picks: (2) transfers per room = starters lost (now + 1), (3) a newcomer needs 6–8 OVR (now 4) to take a starting spot, the recruit cleanup cutoff (now under 60), the weekly rank weight (now 2). Only the worst of the worst real players may be deleted, so prefer dials that keep players in the league.
+6. **Weekly commit onto the school's recruiting board:** so the game signs our weekly commits itself (and shows the school's offer, e.g. Williams Nwaneri, Alabama, no offer while Oklahoma offered). Today the Signing Day write covers it; this is the clean fix. A new write to prove in-game.
+7. **App controls, minimal:** a "Run this week" / "Run Signing Day" button in the Stage view, using the existing log and Save. Show Tom a mockup first. Also fix the stale stage labels (review #6). Tom (eighth session): outliers and oddities must be his call, so the app must let him review the plan and change or drop single moves before Save.
+8. **Check script:** one reusable script that runs every stage on fresh copies of the test saves and checks: rosters ≤ 85, every transfer placed, boards ≤ 35, nobody left teamless, the user team untouched, the save reopens, no transfer skipped for an unknown position, every committed transfer signed to a board at Signing Day. This is the app's automated test.
+9. **Tom's full offseason run** (Players Leaving → Preseason, in-game).
 
 **Side task (Tom, eighth session; not in the order above):** the depth chart uses projected next-season OVR = OVR + expected training gain. Measured Signing Day → Preseason (7,046 returning players): about +2.4 on average, by room to max (0–2: +0.6 … 15+: +2.9) and dev trait (Elite with 15+ room: +4.1); e.g. Ty Hawkins (SMU QB) 82 → 86. It changes every need/role rule, so check before/after on named teams.
 
@@ -37,7 +38,7 @@ Start a chat with `/next` (takes the top task that isn't done); end it with `/ha
 
 Every layer was read line by line. No calculation errors in the rules; speed is fine everywhere. Findings:
 - **#1** `lib/dynasty.mjs` doesn't read `Team.RecruitingBoard` when the save opens, and madden-franchise can't add a field to an already-read table. That is why one script found 0 boards. Fix: add the field to the team read list (task 2).
-- **#2** Moving a cut returning player to another school: `movePlayer` (task 3, not yet proven in-game).
+- **#2** Moving a cut returning player to another school: `movePlayer` (task 3, proven in-game tenth session).
 - **#3** Fixed: a `userTeam` name not found in the save now stops the save from opening (before, the user team was silently unprotected).
 - **#4** Fixed: `settings.json` now overrides defaults at every level, so a missing nested value keeps its default instead of switching its rule off.
 - **#5** Save check too weak for commits and cuts (task 1).
@@ -102,7 +103,8 @@ Everything after the draft lock is built from the same four blocks. They run in 
 3. **Room (SD5):** a free board slot (35 per school), under the position cap (QB 5, HB 6, FB 1, WR 11, TE 5, OT 8, OG 8, C 4, EDGE 8, DT 8, LB 12, CB 9, S 8, K 2, P 2) and under 85. A full school may cut **one** player to make room: only someone who'd be Backup/Buried once the newcomer arrives, whose keep value is 5+ below the newcomer's, recruits first, at most 5 real players per school.
 4. **Keep value (SD2)** = OVR + (max − OVR) × year factor (next season Fr 0.5, So 0.35, Jr 0.2, Sr 0): young players with room to grow outlast topped-out upperclassmen.
 5. **Protected (SD3):** never cut or left unplaced: Jr/Sr 77+, or Fr/So 72+ with max 77+.
-6. **Finish (SD6):** schools still over 85 trim recruits first, then the lowest-keep-value bench players. Cut real players are offered to other schools (schools that want him first); deleted only if no school has room.
+6. **Weekly commits the game didn't sign** (HardCommitted, off every board) are signed to their school first and take a board slot; boards over 35 un-sign their lowest-keep-value recruits (tenth session).
+7. **Finish (SD6):** schools still over 85 trim recruits first, then the lowest-keep-value bench players. Cut real players are offered to other schools (schools that want him first); deleted only if no school has room.
 
 ### Weekly commits (built, eighth session; settings `weekly`)
 
@@ -142,6 +144,8 @@ Exactly the 12 planned records changed. How each is written: `CLAUDE.md` → "Si
 | Top 10 preview | Week 1 | 0 empty Top 10s; BYU #1 for 110 players; Hawkins → Illinois, Tennessee, Duke; Kansas in ~17% of lists |
 | Recruit cleanup | Signing Day | 1,535 un-signed, 150 kept (Impact 131, Elite 11, Star 8) |
 | Placement | Signing Day | 1,310 of 1,310 placed (1,004 at their #1, 25 best fit); 1,094 start; 150 real players cut (137 moved, 13 deleted); rosters 64–85; ~0.8 s. Simmons → Arizona, Hawkins → Duke, Khalil Barnes → BYU |
+| Signing Day write | Signing Day | first dynasty: un-sign 2,215, move 136, cut 15, commit 1,310, ~4 s; run 2: sign 948 unsigned weekly commits, commit 376, all 1,936 transfers in Preseason |
+| League strength | Preseason | best-22 avg: stock y1 79.8, y2 no tool 79.8, tool + lock 81.4, tool no lock 81.1 |
 | Speed | any | open ~0.65 s; whole portal scored ~0.25 s |
 
 ## Later and open questions
