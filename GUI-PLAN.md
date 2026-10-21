@@ -4,7 +4,7 @@ Spec of the Signing Day GUI (`node gui.mjs`). §0–8 are **Built** (each part n
 
 ## 0. Constraints
 1. Built for Tom's screen: **2560×1440, 27", Windows scaling 100%, browser full screen.** The sizes in §2 are tuned for it; nothing on screen under 14px.
-2. The GUI doesn't change placement rules. Its only `lib/` changes outside `lib/gui-plan.mjs` are the locks (§6) and reads (§7); the player card would add Player reads and the output-only snapshot (§9.5), and the snapshot needs Tom's OK (§9.7 Q2).
+2. The GUI doesn't change placement rules. Its only `lib/` changes outside `lib/gui-plan.mjs` are the locks (§6) and reads (§7); the player card adds Player reads and the output-only snapshot (§9.5, Tom OK'd).
 3. Works for any dynasty: nothing about one school is hard-coded. The user team is picked per save (§3.2); Signing Day leaves it out.
 
 ## 1. Product (Built)
@@ -316,7 +316,7 @@ A head name that fails `^[A-Za-z0-9_-]{1,32}$` counts as missing. Cases 1 and 2 
 | Body line | `#12 · 5'10" · 167 lb · Baltimore, Maryland` | `JerseyNum`, `Height` (inches), `Weight` (stored as lb − 160), `PLYR_HOME_TOWN`, `p.homeState` | 4 fields |
 | Move strip | `[logo] Oregon State → [logo] Missouri`, StatusTag, role there (`Starter · WR2`) | raw plan entry: `from`, `team`, `role`, `rank` (his place in the room) | |
 | Why | one sentence (§9.3) | raw plan entries, locks | |
-| Info | kind (Transfer, HS recruit, JUCO recruit, Returning); ranks (`#49 overall · WR #9`); NIL; his undos (`You undid: transfer in at Missouri`) | `p.recruitClass`, `p.nationalRank`, `p.positionRank`, `BaseNILValue`, the locks | NIL |
+| Info | kind (Transfer, HS recruit, JUCO recruit, Returning); ranks (`#49 overall · WR #9`); his undos (`You undid: transfer in at Missouri`). No NIL: `BaseNILValue`'s unit is unknown | `p.recruitClass`, `p.nationalRank`, `p.positionRank`, the locks | |
 | Pitch | his pitch's name; his dealbreaker and pitch categories, each an icon, label and the landing school's grade; dealbreaker met or not | `p.dealbreaker`, `PITCHES[p.pitch]`, `categoryGrade()` (`lib/destinations.mjs`); met from the snapshot | |
 | Ratings | `OVR 87 → MAX 94`; six skill groups, each its name, `LV 15/16` and its ratings with the game's short labels (`SPD 93 ACC 95 STA 90 KR 45`) | `d.skillGroupDetail(p)` | |
 | Top 5 | his list when his turn came: rank, TeamMark, school, `HIS` (player score), `THEIRS` (team score ÷ 2, so 0–100 as in the combined score), `MATCH` (combined), role there. The landing school is tagged `[ HERE ]`, as a 6th row when it isn't in the top 5 (Best fit) | snapshot from the planner (§9.5) | |
@@ -334,7 +334,7 @@ Built by the server from the raw plan entries (`how`, `cut`, `reason`, `forName`
 |---|---|
 | Placed, `Top 10 #n` | `Missouri was #1 on his list when his turn came, with room for him (Starter). Josiah Israel made room.` (Jesse Legree; the second sentence only when the entry has `cut`) |
 | Placed, `Best fit` | `No school on his list had room for him; Missouri was his best fit with room (Buried). Brett Le Blanc made room.` (Mario Wofford) |
-| Moved | `Cut at Missouri for Zeraun Daniel (S cap); of the schools with room that wanted him, he liked West Virginia most (Rotation).` (Jackson Hancock) |
+| Moved | `Cut at Missouri for Zeraun Daniel (S cap); of the schools with room that wanted him, he liked West Virginia most (Rotation). Rodney Geter made room.` (Jackson Hancock; the last sentence only when the entry has `cut`) |
 | Deleted | `Cut at Vanderbilt for Eli Owens (FB cap); no other school had room for him, so he is deleted.` (Jeremy Dugans) |
 | Un-signed for a transfer | `Un-signed to make room for Willie Rodriguez (TE cap).` (Caden Madha) |
 | Un-signed in the cleanup | `Signed recruit under 60 OVR without the dev trait and ceiling to keep him: un-signed to free his board slot.` (Nathan Dunne) |
@@ -372,7 +372,7 @@ With no `forName` (the 85 trim, a full board), the reason stands alone: `Cut at 
 ├─ INFO ───────────────────────────┬─ PITCH: GAMER ─────────────────────────┤
 │ Kind    Transfer                 │ [i] Pro Potential  DEALBREAKER  A-  met│
 │ Ranks   #49 overall · WR #9      │ [i] Conference Prestige         A+     │
-│ NIL     155                      │ [i] Playing Style               D-     │
+│                                  │ [i] Playing Style               D-     │
 ├─ RATINGS   OVR 87 → MAX 94 ──────┴────────────────────────────────────────┤
 │ QUICKNESS        LV 15/16   SPD 93  ACC 95  STA 90  KR 45                 │
 │ HANDS            LV 8/17    CAR 71  CTH 88                                │
@@ -388,11 +388,11 @@ With no `forName` (the 85 trim, a full board), the reason stands alone: `Cut at 
 - **Type:** section labels mono 15px/600 uppercase (the §2.4 label style); body 17px; table rows 46px; ratings in Plex Mono 17px with tabular numbers, every column left-aligned (§2).
 
 ### 9.5 Code changes
-- **`lib/dynasty.mjs`** (first read only; see the `CLAUDE.md` save traps): add `GenericHeadAssetName`, `JerseyNum`, `Height`, `Weight`, `PLYR_HOME_TOWN`, `BaseNILValue` to the Player read list. `refreshPlayer` sets `p.head`, `p.jersey`, `p.height` (inches), `p.weight` (lb: stored + 160), `p.homeTown`, `p.nil`.
+- **`lib/dynasty.mjs`** (first read only; see the `CLAUDE.md` save traps): add `GenericHeadAssetName`, `JerseyNum`, `Height`, `Weight`, `PLYR_HOME_TOWN` to the Player read list. `refreshPlayer` sets `p.head`, `p.jersey`, `p.height` (inches), `p.weight` (lb: stored + 160), `p.homeTown`.
 - **`lib/signing-day.mjs`** (`planPlacement`), output only:
   - Each placed, moved and unplaced entry, and each re-offered cut, keeps the list the planner already computed for him: `top5` (from `w.top10`) and `here` (the landing school's row from `w.teams`, with its list rank or null).
   - Row fields: `teamIndex, team, playerScore, baseScore, combined, role, meets, dealbreakerGrade, pitchGrades`.
-  - No rule change; the rest of the plan stays identical. Besides the reads, this is the one `lib/` change outside §6/§7 (Tom's OK needed, §9.7 Q2).
+  - No rule change; the rest of the plan stays identical. Besides the reads, this is the one `lib/` change outside §6/§7 (Tom OK'd).
   - Why: without it, the card can only show his list from before placement, which disagrees with the plan. Jesse Legree's top 5 before placement (`destinations()` on the unchanged league) is Ole Miss, Colorado, Stanford, Texas Tech, TCU (Missouri 11th), but when his turn came Missouri was #1 and he was placed there.
 - **`lib/gui-plan.mjs`:** `playerCard(session, raw, state, playerIndex)` returns `PlayerCard`; `whyLine(…)` (§9.3); `playerPortrait(head)` (§9.1 lookup).
 - **`gui.mjs`:** `GET /api/player?index=<playerIndex>` returns `PlayerCard`, with a 409 when there's no plan and a 404 for an unknown player.
@@ -405,7 +405,7 @@ With no `forName` (the 85 trim, a full board), the reason stands alone: `Cut at 
 - **`tools/copy-art.mjs`:** use the same head-to-file rule (drop the `-`), then re-run on Tom's PC, so `gui/art/` also gets the 113 cut-short heads' portraits.
 - **This file:** once built, the API row goes in §5.1, the card in §3.5 (S3), and §9 is marked Built.
 
-`PlayerCard` = `{index, name, pos, archetype, year, nextYear, redshirt, dev, stars, ranks:{national, position}, kind, jersey, height, weight, homeTown, homeState, nil, ovr, max, groups:[{name, level, cap, ratings:[{label, value}]}], portrait:{src, blank}|null, initials, status, from, to, role, rank, why, pitch:{name, school, categories:[{id, label, grade, dealbreaker, met}]}|null, top5:[{…team, rank, his, theirs, match, role, here}]|null, undos:[{undone, at}]}`. `from` and `to` = `{index, name, short, colors, logo}` or null.
+`PlayerCard` = `{index, name, pos, archetype, year, nextYear, redshirt, dev, stars, ranks:{national, position}, kind, jersey, height, weight, homeTown, homeState, ovr, max, groups:[{name, level, cap, ratings:[{label, value}]}], portrait:{src, blank}|null, initials, status, from, to, role, rank, why, pitch:{name, school, categories:[{id, label, grade, dealbreaker, met}]}|null, top5:[{…team, rank, his, theirs, match, role, here}]|null, undos:[{undone, at}]}`. `from` and `to` = `{index, name, short, colors, logo}` or null.
 
 ### 9.6 Build steps and acceptance
 Named players (a copy of `DYNASTY-SIGNINGDAYCOPY`, user team Kansas, no undos, Missouri's page):
@@ -421,10 +421,3 @@ Named players (a copy of `DYNASTY-SIGNINGDAYCOPY`, user team Kansas, no undos, M
 2. **Mockup:** the card in `gui/mockup.html` for Missouri's players, screenshot at 2560×1440. The mockup data keeps its one undo (Caden Madha), so his card shows the STAYS story and Mario Wofford lands elsewhere; the step 1 checks use the plan with no undos. The four players' portraits are in `gui/art/`, so the cloud screenshot shows them. **Stop and show Tom.**
 3. **Live:** the API and the drawer. On a copy: open, switch, Esc and Close work. After an Undo of Jesse Legree's row, his card reloads with the new story and the row is in KEPT.
 4. **Tom in-game:** the four portraits match the faces in the game.
-
-### 9.7 Open questions for Tom
-1. **NIL:** what is `BaseNILValue` in the game? What unit, and what do negative values mean (956 players are negative, −5 to −255; the range is −255 to 440)? Show it, `CurrentNILCompensation` (0–510 here), or leave NIL off?
-2. **Top 5 snapshot:** OK to make the output-only change to `lib/signing-day.mjs` (§9.5)? Without it, the Top 5 panel goes.
-3. **Extras:** keep jersey number, height, weight and hometown? They're four cheap reads.
-4. **No portrait file:** the blank (as planned) or the monogram?
-5. **Moved: who made room?** A moved player's entry also has `cut` (Jackson Hancock: Rodney Geter at West Virginia). Add "… made room." as for placed players?
