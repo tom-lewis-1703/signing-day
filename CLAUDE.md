@@ -15,6 +15,9 @@ Docs: `PLAN.md` (status, task list, what's built), `GUI-PLAN.md` (GUI spec). Cha
 - No extras; don't start the next step unprompted.
 - If Tom's idea, decision or code has a mistake or a better alternative, say so right away, briefly and with the reason. Don't wait to be asked.
 - Docs (`PLAN.md`, `GUI-PLAN.md`, `CLAUDE.md`) hold only what an AI needs to work: current facts, rules, open tasks and decisions. No history, proof write-ups or answered questions; git has them.
+  - Once Tom settles a question, delete it and every reference to it. Write the result as plain fact, never who chose it or when.
+  - Don't note what's left out: a spec that doesn't list something already excludes it.
+  - The commit hook `.claude/hooks/lean-docs.mjs` blocks the usual slips; reword the line it shows.
 
 ## Hard rules
 
