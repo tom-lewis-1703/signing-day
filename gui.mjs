@@ -6,7 +6,7 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { Session } from "./lib/session.mjs";
-import { ART_DIRS, listSaves, teamArt, emptyState, loadState, saveState, locksPath, lockCount, rawPlan, buildPlan, movesOf } from "./lib/gui-plan.mjs";
+import { ART_DIRS, listSaves, teamArt, emptyState, loadState, saveState, locksPath, lockCount, rawPlan, buildPlan, movesOf, playerCard } from "./lib/gui-plan.mjs";
 
 const APP_DIR = path.dirname(fileURLToPath(import.meta.url));
 const GUI_DIR = path.join(APP_DIR, "gui");
@@ -66,6 +66,14 @@ const api = {
   },
 
   "GET /api/plan": () => { requirePlan(); return plan(); },
+
+  // Player card (GUI-PLAN.md §6): read-only, from the last planner output.
+  "GET /api/player": ({ index }) => {
+    requirePlan();
+    const card = /^\d+$/.test(index ?? "") ? playerCard(session, raw, state, Number(index)) : null;
+    if (!card) throw new HttpError(404, "Unknown player.");
+    return card;
+  },
 
   // Undo: an IN row keeps the transfer away from that school (notAt); an OUT row keeps the player (keep).
   "POST /api/undo": ({ playerIndex, teamIndex, kind }) => {
@@ -164,7 +172,7 @@ const server = http.createServer(async (req, res) => {
     const handler = api[`${req.method} ${pathname}`];
     if (!handler) return send(res, 404, { error: "Unknown API call." });
     try {
-      const body = req.method === "POST" ? await readJson(req) : {};
+      const body = req.method === "POST" ? await readJson(req) : Object.fromEntries(url.searchParams);
       send(res, 200, await serial(() => handler(body)));
     } catch (e) {
       if (!e.status) console.error(e);

@@ -1,14 +1,15 @@
 # Plan
 
-`/hub` starts the hub chat (design and dispatch; see `.claude/skills/hub/SKILL.md`). `/next` starts the first open task in "Task list" that has no builder tag; `/handoff` updates this file. A task a builder session is working on ends with `(builder: <session id>)`. Rules and save facts are in `CLAUDE.md`; the GUI spec is `GUI-PLAN.md`; history is in git. Cite sections as `PLAN §n.m`.
+`/hub` starts the hub chat (design and dispatch; see `.claude/skills/hub/SKILL.md`). `/next` starts the first open task in "Task list" that has no builder tag; `/handoff` updates this file. A task a builder session is working on ends with `(builder: <session id>)`. Rules and save facts are in `CLAUDE.md`; the GUI engine spec is `GUI-PLAN.md`; history is in git. Cite sections as `PLAN §n.m`.
 
 ## 1. Where we are and what's next
-- On `main`: the Signing Day GUI `node gui.mjs` (spec `GUI-PLAN.md` §0–8), the only way to edit a save. It runs Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
-- Next: the player card (`GUI-PLAN.md` §9; task 1).
+- On `main`: the GUI engine `node gui.mjs` (server, API, undo locks, player card data; spec `GUI-PLAN.md`), with no screens until task 2. It runs Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
+- Next: the GUI redesign (task 2).
 
 ## 2. Task list
 One chat per task. `[ ]` open, `[x]` done.
-1. [ ] **Player card** (`GUI-PLAN.md` §9): build steps 1–3 of §9.6, with the `tools/copy-art.mjs` head-to-file fix. Then Tom re-runs `copy-art` on his PC and checks the four portraits in-game (§9.6 step 4).
+1. [ ] **Portraits** (Tom, on his PC): re-run `tools/copy-art.mjs` (adds the 113 cut-short heads), then check in-game that the four named players' portraits (`GUI-PLAN.md` §6.5) match their faces.
+2. [ ] **GUI redesign:** a new front end in `gui/` on the engine (`GUI-PLAN.md`). Goal: easy to read, good to look at, and using the screen's space well. Designed with Tom in the hub chat, with Mobbin examples; a mockup before building.
 
 ## 3. Open questions for Tom
 None.
@@ -18,7 +19,7 @@ None.
 ### 4.1 Commands
 | Command | Does |
 |---|---|
-| `node gui.mjs [--no-open]` | Signing Day GUI (the only save editor): `GUI-PLAN.md`. The user team is picked per save. |
+| `node gui.mjs [--no-open]` | GUI server and API (`GUI-PLAN.md`); no screens until task 2. The user team is picked per save. |
 | `node tools/<name>.mjs …` | Reports and test helpers: §4.5. |
 
 Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3.1; `sharp` 0.35.5 (devDependency, only `tools/copy-art.mjs`).
@@ -41,7 +42,7 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 | `lib/signing-day.mjs` | Signing Day plan: recruit cleanup, then placement | `planRecruitCleanup`, `planPlacement`, `BOARD_SLOTS` (35), `keepValue`, `isProtected` |
 | `lib/roster-edits.mjs` | Save writer (§4.4) | `RosterEdits`, `changedRecords`, `COMMIT_INFLUENCE_BONUS` (10) |
 | `lib/safe-save.mjs` | Backup, write, verify, replace (§4.4) | `safeSave`, `backupSave`, `BACKUP_DIR_NAME` (`TTT Backups`) |
-| `lib/gui-plan.mjs` | The GUI's Plan, locks file, saves list, team art | `GUI-PLAN.md` §4.3 |
+| `lib/gui-plan.mjs` | The GUI's Plan, locks file, saves list, team art, player card | `GUI-PLAN.md` §2.2 |
 | `lib/C27_486_1.gz` | `madden-franchise` schema 486.1 for CFB 27 | |
 
 ### 4.4 Save writes
@@ -53,7 +54,7 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 |---|---|---|
 | `commitTransfer(p, t)` | `Signed`, 1 offer, on the school's board; the school becomes #1 on his list with the top influence + 10 (a school not on his list replaces his last one) | Signing Day |
 | `unsignRecruit(p)` | `Top10`, 0 offers, off the school's board | Signing Day |
-| `cutPlayer(p)` | `TeamIndex` 255, `PrevTeamIndex` = his school, off its roster list and every depth chart slot; the game deletes him at the rollover (in-game check, git `a9ebb41`) | Signing Day |
+| `cutPlayer(p)` | `TeamIndex` 255, `PrevTeamIndex` = his school, off its roster list and every depth chart slot; the game deletes him at the rollover | Signing Day |
 | `movePlayer(p, t)` | The cut, then `TeamIndex` = the new school and onto its roster list; left off its depth chart | Signing Day |
 
 - `applySigningDay` order: un-sign (frees board slots), cuts and moves, commits.
@@ -68,9 +69,9 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 ### 4.5 Tools and docs
 Usage is in each file's first lines.
 - Read-only reports: `capacity-check`, `list-journey`, `offers-report`, `step3-report` (depth charts), `step4-report` (team side), `step4b-report` (player side + Top 10), `step5-report` (recruit cleanup).
-- Tests on copies: `step1-test` (open, stage, back up and save each test save in a work folder).
+- Tests on copies: `baseline-check` (the minimum proof for a change: `GUI-PLAN.md` §7), `step1-test` (open, stage, back up and save each test save in a work folder).
 - `extract-ratings-model`: one-time; writes `lib/data/ratings-model.json` from Maxi's Dynasty Progression Monitor & Planner page.
-- `gui-mockup-data` (`GUI-PLAN.md` §8.1); `copy-art` (`GUI-PLAN.md` §2.7; Tom's PC).
+- `copy-art` (`GUI-PLAN.md` §2.3; Tom's PC).
 
 ### 4.6 Baseline numbers
 Stock `test_saves/DYNASTY-SIGNINGDAYCOPY` (copy), user team Kansas, no GUI locks, `settings.json` as of this commit (a settings change moves them):

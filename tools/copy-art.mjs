@@ -1,11 +1,12 @@
 // Usage: node tools/copy-art.mjs ["<DynastyOS Assets folder>"]
-// Fills gui/art/ with the slim copy of the DynastyOS asset library the GUI uses (GUI-PLAN.md §2),
+// Fills gui/art/ with the slim copy of the DynastyOS asset library the GUI uses (GUI-PLAN.md §2.3),
 // so it can be committed and cloud sessions can render art. Paths mirror the library's, so the
 // assets/… URLs stay the same:
 //   logos-flat-dark/, helmet/left/       copied unchanged
 //   playerportrait-files.txt             every portrait file name in the library, sorted
 //   playerportrait/nilpp_Unique_*.webp   those matching a player in any test_saves/ save, by name
 //                                        (letters and digits only, any case) or by his head asset
+//                                        (lib/gui-plan.mjs portraitFile: a cut-short head drops its "-")
 //   playerportrait/nilpp_Generic_*.webp  all of them
 //   playerportrait/nilpp_Blank.webp      the card's "file missing" portrait
 // Portraits are resized to 256×256 webp, alpha kept. Read-only on the library and test_saves/;
@@ -16,7 +17,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { openFranchise } from "../lib/dynasty.mjs";
-import { ART_DIR, ASSETS_DIR } from "../lib/gui-plan.mjs";
+import { ART_DIR, ASSETS_DIR, portraitFile } from "../lib/gui-plan.mjs";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SAVES = path.join(ROOT, "test_saves");
@@ -58,7 +59,7 @@ for (const name of fs.readdirSync(SAVES).sort()) {
     if (!r || r.isEmpty || !`${r.FirstName || ""}${r.LastName || ""}`.trim()) continue;
     s.players++;
     const named = uniqueByKey.get(key(`${r.LastName}${r.FirstName}`)) || [];
-    const head = r.GenericHeadAssetName ? `nilpp_${r.GenericHeadAssetName}.webp` : null;
+    const head = portraitFile(r.GenericHeadAssetName);
     const hasHead = head && portraitSet.has(head);
     for (const p of named) wanted.add(p);
     if (hasHead && /^nilpp_Unique_/i.test(head)) wanted.add(head);
