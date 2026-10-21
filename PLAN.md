@@ -6,7 +6,8 @@
 - On `main`: the Signing Day GUI `node gui.mjs` (spec `GUI-PLAN.md` §0–8), the only way to edit a save. It runs Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
 - Portal-week mode removed and the `Kansas` default dropped (git `0593958`): on fresh copies of `DYNASTY-SIGNINGDAYCOPY` the Signing Day plan, every field write and the GUI `/api/plan` are identical to before (only the always-0 `sign unsigned commits` counter is gone); `DYNASTY-WEEK2COPY` and a `settings.json` without `userTeam` are refused in one line.
 - GUI only (hub edit): `ttt.mjs` deleted; the GUI no longer pre-fills a team from `settings.json` (pick per save, remembered in `gui-state.json`); `settings.json` `userTeam` is now `testSavesTeam`, read only when `Session.open` gets no team (the `tools/` scripts); the always-0 `signed` summary counter and the `[ SIGNED COMMIT ]` IN rows are gone. Fresh copy of `DYNASTY-SIGNINGDAYCOPY`: no suggested team on first open, Kansas picked → §4.6 summary unchanged (Missouri IN 16, OUT 22), remembered on reopen; `tools/step5-report` still runs (Kansas skipped, un-signed 1535).
-- Next: §3 questions (Q2 and Q3 are small hub edits).
+- §3 answered: no draft lock in the GUI (Tom; it stays in `tools/step2-test.mjs` only); stale comments fixed and `lib/stage.mjs` `action`/`buildStep` dropped; `/handoff` stays as is.
+- Next: Tom starts working on the GUI. Open GUI questions: `GUI-PLAN.md` §9.7 (player card), §10 Q1–4.
 
 ## 2. Task list
 One chat per task. `[ ]` open, `[x]` done.
@@ -14,10 +15,7 @@ One chat per task. `[ ]` open, `[x]` done.
 - [x] **Decide (Tom):** remove the GUI's leftover signed-commit code? Yes; removed with the GUI-only edit.
 
 ## 3. Open questions for Tom
-1. **Draft lock isn't in the GUI.** Only `tools/step2-test.mjs` applies it (`Session.applyDraftLock`, on a work copy); `Session.open` runs `planDraftLock` read-only for its `draftCheck` counts; the GUI refuses a Players Leaving save. Intended?
-2. **Stale code comments** (a code task; these docs follow git history): `lib/roster-edits.mjs` line 2 calls `movePlayer` "not yet proven", but it was proven in-game (§4.4); `lib/signing-day.mjs` line 1 says "writing comes later", but `Session.applySigningDay` writes the plan; `lib/stage.mjs` `action` and `buildStep` labels are stale and unused.
-3. **Keeping §4 current:** §4 is now the home of commands, files, exports, save writes and baseline numbers, but `/handoff` step 3 sends a changed "file, command, setting behavior or save fact" to `CLAUDE.md`. Point the skill and the brief template's Finish at `PLAN.md` §4 as well?
-4. **GUI:** `GUI-PLAN.md` §9.7 (player card) and §10 Q1–4 (built GUI vs spec, code defects).
+1. **GUI:** `GUI-PLAN.md` §9.7 (player card) and §10 Q1–4 (built GUI vs spec, code defects).
 
 ## 4. What's built
 
@@ -62,7 +60,7 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 | `unsignRecruit(p)` | `Top10`, 0 offers, off the school's board | Signing Day |
 | `cutPlayer(p)` | `TeamIndex` 255, `PrevTeamIndex` = his school, off its roster list and every depth chart slot; the game deletes him at the rollover (in-game check, git `a9ebb41`) | Signing Day |
 | `movePlayer(p, t)` | The cut, then `TeamIndex` = the new school and onto its roster list; left off its depth chart | Signing Day |
-| `applyDraftLock` (built, signed off; git `5aa36fe` `PLAN.md`) | Players with early-draft (`EarlyNFL_*`) rows who are not out of eligibility (Senior not redshirting), not on the user team and not already all Staying: every such row `LeaveStatus` = `Staying`, `PersuadeAttempts` ≥ 1 (what the game writes on a persuade) | `tools/step2-test.mjs` only (§3 Q1) |
+| `applyDraftLock` (built, signed off; git `5aa36fe` `PLAN.md`) | Players with early-draft (`EarlyNFL_*`) rows who are not out of eligibility (Senior not redshirting), not on the user team and not already all Staying: every such row `LeaveStatus` = `Staying`, `PersuadeAttempts` ≥ 1 (what the game writes on a persuade) | `tools/step2-test.mjs` only (Tom: not in the GUI) |
 
 - `applySigningDay` order: un-sign (frees board slots), cuts and moves, commits.
 - Save (`session.save()` → `lib/safe-save.mjs` `safeSave`):
