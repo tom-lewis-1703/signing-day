@@ -1,27 +1,19 @@
 # Plan
 
-## Built
-- Read layer, safe save (backup + reopen check), save writer (commits, un-signs, cuts, moves, list updates; proven in-game).
-- `node ttt.mjs "<save copy>"`: per stage, plans this week's commits + list updates (Weeks 1–4) or the full Signing Day build, shows the top 10 moves, asks before saving.
+`/next` starts the first open task in "Task list"; `/handoff` updates this file. Rules and save facts are in `CLAUDE.md`; history is in git.
 
-## Decided (Oct 21, 2026): Signing Day simulation
-- At Signing Day the uncommitted transfers are placed by a simulation instead of the old placement. The game's own commits stay.
-- CPU schools: offer only to transfers who'd start or rotate there; team score = role × (0.5 + 0.5 × need), 0–100; NIL budget = 25% of `RemainingProgramPoints`, price = `BaseNILValue`. HS recruits on a board and transfers compete for its 35 slots by the same team score (weaker recruits get bumped).
-- Players rank schools by the player score; matching until nothing changes (stable matching); unmatched transfers drop out.
-- User team: Tom recruits in-game; at Signing Day his uncommitted board offers (incl. NIL) compete in the sim; his commits are never touched.
-- Targets: 65–70% of transfers on a roster; every 85+ placed, 90%+ of 80–84; 85+ average prestige 7+, none at ≤3; 60%+ start or rotate; league near stock (a super team or two is fine); no school over its NIL budget; rosters 80–85, no room above the stock maximum.
+## Where we are and what's next
+- On `main`: `node ttt.mjs "<save copy>"` (CLI: this week's commits and list updates in the portal weeks, or the full Signing Day build) and `node gui.mjs` (Signing Day GUI, spec `GUI-PLAN.md` §1–9). At Signing Day both use `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`).
+- Under both: read layer `lib/dynasty.mjs`, save writer `lib/roster-edits.mjs` (proven in-game), safe save `lib/safe-save.mjs` (backup + reopen check).
+- Next: no task is set; ask Tom.
 
-## Next (in order)
-1. Sim: schools rescore needs as they sign players.
-2. Sim: the user team competes with its in-game board offers.
-3. Sim: move-by-move list (CLI art) to judge placements.
-4. Sim: tune placement toward the targets.
-5. Build the sim into the tool; review before Save; check script; Tom's full offseason run in-game.
+## Task list
+One chat per task. `[ ]` open, `[x]` done.
+- None open.
 
-## Later / undecided
+## Later (not scheduled; don't start without Tom)
 - GUI player card: plan in `GUI-PLAN.md` §10.
-- Weekly commits and list updates: likely dropped with the sim.
-- AI-run CPU coaches as a layer on top of the sim.
+- AI-run CPU coaches.
 - Position limits (the game over-recruits RB and WR).
 - When and how players get deleted; real players vs recruits.
 - In-game player progression (Tom's own system).
