@@ -172,7 +172,6 @@ td.tile-cell .logo, td.tile-cell .tile { display: block; }
 .tag.RE-CHECK { color: var(--warn); }
 .tag.CHANGED { color: var(--moved); }
 .tag.KEPT { color: var(--text-2); }
-.tag.SIGNED { color: var(--orange); }
 
 /* ---- Roster numbers (before → after) ---- */
 .roster { font: 500 17px var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }

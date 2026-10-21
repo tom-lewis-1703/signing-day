@@ -31,7 +31,7 @@ CSS custom properties on `:root` (`gui/styles.css`):
 --out:         #FF4545   /* deleted, players out */
 --warn:        #FFC53D   /* re-check, dropped, warnings */
 --moved:       #2BD4FF   /* moved, CHANGED */
---orange:      #FF8A2B   /* un-signed, signed commits */
+--orange:      #FF8A2B   /* un-signed */
 --accent:      user team primary, exactly as stored in the save (§2.3); CSS default #2BD4FF
 --accent-2:    user team secondary, exactly as stored; CSS default #FF8A2B
 --accent-ink / --accent-2-ink: #000000 or #FFFFFF, whichever contrasts more with that accent
@@ -118,7 +118,7 @@ Tabler Icons (MIT, `gui/icons/LICENSE.txt`), stroke 2.25, 21px (30px in empty st
 - **Tabs:** 48px high, mono labels with a count pill, e.g. `CHANGED 132`; active tab underlined 3px `--accent-2`, its count pill filled `--accent-2`.
 - **TeamMark:** the school's logo, 46px; else a MonogramTile: 42px square (64px with 19px text in the S3 header), fill = that team's own primary color (contrast-adjusted against its text: white or black, whichever contrasts more, lightness stepped by 5% until 4.5:1; no valid color → `#2B2B38`), `Team.ShortName` (e.g. `KU`, `BAMA`) in mono 15px/700.
 - **Helmet** (S3 header): 150px box, scaled 1.25.
-- **StatusTag:** mono `[ REVIEWED ]` (`--in`), `[ CHANGED ]` (`--moved`), `[ RE-CHECK ]` (`--warn`), `[ KEPT ]` (`--text-2`), `[ SIGNED COMMIT ]` (`--orange`); no status shows `—`.
+- **StatusTag:** mono `[ REVIEWED ]` (`--in`), `[ CHANGED ]` (`--moved`), `[ RE-CHECK ]` (`--warn`), `[ KEPT ]` (`--text-2`); no status shows `—`.
 - **Roster:** next season's roster as plain mono numbers, before → after: `91 → 85` (before `--text-2`, after bold). No bars or marker lines.
 - **Panel:** a bordered box with a 3px colored top edge and a 56px header (icon, mono title, count, hint on the right); not a `.card` (no 22px padding; header side padding `--cell`); used for IN (`--in`), OUT (`--out`), KEPT (`--text-2`).
 - **EmptyState:** a 30px icon, one sentence, one button.
@@ -136,7 +136,7 @@ Tabler Icons (MIT, `gui/icons/LICENSE.txt`), stroke 2.25, 21px (30px in empty st
 - **Saves list** (`lib/gui-plan.mjs` `listSaves`): `.../Documents/EA SPORTS College Football 27/saves/` under the home folder (Windows: `%USERPROFILE%`), newest first. Columns: Name, Modified. Only `DYNASTY-…` files (profile and playbook files share the folder); hides `*.bak`, `*.tmp`, `*.json` and the `TTT Backups` folder. The folder of the first save shows above the list (none when there are no saves). Click a save to open it; the open save's row is selected. None: EmptyState "No dynasty saves found in the CFB 27 saves folder." with Refresh.
 - **Other saves:** a text box to paste any path (surrounding double quotes are dropped), plus **Open** (or Enter).
 - **User team:** after a save opens, a dropdown "Your team (never changed)" of every school in the save (sorted by name) picks the user team.
-  - Default: the choice remembered for this save path, else `settings.json → userTeam` if it's in the save, else empty.
+  - Default: the choice remembered for this save path (`gui-state.json`), else empty. `settings.json` names no team.
   - **Continue** is disabled until a team is picked; it builds the plan and opens S1.
   - The choice (team name) is remembered per save path in `gui-state.json` in the app folder (`{"teams": {"<save path>": "<team name>"}}`).
 - **Wrong stage:** file, stage and the notice "This tool works on a Signing Day save." instead of the dropdown.
@@ -159,16 +159,16 @@ Tabler Icons (MIT, `gui/icons/LICENSE.txt`), stroke 2.25, 21px (30px in empty st
 ### 3.5 S3 Team review
 - **Header:** helmet (else TeamMark), team name, prestige, status, roster next season (before → after, large).
 - **Panels** (no tabs: on a 2560 screen everything about a team fits at once): `IN n` and `OUT n` side by side (widths 9 : 11), `KEPT n` under them; at 1900px wide or less they stack. Rows sorted by OVR, high first, then name.
-  - `IN n` (hint "transfers placed here"): transfers placed here and players moved in. (The code's signed-commit rows, tagged `[ SIGNED COMMIT ]`, no longer appear: §10 Q5.) Columns: Player, Pos, OVR, From, Role here.
+  - `IN n` (hint "transfers placed here"): transfers placed here and players moved in. Columns: Player, Pos, OVR, From, Role here.
   - `OUT n` (hint "un-signed, deleted or moved"): recruits un-signed (marked "recruit"), players cut and deleted, players moved away (`Moved → <school>`), each with its reason. Columns: Player, Pos, OVR, Result, Reason.
   - `KEPT n` (hint "undone moves"): undone items (`[ KEPT ]` and what was undone, where the player is now), each with **Restore**. Columns: Player, Pos, OVR, Undone, Now.
   - Empty panels show one line: "No transfers placed here." / "Nobody leaves this team." / "Nothing undone at this team. Undo a move above and it shows here."
-- **Undo:** every IN and OUT row has an **Undo** button, except signed commits (undoing one would only get him deleted at the rollover).
+- **Undo:** every IN and OUT row has an **Undo** button.
 - **Footer ActionBar:** `‹ Previous team` · `Mark reviewed` (primary; `Mark not reviewed` on a REVIEWED team) · `Next team ›`, in teams-list order (S2's current tab, search, chips and sort; all teams A–Z when this team is filtered out).
 - **Unknown team index:** EmptyState "That team isn't in this plan." with Back to teams.
 
 ### 3.6 S4 Save confirm and result
-- **Modal** (sidebar `Save…`, enabled on any screen once a plan exists; S1 also has a `Save…` button): "a backup is made first, then the saved file is reopened and checked"; final counts (placed, dropped, un-signed, deleted, moved; `Commits signed` only when > 0), number of undos, number of teams not reviewed (CHANGED or RE-CHECK; in `--warn` if more than 0).
+- **Modal** (sidebar `Save…`, enabled on any screen once a plan exists; S1 also has a `Save…` button): "a backup is made first, then the saved file is reopened and checked"; final counts (placed, dropped, un-signed, deleted, moved), number of undos, number of teams not reviewed (CHANGED or RE-CHECK; in `--warn` if more than 0).
 - **Buttons:** `Save` (primary), `Cancel`; Esc cancels; both are disabled while saving.
 - **Failure:** the modal stays with "Not saved." and each failure; after an `{ok:false}` answer the plan reloads.
 - **After saving:** a result screen (`#/saved`) with the backup path and **Open another save**.
@@ -187,7 +187,7 @@ Tabler Icons (MIT, `gui/icons/LICENSE.txt`), stroke 2.25, 21px (30px in empty st
 - Clicks route through `data-action` attributes and the `actions` map in `app.js` (an `<a>` with `data-action` gets `preventDefault`); a click on a `tr[data-href]` row opens it unless it lands on a link or button.
 
 ### 4.3 Data (`lib/gui-plan.mjs`, `lib/session.mjs`)
-- All save access goes through `lib/session.mjs`. Save uses the same backup and reopen check as `ttt.mjs` (`session.applySigningDay(locks)`, then `session.save()`; `PLAN.md` §4.4).
+- All save access goes through `lib/session.mjs`. Save uses the backup and reopen check (`session.applySigningDay(locks)`, then `session.save()`; `PLAN.md` §4.4).
 - `lib/gui-plan.mjs`: plan building (`rawPlan`, `buildPlan`, `movesOf`), locks file (`locksPath`, `emptyState`, `loadState`, `saveState`, `lockCount`), saves list (`SAVES_DIR`, `listSaves`), team art (`ART_DIR`, `ASSETS_DIR`, `ART_DIRS`, `teamArt`).
 - Refuses any path inside `test_saves/` (any folder of that name in the path).
 
@@ -213,15 +213,15 @@ Tabler Icons (MIT, `gui/icons/LICENSE.txt`), stroke 2.25, 21px (30px in empty st
 - `/api/save`: `counts` = the Plan `summary`, `undos` = the lock count. On success the locks file is deleted and the session closed. If an edit fails, `failed` lists them and the plan is rebuilt; if the save check fails, the save is reopened for the same team and the plan rebuilt.
 
 ### 5.2 Plan
-`Plan` = `{save:{fileName, filePath, stage}, summary:{placed, dropped, unsigned, deleted, moved, signed}, userTeam:{index, name, short, colors, logo, helmet}, teams:[{index, name, short, colors, logo, helmet, prestige, rosterBefore, rosterAfter, in:[…], out:[…], kept:[…], counts:{in, out, deleted, kept}, status}], locks:{count}}`.
+`Plan` = `{save:{fileName, filePath, stage}, summary:{placed, dropped, unsigned, deleted, moved}, userTeam:{index, name, short, colors, logo, helmet}, teams:[{index, name, short, colors, logo, helmet, prestige, rosterBefore, rosterAfter, in:[…], out:[…], kept:[…], counts:{in, out, deleted, kept}, status}], locks:{count}}`.
 - `save.stage`: the stage label.
-- `summary`: `placed` = `placement.placed` · `dropped` = `placement.unplaced` · `unsigned` = cleanup `unsign` + recruit cuts · `deleted` = cuts with `fate` `Deleted` · `moved` = `placement.moved` · `signed` = `committed` with `sign: true` (counts; `signed` is always 0 now, §10 Q5).
+- `summary`: `placed` = `placement.placed` · `dropped` = `placement.unplaced` · `unsigned` = cleanup `unsign` + recruit cuts · `deleted` = cuts with `fate` `Deleted` · `moved` = `placement.moved` (counts).
 - `teams`: the CPU teams of the plan (not the user team), sorted by name. `rosterBefore` = next season's projected roster before the plan (`getLeague()` `rosterNextSeason`); `rosterAfter` = `placement.teams[].rosterEnd`. `status`: `""` (no moves), `CHANGED`, `REVIEWED`, `RE-CHECK`.
 - `colors`: `{primary:"#rrggbb", secondary:"#rrggbb"}` (lowercase). `logo`, `helmet`: an `assets/…` URL or null.
 
 ### 5.3 Rows
 Every row has `playerIndex, name, pos, ovr`.
-- `in`: `from, role, kind` (`placed`, `moved` or `signed`).
+- `in`: `from, role, kind` (`placed` or `moved`).
 - `out`: `kind` (`Recruit` or `Returning`; transfers are never cut), `result` (`Un-signed`, `Moved`, `Deleted`), `to` (school or null), `reason`: `Under <underOverall> OVR` (cleanup), `Room for <name> (<cut reason>)`, or the cut reason alone when no one was placed for it (`board full`, `trim to 85`).
 - `kept`: `lock` (`keep` or `notAt`), `undone` (`Un-sign`, `Cut` or `Transfer in`), `now` (`Placed at <school>`, `Un-signed`, `Moved to <school>`, `Deleted`, `Dropped (no school)`, else `Stays`). Shown at the school the undo was made at: `keep` at the recruit's destination or the player's team; `notAt` at each locked school.
 
@@ -251,8 +251,8 @@ Every row has `playerIndex, name, pos, ovr`.
 
 ## 7. Reads and the picked user team (Built)
 - **`lib/dynasty.mjs`:** the Team table's first read includes `TEAM_BACKGROUNDCOLORR`, `…G`, `…B`, `…R2`, `…G2`, `…B2`, exposed as `team.colors`; `ShortName` is exposed as `team.short` (`Mascot_AssetName` is empty for 12 of 138 schools; `ShortName` is always filled and unique).
-- **`lib/session.mjs`:** `open(path, {userTeam})` takes the picked team (name or index) instead of `settings.userTeam`, and refuses if it isn't in the save. `Session.peek(path)` reads a save's stage and schools (`{index, name, longName, short, colors}`) for S0.
-  - The planners (`signing-day.mjs`, `destinations.mjs`) look the user team up by name in `settings.userTeam`. So the session keeps `this.settings = {...settings, userTeam: <picked team's name>}` in memory (`settings.json` is unchanged), and every planner protects the picked team; `RosterEdits` gets its index.
+- **`lib/session.mjs`:** `open(path, {userTeam})` takes the picked team (name or index), and refuses if it isn't in the save. With no team passed it reads `settings.json` → `testSavesTeam` (only the `tools/` scripts, which run on `test_saves` copies); with neither, it refuses. `Session.peek(path)` reads a save's stage and schools (`{index, name, longName, short, colors}`) for S0.
+  - The planners (`signing-day.mjs`, `destinations.mjs`) look the user team up by name in `settings.userTeam`. So the session keeps `this.settings = {...settings, userTeam: <picked team's name>}` in memory (`settings.json` has no `userTeam`), and every planner protects the picked team; `RosterEdits` gets its index.
   - The session remembers the pick, so its own reopen after a failed `applySigningDay` keeps the same team.
 
 ## 8. Mockup and checks
@@ -265,7 +265,7 @@ Mock up a screen change before building it; rerun the checks after any GUI or `l
 
 ### 8.2 Checks
 On a copy of `test_saves/DYNASTY-SIGNINGDAYCOPY` (baseline numbers: `PLAN.md` §4.6):
-- Picking the `settings.json` team: the overview counts match `ttt.mjs` on the same copy (placed = `place`, unsigned = `un-sign` + `un-sign … recruits`, deleted = `cut`, moved = `move`, dropped = `unplaced`; signed is always 0, §10 Q5). Picking another team: it has no moves, and the `settings.json` team is planned like any CPU team.
+- Picking Kansas: the overview counts match the baseline. Picking another team: it has no moves, and Kansas is planned like any CPU team.
 - S2 lists 137 CPU teams; search, tabs, sort and filters work. Missouri's IN and OUT match the plan.
 - Undo one transfer-in and one un-signed recruit: the plan rebuilds, both move to KEPT, an affected reviewed team shows `RE-CHECK`, and the locks file survives a page refresh. With no locks, the plan matches the planner's output.
 - Save: passes the reopen check, the backup exists and the locks file is deleted.
@@ -321,8 +321,8 @@ A head name that fails `^[A-Za-z0-9_-]{1,32}$` counts as missing. Cases 1 and 2 
 | Ratings | `OVR 87 → MAX 94`; six skill groups, each its name, `LV 15/16` and its ratings with the game's short labels (`SPD 93 ACC 95 STA 90 KR 45`) | `d.skillGroupDetail(p)` | |
 | Top 5 | his list when his turn came: rank, TeamMark, school, `HIS` (player score), `THEIRS` (team score ÷ 2, so 0–100 as in the combined score), `MATCH` (combined), role there. The landing school is tagged `[ HERE ]`, as a 6th row when it isn't in the top 5 (Best fit) | snapshot from the planner (§9.5) | |
 
-- **Status** (StatusTag and the card's top edge): PLACED `--in`, MOVED `--moved`, SIGNED COMMIT and UN-SIGNED `--orange`, DELETED `--out`, DROPPED `--warn`, STAYS (an undone un-sign or cut) `--text-2`.
-- **Hidden parts:** Pitch when he ends up nowhere (un-signed, deleted, dropped). Top 5 when the planner never ranked schools for him (signed commits, recruits).
+- **Status** (StatusTag and the card's top edge): PLACED `--in`, MOVED `--moved`, UN-SIGNED `--orange`, DELETED `--out`, DROPPED `--warn`, STAYS (an undone un-sign or cut) `--text-2`.
+- **Hidden parts:** Pitch when he ends up nowhere (un-signed, deleted, dropped). Top 5 when the planner never ranked schools for him (recruits).
 - **Key ratings** = the six skill groups: they're the game's own progression view, and `skillGroupDetail` already computes them.
 - **Category icons** (Tabler, always beside the label, copied into `gui/icons/`): Playing Time `clock`, Proximity to Home `home`, Championship Contender `trophy`, Brand Exposure `speakerphone`, Coach Prestige `user-star`, Coach Stability `anchor`, Conference Prestige `flag`, Program Tradition `books`, Stadium Atmosphere `building-stadium`, Academic Prestige `school`, Campus Lifestyle `confetti`, Athletic Facilities `barbell`, Playing Style `ball-american-football`, Pro Potential `briefcase`. Plus `x` for Close.
 - The Plan rows already carry `playerIndex`, so the `Plan` itself doesn't change.
@@ -415,7 +415,7 @@ Named players (a copy of `DYNASTY-SIGNINGDAYCOPY`, user team Kansas, no undos, M
 - **Jackson Hancock** (FS 71, 13344): cut at Missouri for Zeraun Daniel (S cap), moved to West Virginia (Rotation).
 
 1. **Data:** the reads, the snapshot and `playerCard`. Proof on a fresh copy:
-   - The `ttt.mjs` counts and the GUI plan's summary are unchanged.
+   - The GUI plan's summary is unchanged.
    - The plan JSON with `top5`/`here` removed equals today's.
    - The card JSON for the four players matches the bullets above.
 2. **Mockup:** the card in `gui/mockup.html` for Missouri's players, screenshot at 2560×1440. The mockup data keeps its one undo (Caden Madha), so his card shows the STAYS story and Mario Wofford lands elsewhere; the step 1 checks use the plan with no undos. The four players' portraits are in `gui/art/`, so the cloud screenshot shows them. **Stop and show Tom.**
@@ -434,4 +434,3 @@ Named players (a copy of `DYNASTY-SIGNINGDAYCOPY`, user team Kansas, no undos, M
 2. **Spacing:** keep the 4/8px grid as the rule for new work, or drop it (§2.5)?
 3. **Undo without `teamIndex` corrupts the locks file** (code defect): `gui.mjs` `/api/undo` with kind `"in"` and no `teamIndex` stores `NaN`, saved as `null`, which reloads as team 0 (the player shows in Air Force's KEPT). The GUI always sends it. Validate it?
 4. **Locks follow the save path, not the team:** picking another user team for the same save reuses its undos and reviews (§6). Intended?
-5. **Inert signed-commit pieces** (portal-week mode removed, `PLAN.md` §5): the planner no longer sets `committed[].sign`, so `summary.signed` is always 0, and the `[ SIGNED COMMIT ]` IN rows (§2.8, §3.5, with their Undo exception) and S4's `Commits signed` (§3.6) never show. Code: `lib/gui-plan.mjs` (the `kind: "signed"` rows, `summary.signed`), `gui/views.js` (the tag, `Commits signed`), `gui/styles.css` `.tag.SIGNED`. Remove them in a GUI task?

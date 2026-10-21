@@ -2,7 +2,7 @@
 
 ## Project
 
-Node.js CLI (`ttt.mjs`) and local GUI (`gui.mjs`) that edit EA Sports College Football 27 dynasty saves. CPU schools barely recruit the transfer portal, so at the Signing Day → Preseason rollover the game deletes ~1,300 uncommitted transfers and teams collapse. The tool's core is calculating interest both ways (how much a player wants each school, how much each school wants him) and placing transfers by it. The user team (the user's own school) is never touched.
+Local GUI (`gui.mjs`, Node.js) that edits EA Sports College Football 27 dynasty saves. CPU schools barely recruit the transfer portal, so at the Signing Day → Preseason rollover the game deletes ~1,300 uncommitted transfers and teams collapse. The tool's core is calculating interest both ways (how much a player wants each school, how much each school wants him) and placing transfers by it. The user team (the user's own school) is never touched.
 
 Personal tool: one user (Tom), run locally, private repo. Skip public-release concerns (accessibility, other browsers/screens, auth, user-proofing, backwards compatibility, polished errors). Reading Tom's PC folders is fine. Save-safety rules still apply in full.
 
@@ -17,7 +17,7 @@ Docs: `PLAN.md` (status, task list, what's built), `GUI-PLAN.md` (GUI spec). Cha
 
 ## Hard rules
 
-- Never change the user team (`settings.json` → `userTeam`; never hard-coded). If the name isn't found in a save, refuse to open it.
+- Never change the user team (picked per save in the GUI; never hard-coded or defaulted). If it isn't found in a save, refuse to open it.
 - Never write to `test_saves/` or a real save. Work on copies; only an explicit Save writes, always with a backup and a reopen check.
 
 ## Save traps (learned the hard way)
