@@ -6,7 +6,6 @@
 - On `main`: the Signing Day GUI `node gui.mjs` (spec `GUI-PLAN.md` §0–8), the only way to edit a save. It runs Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
 - Portal-week mode removed and the `Kansas` default dropped (git `0593958`): on fresh copies of `DYNASTY-SIGNINGDAYCOPY` the Signing Day plan, every field write and the GUI `/api/plan` are identical to before (only the always-0 `sign unsigned commits` counter is gone); `DYNASTY-WEEK2COPY` and a `settings.json` without `userTeam` are refused in one line.
 - GUI only (hub edit): `ttt.mjs` deleted; the GUI no longer pre-fills a team from `settings.json` (pick per save, remembered in `gui-state.json`); `settings.json` `userTeam` is now `testSavesTeam`, read only when `Session.open` gets no team (the `tools/` scripts); the always-0 `signed` summary counter and the `[ SIGNED COMMIT ]` IN rows are gone. Fresh copy of `DYNASTY-SIGNINGDAYCOPY`: no suggested team on first open, Kansas picked → §4.6 summary unchanged (Missouri IN 16, OUT 22), remembered on reopen; `tools/step5-report` still runs (Kansas skipped, un-signed 1535).
-- §3 answered: no draft lock in the GUI (Tom; it stays in `tools/step2-test.mjs` only); stale comments fixed and `lib/stage.mjs` `action`/`buildStep` dropped; `/handoff` stays as is.
 - Next: Tom starts working on the GUI. Open GUI questions: `GUI-PLAN.md` §9.7 (player card), §10 Q1–4.
 
 ## 2. Task list
