@@ -6,7 +6,6 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { Session } from "./lib/session.mjs";
-import { loadSettings } from "./lib/settings.mjs";
 import { ART_DIRS, listSaves, teamArt, emptyState, loadState, saveState, locksPath, lockCount, rawPlan, buildPlan, movesOf } from "./lib/gui-plan.mjs";
 
 const APP_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -48,7 +47,7 @@ const api = {
     const peek = await Session.peek(file);
     const teams = peek.teams.map(t => ({ index: t.index, name: t.name, short: t.short, colors: t.colors, ...teamArt(t.name, t.longName) }));
     const find = name => teams.find(t => t.name.toLowerCase() === String(name || "").trim().toLowerCase());
-    const suggested = find(guiState().teams?.[peek.filePath]) ?? find(loadSettings().userTeam) ?? null;
+    const suggested = find(guiState().teams?.[peek.filePath]) ?? null;
     opened = peek;
     return { path: peek.filePath, fileName: peek.fileName, stage: { id: peek.stage.id, label: peek.stage.label }, teams, suggestedUserTeam: suggested?.index ?? null };
   },

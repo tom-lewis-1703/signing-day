@@ -205,7 +205,7 @@ function teamView(ui, t, nav) {
   const panel = (cls, ic, title, n, hint, body) => `<section class="panel ${cls}" aria-label="${esc(title)}"><header>${icon(ic)}<h2>${esc(title)}</h2><span class="n">${n}</span>${hint ? `<span class="hint">${esc(hint)}</span>` : ""}</header>${body}</section>`;
 
   const inBody = t.in.length ? `<table class="actions-table">${cols([null, 84, 72, 230, 150, 130])}${head([["Player"], ["Pos"], ["OVR", 1], ["From"], ["Role here"]])}<tbody>${t.in.map(r =>
-      `<tr>${player(r, r.kind === "signed" ? ` <span class="tag SIGNED">[ SIGNED COMMIT ]</span>` : "")}<td>${esc(r.from)}</td><td>${esc(r.role ?? "—")}</td><td class="act">${r.kind === "signed" ? "" : undo(r, "in")}</td></tr>`).join("")}</tbody></table>`
+      `<tr>${player(r)}<td>${esc(r.from)}</td><td>${esc(r.role ?? "—")}</td><td class="act">${undo(r, "in")}</td></tr>`).join("")}</tbody></table>`
     : `<p class="none">No transfers placed here.</p>`;
   const outBody = t.out.length ? `<table class="actions-table">${cols([240, 84, 64, 280, null, 130])}${head([["Player"], ["Pos"], ["OVR", 1], ["Result"], ["Reason"]])}<tbody>${t.out.map(r =>
       `<tr>${player(r, r.kind === "Recruit" ? ` <span class="muted">recruit</span>` : "")}<td>${result(r)}</td><td class="muted wrap">${esc(r.reason)}</td><td class="act">${undo(r, "out")}</td></tr>`).join("")}</tbody></table>`
@@ -240,7 +240,7 @@ function saveModal(ui) {
     <h2 id="save-h">Save this plan?</h2>
     <p class="muted">${esc(p.save.fileName)}: a backup is made first, then the saved file is reopened and checked.</p>
     <div class="kv">
-      ${kv("Transfers placed", s.placed)}${kv("Dropped", s.dropped)}${kv("Recruits un-signed", s.unsigned)}${kv("Players deleted", s.deleted)}${kv("Players moved", s.moved)}${s.signed ? kv("Commits signed", s.signed) : ""}
+      ${kv("Transfers placed", s.placed)}${kv("Dropped", s.dropped)}${kv("Recruits un-signed", s.unsigned)}${kv("Players deleted", s.deleted)}${kv("Players moved", s.moved)}
       ${kv("Undos", p.locks.count)}${kv("Teams not reviewed", notReviewed, notReviewed > 0 ? "warn" : "")}
     </div>
     ${m.failed ? `<div class="notice error" role="alert">${icon("alert-triangle")}<span>Not saved. ${m.failed.map(esc).join("<br>")}</span></div>` : ""}

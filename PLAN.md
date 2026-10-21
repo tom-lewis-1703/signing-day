@@ -3,29 +3,29 @@
 `/hub` starts the hub chat (design and dispatch; see `.claude/skills/hub/SKILL.md`). `/next` starts the first open task in "Task list" that has no builder tag; `/handoff` updates this file. A task a builder session is working on ends with `(builder: <session id>)`. Rules and save facts are in `CLAUDE.md`; the GUI spec is `GUI-PLAN.md`; history is in git. Cite sections as `PLAN §n.m`.
 
 ## 1. Where we are and what's next
-- On `main`: the CLI `node ttt.mjs "<save copy>"` (Signing Day: the full build; a portal-week save is refused) and the Signing Day GUI `node gui.mjs` (spec `GUI-PLAN.md` §0–8). Both run Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
+- On `main`: the Signing Day GUI `node gui.mjs` (spec `GUI-PLAN.md` §0–8), the only way to edit a save. It runs Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
 - Portal-week mode removed and the `Kansas` default dropped (git `0593958`): on fresh copies of `DYNASTY-SIGNINGDAYCOPY` the Signing Day plan, every field write and the GUI `/api/plan` are identical to before (only the always-0 `sign unsigned commits` counter is gone); `DYNASTY-WEEK2COPY` and a `settings.json` without `userTeam` are refused in one line.
-- Next: Tom decided the tool is GUI only (the CLI is retired); the hub does the first task below itself as a small edit.
+- GUI only (hub edit): `ttt.mjs` deleted; the GUI no longer pre-fills a team from `settings.json` (pick per save, remembered in `gui-state.json`); `settings.json` `userTeam` is now `testSavesTeam`, read only when `Session.open` gets no team (the `tools/` scripts); the always-0 `signed` summary counter and the `[ SIGNED COMMIT ]` IN rows are gone. Fresh copy of `DYNASTY-SIGNINGDAYCOPY`: no suggested team on first open, Kansas picked → §4.6 summary unchanged (Missouri IN 16, OUT 22), remembered on reopen; `tools/step5-report` still runs (Kansas skipped, un-signed 1535).
+- Next: §3 questions (Q2 and Q3 are small hub edits).
 
 ## 2. Task list
 One chat per task. `[ ]` open, `[x]` done.
-- [ ] **GUI only** (hub, small edit): delete `ttt.mjs`; `gui.mjs` stops reading `settings.json` for the team (no pre-fill: pick per save, remembered in `gui-state.json`); rename `settings.json` `userTeam` to `testSavesTeam`, read only by `Session.open` when no team is passed (the `tools/` check scripts, which only run on `test_saves/`, Tom's Kansas dynasty); update `CLAUDE.md` (project line, hard rule), §1, §4 and `GUI-PLAN.md` §3.2/§5 to match. Test on a fresh copy of `DYNASTY-SIGNINGDAYCOPY`: the GUI opens it, Kansas is picked, the counts match §4's baseline; one `tools/` script still runs.
-- [ ] **Decide (Tom):** remove the GUI's leftover signed-commit code (the `signed` summary counter, always 0 now, and the `[ SIGNED COMMIT ]` row)? If yes, the hub does it as a small edit.
+- [x] **GUI only** (hub, small edit): delete `ttt.mjs`; `gui.mjs` stops reading `settings.json` for the team (no pre-fill: pick per save, remembered in `gui-state.json`); rename `settings.json` `userTeam` to `testSavesTeam`, read only by `Session.open` when no team is passed (the `tools/` check scripts, which only run on `test_saves/`, Tom's Kansas dynasty); update `CLAUDE.md` (project line, hard rule), §1, §4 and `GUI-PLAN.md` §3.2/§5 to match. Test on a fresh copy of `DYNASTY-SIGNINGDAYCOPY`: the GUI opens it, Kansas is picked, the counts match §4's baseline; one `tools/` script still runs.
+- [x] **Decide (Tom):** remove the GUI's leftover signed-commit code? Yes; removed with the GUI-only edit.
 
 ## 3. Open questions for Tom
-1. **Draft lock isn't in `ttt.mjs` or the GUI.** Only `tools/step2-test.mjs` applies it (`Session.applyDraftLock`, on a work copy); `Session.open` runs `planDraftLock` read-only for its `draftCheck` counts; `ttt.mjs` prints `No action at this stage.` at Players Leaving. Intended?
+1. **Draft lock isn't in the GUI.** Only `tools/step2-test.mjs` applies it (`Session.applyDraftLock`, on a work copy); `Session.open` runs `planDraftLock` read-only for its `draftCheck` counts; the GUI refuses a Players Leaving save. Intended?
 2. **Stale code comments** (a code task; these docs follow git history): `lib/roster-edits.mjs` line 2 calls `movePlayer` "not yet proven", but it was proven in-game (§4.4); `lib/signing-day.mjs` line 1 says "writing comes later", but `Session.applySigningDay` writes the plan; `lib/stage.mjs` `action` and `buildStep` labels are stale and unused.
 3. **Walkthrough page out of date:** `docs/ttt-internals.html` line 454 says prestige counts only if he'd start, rotate or has a path to start; since git `17c12de`, `lib/destinations.mjs` counts it whatever his role. Its weekly-commit parts describe the removed portal-week mode (§5). Update the page (and republish) at the next `/handoff`?
 4. **Keeping §4 current:** §4 is now the home of commands, files, exports, save writes and baseline numbers, but `/handoff` step 3 sends a changed "file, command, setting behavior or save fact" to `CLAUDE.md`. Point the skill and the brief template's Finish at `PLAN.md` §4 as well?
-5. **GUI:** `GUI-PLAN.md` §9.7 (player card) and §10 (built GUI vs spec, code defects).
+5. **GUI:** `GUI-PLAN.md` §9.7 (player card) and §10 Q1–4 (built GUI vs spec, code defects).
 
 ## 4. What's built
 
 ### 4.1 Commands
 | Command | Does |
 |---|---|
-| `node ttt.mjs "<save copy>"` | Refuses a path with a `test_saves` folder in it, and (one line, exit 1) a `settings.json` with no `userTeam`. Opens the save with `Session.open` (user team = `settings.json` → `userTeam`), then by stage (§4.2):<br>• `week-1`…`week-4`: one line, `Portal-week mode was removed (PLAN.md §5); nothing was changed.`, exit 1.<br>• `signing-day`: `session.applySigningDay()`, all or nothing (any failed edit: the save is reopened, failures printed, exit 1); prints `un-sign N · place N of N (unplaced N)` and `make room: un-sign N recruits, move N, cut N`.<br>• any other stage (incl. `players-leaving`): `No action at this stage.`<br>Then the top 10 moves by OVR and `Save? y/n`; `y` → `session.save()` (§4.4). |
-| `node gui.mjs [--no-open]` | Signing Day GUI: `GUI-PLAN.md`. |
+| `node gui.mjs [--no-open]` | Signing Day GUI (the only save editor; the CLI `ttt.mjs` was removed): `GUI-PLAN.md`. The user team is picked per save. |
 | `node tools/<name>.mjs …` | Reports and test helpers: §4.5. |
 
 Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3.1; `sharp` 0.35.5 (devDependency, only `tools/copy-art.mjs`).
@@ -36,10 +36,10 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 ### 4.3 Code map
 | File | Role | Main exports |
 |---|---|---|
-| `lib/session.mjs` | The entry point for `ttt.mjs` and `gui.mjs`: open (refuses when no user team is named, and a save that doesn't contain the user team named in `settings.json` or picked in the GUI), plans, edits, save | `Session`: `peek`, `open(path, {userTeam})`, `signingDayPlan(locks)`, `applySigningDay(locks)`, `edits()`, `getLeague()`, `save()`, `previewDraftLock`, `applyDraftLock`; read-only helpers `depthTeams`, `depthTeam`, `leagueSummary`, `portalPlayers`, `roleAt`, `whoWantsHim`, `destinations` |
+| `lib/session.mjs` | The entry point for `gui.mjs` and `tools/`: open (refuses when no user team is named, and a save that doesn't contain the team picked in the GUI, or for `tools/`, `settings.json` → `testSavesTeam`), plans, edits, save | `Session`: `peek`, `open(path, {userTeam})`, `signingDayPlan(locks)`, `applySigningDay(locks)`, `edits()`, `getLeague()`, `save()`, `previewDraftLock`, `applyDraftLock`; read-only helpers `depthTeams`, `depthTeam`, `leagueSummary`, `portalPlayers`, `roleAt`, `whoWantsHim`, `destinations` |
 | `lib/dynasty.mjs` | Read layer: every field read once in `Dynasty.load` (save trap, `CLAUDE.md`); teams, players, boards, offers, indexes | `Dynasty`, `openFranchise`, `NO_TEAM` (255), `ZERO`, `nextClass`, `classRank`, `GRADES`, `gradeValue` |
 | `lib/stage.mjs` | Stage from `SeasonInfo` (§4.2) | `readStage` |
-| `lib/settings.mjs` | Tuning values: `DEFAULTS` (every tuning key commented; `userTeam` has no default, so `settings.json` must name it). `settings.json` overrides key by key at every level; lists replace whole; a missing `settings.json` is written from `DEFAULTS` | `DEFAULTS`, `loadSettings` |
+| `lib/settings.mjs` | Tuning values: `DEFAULTS` (every tuning key commented). No user team; `testSavesTeam` (no default; Kansas in `settings.json`) names it for the `tools/` scripts. `settings.json` overrides key by key at every level; lists replace whole; a missing `settings.json` is written from `DEFAULTS` | `DEFAULTS`, `loadSettings` |
 | `lib/depth-chart.mjs` | Next season's depth chart per team; roles Starter / Rotation / Backup / Buried | `projectLeague`, `roomOf`, `ROOMS`, `ROOM_ORDER`, `assignRoles`, `roleAtTeam` |
 | `lib/ratings-model.mjs` | OVR and max OVR (ceiling) per skill group; data `lib/data/ratings-model.json` | `ceiling`, `RATING_FIELDS` |
 | `lib/fit.mjs` | Team side: how much each school wants him | `whoWantsHim`, `fitAt`, `starterLevels`, `prestigeTargets`, `roomNeeds` |
@@ -86,8 +86,8 @@ Usage is in each file's first lines.
 ### 4.6 Baseline numbers
 Stock `test_saves/DYNASTY-SIGNINGDAYCOPY` (copy), user team Kansas, no GUI locks, `settings.json` as of this commit (a settings change moves them):
 - 138 schools (137 CPU), 16,233 named players; 1,310 uncommitted transfers.
-- `ttt.mjs`: `un-sign 1535 · place 1310 of 1310 (unplaced 0)`; `make room: un-sign 682 recruits, move 136, cut 15`.
-- GUI summary: placed 1,310 · dropped 0 · unsigned 2,217 · deleted 15 · moved 136 · signed 0. Missouri: IN 16, OUT 22.
+- Planner: the recruit cleanup un-signs 1,535 (`tools/step5-report`); placement makes room by un-signing 682 more recruits, moving 136 and cutting 15 (GUI unsigned = 1,535 + 682).
+- GUI summary: placed 1,310 · dropped 0 · unsigned 2,217 · deleted 15 · moved 136. Missouri: IN 16, OUT 22.
 
 ## 5. Later (not scheduled; don't start without Tom)
 - GUI player card: plan in `GUI-PLAN.md` §9.
