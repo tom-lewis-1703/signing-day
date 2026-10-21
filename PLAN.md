@@ -1,6 +1,6 @@
 # Plan
 
-`/next` starts the first open task in "Task list"; `/handoff` updates this file. Rules and save facts are in `CLAUDE.md`; history is in git.
+`/hub` starts the hub chat (design and dispatch; see `.claude/skills/hub/SKILL.md`). `/next` starts the first open task in "Task list"; `/handoff` updates this file. A task a builder session is working on ends with `(builder: <session id>)`. Rules and save facts are in `CLAUDE.md`; history is in git.
 
 ## Where we are and what's next
 - On `main`: `node ttt.mjs "<save copy>"` (CLI: this week's commits and list updates in the portal weeks, or the full Signing Day build) and `node gui.mjs` (Signing Day GUI, spec `GUI-PLAN.md` §1–8). At Signing Day both use `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`).
