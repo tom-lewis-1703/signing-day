@@ -9,7 +9,7 @@ const LIMIT = 85;
 const s = new Session();
 await s.open(process.argv[2]);
 const d = s.d, L = s.getLeague();
-const kansas = s.userTeam.teamIndex;
+const user = s.userTeam;
 
 const uncommitted = d.players.filter(p => p.isTransfer && !p.transferCommitted);
 const isRecruitTag = e => e.tags.some(t => /recruit/.test(t));
@@ -21,7 +21,7 @@ const capRoomByPos = Object.fromEntries(Object.keys(CAPS).map(k => [k, 0]));
 const overCapRealByPos = Object.fromEntries(Object.keys(CAPS).map(k => [k, 0]));
 
 for (const proj of L.teams.values()) {
-  if (proj.teamIndex === kansas) continue;
+  if (proj.teamIndex === user.teamIndex) continue;
   sum.teams++;
   const rooms = Object.fromEntries(Object.entries(proj.rooms).map(([r, l]) => [r, [...l]]));
   const count = () => Object.values(rooms).reduce((a, l) => a + l.length, 0);
@@ -64,7 +64,7 @@ for (const proj of L.teams.values()) {
 const needByPos = Object.fromEntries(Object.keys(CAPS).map(k => [k, 0]));
 for (const p of uncommitted) { const r = roomOf(p.position); if (r) needByPos[r]++; }
 
-console.log(`Signing Day: ${uncommitted.length} uncommitted transfers; ${sum.teams} AI teams (Kansas excluded)`);
+console.log(`Signing Day: ${uncommitted.length} uncommitted transfers; ${sum.teams} AI teams (${user.name} excluded)`);
 console.log(JSON.stringify(sum, null, 1));
 console.log("\nBy position: uncommitted transfers vs free cap spots across AI teams after cleanup");
 for (const r of Object.keys(CAPS)) console.log(`  ${r.padEnd(4)} transfers ${String(needByPos[r]).padStart(4)} | free cap spots ${String(capRoomByPos[r]).padStart(4)}${overCapRealByPos[r] ? ` | real players already over cap: ${overCapRealByPos[r]}` : ""}`);
