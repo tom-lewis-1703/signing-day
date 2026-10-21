@@ -4,13 +4,14 @@
 
 ## 1. Where we are and what's next
 - On `main`: the Signing Day GUI `node gui.mjs` (spec `GUI-PLAN.md` §0–8), the only way to edit a save. It runs Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
-- Next: Tom starts working on the GUI. Open GUI questions: `GUI-PLAN.md` §9.7 (player card).
+- Next: the player card (`GUI-PLAN.md` §9; task 1).
 
 ## 2. Task list
 One chat per task. `[ ]` open, `[x]` done.
+1. [ ] **Player card** (`GUI-PLAN.md` §9): build steps 1–3 of §9.6, with the `tools/copy-art.mjs` head-to-file fix. Then Tom re-runs `copy-art` on his PC and checks the four portraits in-game (§9.6 step 4).
 
 ## 3. Open questions for Tom
-1. **GUI:** `GUI-PLAN.md` §9.7 (player card).
+None.
 
 ## 4. What's built
 
@@ -81,7 +82,6 @@ Stock `test_saves/DYNASTY-SIGNINGDAYCOPY` (copy), user team Kansas, no GUI locks
 - GUI summary: placed 1,310 · dropped 0 · unsigned 2,217 · deleted 15 · moved 136. Missouri: IN 16, OUT 22.
 
 ## 5. Later (not scheduled; don't start without Tom)
-- GUI player card: plan in `GUI-PLAN.md` §9.
 - Portal-week mode (weekly commits, list updates): removed in `0593958` for a full redesign; old code in git history.
 - AI-run CPU coaches.
 - Position limits (the game over-recruits RB and WR).
