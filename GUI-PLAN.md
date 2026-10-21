@@ -270,10 +270,10 @@ With no `forName` (the 85 trim, a full board), the reason stands alone: `Cut at 
 - **Read-only:** no Undo in the card; the row keeps it. After Undo, Restore or Mark reviewed, the plan rebuilds and an open card reloads (his story may have changed).
 - **Loading:** the card shows his name from the row and `Loading…`; an error shows as a notice inside the card.
 - **Where (2560×1440, 100%):** a drawer fixed to the right edge under the top bar.
-  - Size: 860px wide, x 1700–2560, y 58–1440 (1382px tall).
+  - Size: 840px wide, y 58–1440 (1382px tall). Its right edge is the page's scroll bar gutter (`scrollbar-gutter: stable`, about 17px in Edge at 100%), so it spans about x 1703–2543 on Tom's screen.
   - Look: `--surface`, 1px `--border` left edge, 3px top edge in his status color, padding 28px, no dimming.
   - Measured on the mockup's Missouri page: IN ends at x 1271 and OUT's Player, Pos and OVR columns end at x 1684. With the card open, every row's name stays visible and clickable.
-  - Under 1900px wide the panels stack and the drawer stays 860px; player names stay visible down to the 1600px minimum window.
+  - Under 1900px wide the panels stack and the drawer stays 840px; player names stay visible down to the 1600px minimum window.
   - It doesn't scroll with the page. Its body scrolls only on a window shorter than the card. The save modal (z-index 20) still opens above it.
 - **Inside, top to bottom** (fits 1382px with no scroll on Tom's screen). Values are Jesse Legree's on the stock copy; `nn` are scores the snapshot will supply, and `met` is format only:
 
