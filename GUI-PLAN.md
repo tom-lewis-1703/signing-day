@@ -159,7 +159,7 @@ Tabler Icons (MIT, `gui/icons/LICENSE.txt`), stroke 2.25, 21px (30px in empty st
 ### 3.5 S3 Team review
 - **Header:** helmet (else TeamMark), team name, prestige, status, roster next season (before → after, large).
 - **Panels** (no tabs: on a 2560 screen everything about a team fits at once): `IN n` and `OUT n` side by side (widths 9 : 11), `KEPT n` under them; at 1900px wide or less they stack. Rows sorted by OVR, high first, then name.
-  - `IN n` (hint "transfers placed here"): transfers placed here, players moved in, plus signed commits (weekly commits the game didn't sign; the tool signs them so the rollover doesn't delete them), tagged `[ SIGNED COMMIT ]`. Columns: Player, Pos, OVR, From, Role here.
+  - `IN n` (hint "transfers placed here"): transfers placed here and players moved in. (The code's signed-commit rows, tagged `[ SIGNED COMMIT ]`, no longer appear: §10 Q5.) Columns: Player, Pos, OVR, From, Role here.
   - `OUT n` (hint "un-signed, deleted or moved"): recruits un-signed (marked "recruit"), players cut and deleted, players moved away (`Moved → <school>`), each with its reason. Columns: Player, Pos, OVR, Result, Reason.
   - `KEPT n` (hint "undone moves"): undone items (`[ KEPT ]` and what was undone, where the player is now), each with **Restore**. Columns: Player, Pos, OVR, Undone, Now.
   - Empty panels show one line: "No transfers placed here." / "Nobody leaves this team." / "Nothing undone at this team. Undo a move above and it shows here."
@@ -215,7 +215,7 @@ Tabler Icons (MIT, `gui/icons/LICENSE.txt`), stroke 2.25, 21px (30px in empty st
 ### 5.2 Plan
 `Plan` = `{save:{fileName, filePath, stage}, summary:{placed, dropped, unsigned, deleted, moved, signed}, userTeam:{index, name, short, colors, logo, helmet}, teams:[{index, name, short, colors, logo, helmet, prestige, rosterBefore, rosterAfter, in:[…], out:[…], kept:[…], counts:{in, out, deleted, kept}, status}], locks:{count}}`.
 - `save.stage`: the stage label.
-- `summary`: `placed` = `placement.placed` · `dropped` = `placement.unplaced` · `unsigned` = cleanup `unsign` + recruit cuts · `deleted` = cuts with `fate` `Deleted` · `moved` = `placement.moved` · `signed` = `committed` with `sign: true` (counts).
+- `summary`: `placed` = `placement.placed` · `dropped` = `placement.unplaced` · `unsigned` = cleanup `unsign` + recruit cuts · `deleted` = cuts with `fate` `Deleted` · `moved` = `placement.moved` · `signed` = `committed` with `sign: true` (counts; `signed` is always 0 now, §10 Q5).
 - `teams`: the CPU teams of the plan (not the user team), sorted by name. `rosterBefore` = next season's projected roster before the plan (`getLeague()` `rosterNextSeason`); `rosterAfter` = `placement.teams[].rosterEnd`. `status`: `""` (no moves), `CHANGED`, `REVIEWED`, `RE-CHECK`.
 - `colors`: `{primary:"#rrggbb", secondary:"#rrggbb"}` (lowercase). `logo`, `helmet`: an `assets/…` URL or null.
 
@@ -227,7 +227,7 @@ Every row has `playerIndex, name, pos, ovr`.
 
 ### 5.4 Built from `session.signingDayPlan(locks)` (`rawPlan`)
 - Recruit cleanup: `unsign`, `underOverall`.
-- Placement: `placed`, `moved`, `cuts` (`kind`, `fate`, `reason`, `forName`), `unplaced`, `committed` (entries with `sign: true` are the signed commits in that team's IN), `teams`.
+- Placement: `placed`, `moved`, `cuts` (`kind`, `fate`, `reason`, `forName`), `unplaced`, `committed` (the game's commits; no `sign` field since portal-week mode was removed, §10 Q5), `teams`.
 - Cut `reason`: `<room> cap`, `board full`, `<rosterMax> limit`, `trim to <rosterMax>` (rosterMax 85). `fate`: `Un-signed`, `Moved → <school> (<role>)`, `Deleted`.
 
 ### 5.5 Behavior notes
@@ -252,7 +252,7 @@ Every row has `playerIndex, name, pos, ovr`.
 ## 7. Reads and the picked user team (Built)
 - **`lib/dynasty.mjs`:** the Team table's first read includes `TEAM_BACKGROUNDCOLORR`, `…G`, `…B`, `…R2`, `…G2`, `…B2`, exposed as `team.colors`; `ShortName` is exposed as `team.short` (`Mascot_AssetName` is empty for 12 of 138 schools; `ShortName` is always filled and unique).
 - **`lib/session.mjs`:** `open(path, {userTeam})` takes the picked team (name or index) instead of `settings.userTeam`, and refuses if it isn't in the save. `Session.peek(path)` reads a save's stage and schools (`{index, name, longName, short, colors}`) for S0.
-  - The planners (`signing-day.mjs`, `destinations.mjs`, `weekly-commits.mjs`) look the user team up by name in `settings.userTeam`. So the session keeps `this.settings = {...settings, userTeam: <picked team's name>}` in memory (`settings.json` is unchanged), and every planner protects the picked team; `RosterEdits` gets its index.
+  - The planners (`signing-day.mjs`, `destinations.mjs`) look the user team up by name in `settings.userTeam`. So the session keeps `this.settings = {...settings, userTeam: <picked team's name>}` in memory (`settings.json` is unchanged), and every planner protects the picked team; `RosterEdits` gets its index.
   - The session remembers the pick, so its own reopen after a failed `applySigningDay` keeps the same team.
 
 ## 8. Mockup and checks
@@ -265,7 +265,7 @@ Mock up a screen change before building it; rerun the checks after any GUI or `l
 
 ### 8.2 Checks
 On a copy of `test_saves/DYNASTY-SIGNINGDAYCOPY` (baseline numbers: `PLAN.md` §4.6):
-- Picking the `settings.json` team: the overview counts match `ttt.mjs` on the same copy (placed = `place`, unsigned = `un-sign` + `un-sign … recruits`, deleted = `cut`, moved = `move`, dropped = `unplaced`, signed = `sign unsigned commits`). Picking another team: it has no moves, and the `settings.json` team is planned like any CPU team.
+- Picking the `settings.json` team: the overview counts match `ttt.mjs` on the same copy (placed = `place`, unsigned = `un-sign` + `un-sign … recruits`, deleted = `cut`, moved = `move`, dropped = `unplaced`; signed is always 0, §10 Q5). Picking another team: it has no moves, and the `settings.json` team is planned like any CPU team.
 - S2 lists 137 CPU teams; search, tabs, sort and filters work. Missouri's IN and OUT match the plan.
 - Undo one transfer-in and one un-signed recruit: the plan rebuilds, both move to KEPT, an affected reviewed team shows `RE-CHECK`, and the locks file survives a page refresh. With no locks, the plan matches the planner's output.
 - Save: passes the reopen check, the backup exists and the locks file is deleted.
@@ -434,3 +434,4 @@ Named players (a copy of `DYNASTY-SIGNINGDAYCOPY`, user team Kansas, no undos, M
 2. **Spacing:** keep the 4/8px grid as the rule for new work, or drop it (§2.5)?
 3. **Undo without `teamIndex` corrupts the locks file** (code defect): `gui.mjs` `/api/undo` with kind `"in"` and no `teamIndex` stores `NaN`, saved as `null`, which reloads as team 0 (the player shows in Air Force's KEPT). The GUI always sends it. Validate it?
 4. **Locks follow the save path, not the team:** picking another user team for the same save reuses its undos and reviews (§6). Intended?
+5. **Inert signed-commit pieces** (portal-week mode removed, `PLAN.md` §5): the planner no longer sets `committed[].sign`, so `summary.signed` is always 0, and the `[ SIGNED COMMIT ]` IN rows (§2.8, §3.5, with their Undo exception) and S4's `Commits signed` (§3.6) never show. Code: `lib/gui-plan.mjs` (the `kind: "signed"` rows, `summary.signed`), `gui/views.js` (the tag, `Commits signed`), `gui/styles.css` `.tag.SIGNED`. Remove them in a GUI task?
