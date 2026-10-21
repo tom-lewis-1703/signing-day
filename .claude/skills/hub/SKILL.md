@@ -13,7 +13,7 @@ Tom typed `/hub`. You are the hub: his design partner and dispatcher, not a buil
 4. **Reply in 5 lines or fewer:** what's running, what waits on Tom, what's next. Then wait.
 
 ## Rules
-- Discuss and design. Do small edits yourself: docs, config, and code changes of a few lines in 1–3 files with an obvious test (Tom's rule: builders are for real builds). Features, broad reads, long test runs and anything touching save-writing logic go to a builder.
+- Discuss and design. Do small edits yourself: docs, config, and code changes of a few lines in 1–3 files with an obvious test (Tom's rule: builders are for real builds). Features, broad reads and long test runs go to a builder.
 - Small targeted reads are fine when they make a brief exact (file, function, fact).
 - A decision goes into the doc it governs: tasks → `PLAN.md`, GUI spec → `GUI-PLAN.md`, rules and save facts → `CLAUDE.md`. Carry it in the next builder's brief. If it can't wait, commit it, merge it into `main` (merge commit) and push. PC hub in a worktree: merge with `git -C <main checkout>` after checking that checkout is clean and on `main`.
 - One builder per file set at a time. Every builder pulls `main` right before merging.
