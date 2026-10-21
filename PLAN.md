@@ -1,6 +1,6 @@
 # Plan
 
-`/hub` starts the hub chat (design and dispatch; see `.claude/skills/hub/SKILL.md`). `/next` starts the first open task in "Task list"; `/handoff` updates this file. A task a builder session is working on ends with `(builder: <session id>)`. Rules and save facts are in `CLAUDE.md`; the GUI spec is `GUI-PLAN.md`; history is in git. Cite sections as `PLAN §n.m`.
+`/hub` starts the hub chat (design and dispatch; see `.claude/skills/hub/SKILL.md`). `/next` starts the first open task in "Task list" that has no builder tag; `/handoff` updates this file. A task a builder session is working on ends with `(builder: <session id>)`. Rules and save facts are in `CLAUDE.md`; the GUI spec is `GUI-PLAN.md`; history is in git. Cite sections as `PLAN §n.m`.
 
 ## 1. Where we are and what's next
 - On `main`: the CLI `node ttt.mjs "<save copy>"` (portal weeks: this week's commits and list updates; Signing Day: the full build) and the Signing Day GUI `node gui.mjs` (spec `GUI-PLAN.md` §0–8). Both run Signing Day through `lib/signing-day.mjs` (`planRecruitCleanup`, then `planPlacement`). What's built: §4.
@@ -11,9 +11,11 @@ One chat per task. `[ ]` open, `[x]` done.
 - None open.
 
 ## 3. Open questions for Tom
-1. **Draft lock has no command.** `lib/draft-lock.mjs` and `Session.previewDraftLock` / `applyDraftLock` exist, but `ttt.mjs` prints `No action at this stage.` at Players Leaving. Intended?
+1. **Draft lock isn't in `ttt.mjs` or the GUI.** Only `tools/step2-test.mjs` applies it (`Session.applyDraftLock`, on a work copy); `Session.open` runs `planDraftLock` read-only for its `draftCheck` counts; `ttt.mjs` prints `No action at this stage.` at Players Leaving. Intended?
 2. **Stale code comments** (a code task; these docs follow git history): `lib/roster-edits.mjs` calls the weekly `commitTransfer`, `setTopSchools` and `movePlayer` "not yet proven", but all three were proven in-game (§4.4); `lib/signing-day.mjs` line 1 says "writing comes later", but `Session.applySigningDay` writes the plan; `lib/stage.mjs` `action` and `buildStep` labels are stale and unused.
-3. **GUI:** `GUI-PLAN.md` §9.7 (player card) and §10 (built GUI vs spec).
+3. **Walkthrough page out of date:** `docs/ttt-internals.html` line 454 says prestige counts only if he'd start, rotate or has a path to start; since git `17c12de`, `lib/destinations.mjs` counts it whatever his role. Update the page (and republish) at the next `/handoff`?
+4. **Keeping §4 current:** §4 is now the home of commands, files, exports, save writes and baseline numbers, but `/handoff` step 3 sends a changed "file, command, setting behavior or save fact" to `CLAUDE.md`. Point the skill and the brief template's Finish at `PLAN.md` §4 as well?
+5. **GUI:** `GUI-PLAN.md` §9.7 (player card) and §10 (built GUI vs spec, code defects).
 
 ## 4. What's built
 
@@ -32,10 +34,10 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 ### 4.3 Code map
 | File | Role | Main exports |
 |---|---|---|
-| `lib/session.mjs` | The entry point for `ttt.mjs` and `gui.mjs`: open (refuses a save without the user team), plans, edits, save | `Session`: `peek`, `open(path, {userTeam})`, `signingDayPlan(locks)`, `applySigningDay(locks)`, `edits()`, `getLeague()`, `save()`, `previewDraftLock`, `applyDraftLock`; read-only helpers `depthTeams`, `depthTeam`, `leagueSummary`, `portalPlayers`, `roleAt`, `whoWantsHim`, `destinations` |
+| `lib/session.mjs` | The entry point for `ttt.mjs` and `gui.mjs`: open (refuses a save that doesn't contain the user team named in `settings.json` or picked in the GUI), plans, edits, save | `Session`: `peek`, `open(path, {userTeam})`, `signingDayPlan(locks)`, `applySigningDay(locks)`, `edits()`, `getLeague()`, `save()`, `previewDraftLock`, `applyDraftLock`; read-only helpers `depthTeams`, `depthTeam`, `leagueSummary`, `portalPlayers`, `roleAt`, `whoWantsHim`, `destinations` |
 | `lib/dynasty.mjs` | Read layer: every field read once in `Dynasty.load` (save trap, `CLAUDE.md`); teams, players, boards, offers, indexes | `Dynasty`, `openFranchise`, `NO_TEAM` (255), `ZERO`, `nextClass`, `classRank`, `GRADES`, `gradeValue` |
 | `lib/stage.mjs` | Stage from `SeasonInfo` (§4.2) | `readStage` |
-| `lib/settings.mjs` | Tuning values: `DEFAULTS` (each commented). `settings.json` overrides key by key at every level; lists replace whole; a missing `settings.json` is written from `DEFAULTS` | `DEFAULTS`, `loadSettings` |
+| `lib/settings.mjs` | Tuning values: `DEFAULTS` (every tuning key commented; `userTeam` defaults to `Kansas`). `settings.json` overrides key by key at every level; lists replace whole; a missing `settings.json` is written from `DEFAULTS` | `DEFAULTS`, `loadSettings` |
 | `lib/depth-chart.mjs` | Next season's depth chart per team; roles Starter / Rotation / Backup / Buried | `projectLeague`, `roomOf`, `ROOMS`, `ROOM_ORDER`, `assignRoles`, `roleAtTeam` |
 | `lib/ratings-model.mjs` | OVR and max OVR (ceiling) per skill group; data `lib/data/ratings-model.json` | `ceiling`, `RATING_FIELDS` |
 | `lib/fit.mjs` | Team side: how much each school wants him | `whoWantsHim`, `fitAt`, `starterLevels`, `prestigeTargets`, `roomNeeds` |
@@ -50,6 +52,7 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 | `lib/C27_486_1.gz` | `madden-franchise` schema 486.1 for CFB 27 | |
 
 ### 4.4 Save writes
+- "Board" below = a school's Signing Day board, `Team.CommittedPlayers` (`BOARD_SLOTS` 35; read into `d.boardTeamByPlayerRef`), not its `RecruitingBoard`.
 - Only two writers: `RosterEdits` (`lib/roster-edits.mjs`, through `session.edits()`) and `applyDraftLock` (`lib/draft-lock.mjs`). `RosterEdits` refuses the user team and logs every field it writes (`writes`); `applyDraftLock` writes records directly (not in `writes`).
 - Every `RosterEdits` method is proven in-game (git `a9ebb41`, `bc0083a`, `5aa36fe`). `CLAUDE.md`: change these formulas only with an in-game re-test.
 
@@ -59,10 +62,10 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
 | `commitTransfer(p, t, {weekly: true})` | `HardCommitted`, 1 offer, not on the board; same list change | `ttt.mjs` weeks |
 | `setTopSchools(p, list)` | His in-game list, slot by slot (same length; the user team keeps its spot and influence; refused if he is on the user team's board) | `ttt.mjs` weeks |
 | `unsignRecruit(p)` | `Top10`, 0 offers, off the school's board | Signing Day |
-| `cutPlayer(p)` | `TeamIndex` 255, `PrevTeamIndex` = his school, off its roster list and every depth chart slot | Signing Day |
+| `cutPlayer(p)` | `TeamIndex` 255, `PrevTeamIndex` = his school, off its roster list and every depth chart slot; the game deletes him at the rollover (in-game check, git `a9ebb41`) | Signing Day |
 | `movePlayer(p, t)` | The cut, then `TeamIndex` = the new school and onto its roster list; left off its depth chart | Signing Day |
 | `signCommitted(p)` | A weekly commit the game didn't sign: `Signed`, 1 offer, onto his school's board | Signing Day |
-| `applyDraftLock` (built, signed off; git `5aa36fe` `PLAN.md`) | Players with early-draft (`EarlyNFL_*`) rows who are not out of eligibility (Senior not redshirting), not on the user team and not already all Staying: every such row `LeaveStatus` = `Staying`, `PersuadeAttempts` ≥ 1 (what the game writes on a persuade) | no command (§3.1) |
+| `applyDraftLock` (built, signed off; git `5aa36fe` `PLAN.md`) | Players with early-draft (`EarlyNFL_*`) rows who are not out of eligibility (Senior not redshirting), not on the user team and not already all Staying: every such row `LeaveStatus` = `Staying`, `PersuadeAttempts` ≥ 1 (what the game writes on a persuade) | `tools/step2-test.mjs` only (§3 Q1) |
 
 - `applySigningDay` order: un-sign (frees board slots), cuts and moves, sign the unsigned weekly commits, commits.
 - Save (`session.save()` → `lib/safe-save.mjs` `safeSave`):
@@ -71,12 +74,13 @@ Run from the repo root after `npm install`. Dependencies: `madden-franchise` 4.3
   3. `Session.verifySaved`: reopens; same stage; same named-player count; when `RosterEdits` made edits, every written field reads back and no record changed that no edit wrote (byte compare with the backup, `changedRecords`).
   4. Rename the temp file over the original.
 
-  On any failure the original is unchanged and the temp file deleted; the backup stays. After a draft lock, `<name>__<YYYY-MM-DD_HHMMSS>.draft-lock.json` beside the backup records who was locked.
+  If the backup's SHA-1 check fails, the backup is deleted and nothing is written. On any later failure the original is unchanged and the temp file deleted; the backup stays. After a draft lock, `<name>__<YYYY-MM-DD_HHMMSS>.draft-lock.json` beside the backup records who was locked.
 
 ### 4.5 Tools and docs
 Usage is in each file's first lines.
 - Read-only reports: `capacity-check`, `list-journey`, `lists-report`, `offers-report`, `step3-report` (depth charts), `step4-report` (team side), `step4b-report` (player side + Top 10), `step5-report` (recruit cleanup), `weekly-report`.
-- Tests on copies: `step1-test` (open, stage, back up and save each test save in a work folder), `step2-test` (draft lock on a copy), `step2-check` (locked players still on their teams after advancing).
+- Tests on copies: `step1-test` (open, stage, back up and save each test save in a work folder), `step2-test` (draft lock on a copy, saved).
+- Read-only check: `step2-check` (a `.draft-lock.json` and a later save: are the locked players still on their teams).
 - `extract-ratings-model`: one-time; writes `lib/data/ratings-model.json` from Maxi's Dynasty Progression Monitor & Planner page.
 - `gui-mockup-data` (`GUI-PLAN.md` §8.1); `copy-art` (`GUI-PLAN.md` §2.7; Tom's PC).
 - `docs/ttt-internals.html`: the rule walkthrough page (published); `/handoff` updates and republishes it when a rule changes.
