@@ -63,7 +63,7 @@ Line height 1.5.
 
 **Icons.** Tabler Icons (MIT), stroke 2.25, 21px (30px in empty states); copy the SVGs used into `gui/icons/`. Always beside a text label, never alone. Used: `folder-open`, `file`, `layout-dashboard`, `users`, `arrow-down-circle` (in), `arrow-up-circle` (out), `trash` (deleted), `arrows-exchange` (moved), `arrow-back-up` (undo), `arrow-forward-up` (restore), `check` (reviewed), `alert-triangle` (re-check), `device-floppy` (save), `chevron-left`, `chevron-right`, `search`, `filter`.
 
-**Team art.** Tom's DynastyOS asset library (`%USERPROFILE%\Documents\DynastyOS Assets`) is served by the GUI at `assets/…`; it is never copied into the repo. Logos: `logos-flat-dark/tlow_<School>.webp`; helmets: `helmet/left/thel_lthelmets_<School>_result.webp`. Match on `Team.LongName`/`DisplayName` with letters and digits only, plus aliases (California → CAL, UConn → Connecticut, East Carolina → ECU, Middle Tennessee → MidTennState, Sam Houston → SamHoustonState, Massachusetts → UMass). No library or no match: a MonogramTile.
+**Team art.** The GUI serves art at `assets/…` from `gui/art/` first, then from Tom's DynastyOS asset library (`%USERPROFILE%\Documents\DynastyOS Assets`, ~1.1 GB, only on his PC). `gui/art/` is a slim copy, committed so cloud sessions can render art, made by `tools/copy-art.mjs` on Tom's PC with the library's relative paths: `logos-flat-dark/` and `helmet/left/` unchanged, `playerportrait-files.txt` (every portrait name in the library), and the portraits of players in `test_saves/` plus all `nilpp_Generic_*` and `nilpp_Blank`, resized to 256×256 webp with alpha, so the player card shows portraits at ≤256px. Logos: `logos-flat-dark/tlow_<School>.webp`; helmets: `helmet/left/thel_lthelmets_<School>_result.webp`. Match on `Team.LongName`/`DisplayName` with letters and digits only, plus aliases (California → CAL, UConn → Connecticut, East Carolina → ECU, Middle Tennessee → MidTennState, Sam Houston → SamHoustonState, Massachusetts → UMass). No library or no match: a MonogramTile.
 
 **Components.**
 - **Button:** primary (fill `--accent`, text `--accent-ink`), secondary (1px `--border` outline on `--surface`), danger (`--out` outline).
@@ -122,7 +122,7 @@ Line height 1.5.
 
 - **Server:** `node gui.mjs` starts a local server (Node `http`, no new npm dependencies) on port 5178, or the next free one, and opens the browser (Windows `start`, mac `open`, Linux `xdg-open`; `--no-open` skips it). Windows can reserve whole port ranges (Hyper-V; on Tom's PC 5080–5279), so a blocked port counts as taken: there it starts on 5280.
 - **Front end:** static files from `gui/` (`index.html`, `app.js`, `views.js` (screens, shared with `mockup.html`), `styles.css`, `fonts/`, `icons/`). Plain JS with ES modules, no framework, no build step. One page; screens switch by hash route (`#/start`, `#/overview`, `#/teams`, `#/team/<index>`, `#/saved`).
-- **Team art:** `assets/…` serves image files from the DynastyOS asset library (§2), read-only.
+- **Team art:** `assets/…` serves image files from `gui/art/` (slim copies made by `tools/copy-art.mjs`), else the DynastyOS asset library (§2), read-only; cached by the browser for a day.
 - **Plan building, locks file, saves list, team art:** `lib/gui-plan.mjs`.
 - **Data:** all save access goes through `lib/session.mjs`. The same backup and reopen check on Save as `ttt.mjs`. Refuse any path inside `test_saves/`.
 - **`.gitignore`:** add `gui-state.json` and `*.locks.json`.

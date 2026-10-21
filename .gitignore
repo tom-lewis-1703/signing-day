@@ -15,3 +15,6 @@ TTT Backups/
 # Signing Day GUI: picked teams per save, and undo locks kept beside each save
 gui-state.json
 *.locks.json
+
+# Slim art copy (tools/copy-art.mjs) is committed, whatever its file types
+!gui/art/**
