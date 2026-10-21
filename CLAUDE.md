@@ -2,7 +2,7 @@
 
 ## Project
 
-Local GUI (`gui.mjs`, Node.js) that edits EA Sports College Football 27 dynasty saves. CPU schools barely recruit the transfer portal, so at the Signing Day → Preseason rollover the game deletes ~1,300 uncommitted transfers and teams collapse. The tool's core is calculating interest both ways (how much a player wants each school, how much each school wants him) and placing transfers by it. Signing Day and the draft lock leave the user team (the user's own school) out of their plans.
+Local GUI (`gui.mjs`, Node.js) that edits EA Sports College Football 27 dynasty saves. CPU schools barely recruit the transfer portal, so at the Signing Day → Preseason rollover the game deletes ~1,300 uncommitted transfers and teams collapse. The tool's core is calculating interest both ways (how much a player wants each school, how much each school wants him) and placing transfers by it. Signing Day leaves the user team (the user's own school) out of its plan.
 
 Personal tool: one user (Tom), run locally, private repo. Skip public-release concerns (accessibility, other browsers/screens, auth, user-proofing, backwards compatibility, polished errors). Reading Tom's PC folders is fine. Save-safety rules still apply in full.
 
