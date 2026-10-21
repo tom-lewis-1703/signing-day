@@ -11,3 +11,7 @@ TTT Backups/
 *.draft-lock.json
 *.png
 *.log
+
+# Signing Day GUI: picked teams per save, and undo locks kept beside each save
+gui-state.json
+*.locks.json
