@@ -1,14 +1,11 @@
-# GUI-PLAN.md: Signing Day GUI (spec for an AI builder)
+# GUI-PLAN.md: Signing Day GUI spec
 
-Read `CLAUDE.md` first; its rules apply unless the prompt that started your chat overrides them. This file is the full spec. Build exactly this; if something isn't covered, choose the simplest option and list it in your final report.
+§1–8 describe the Signing Day GUI as built (`node gui.mjs`). When the GUI changes, update its section here in the same commit. §9 is the player card: planned, not built.
 
-## 0. Guardrails
+## 0. Constraints
 
-- References below are **inspiration, not templates**. Combine their best parts into one original design. Never reproduce any one site's layout, colors or branding.
-- No features beyond this spec. No placement rule changes in `lib/` except §6 (locks) and §7 (reads).
-- Never change the user team. Never write to `test_saves/`; test on a copy in the scratchpad or `test_runs/`.
-- If the same problem fails twice, switch to a simpler approach, note it, move on.
 - Built for Tom's screen: **2560×1440, 27", Windows scaling 100%, browser full screen.** The sizes in §2 are tuned for it; nothing on screen under 14px.
+- The GUI doesn't change placement rules. Its only `lib/` changes are the locks (§6) and the reads (§7).
 
 ## 1. Product
 
@@ -18,11 +15,7 @@ Signing Day only. For any other stage, show the stage name and "This tool works 
 
 ## 2. Design system (black, terminal look)
 
-**Direction.** A black terminal-style app: the user team's own colors as accents, neon status colors. Inspiration mix:
-- **Codecademy:** crisp bordered flat cards; monospace uppercase labels and numbers; a "scoreboard" summary panel with a dot texture; joined action bars with one filled primary button; a thick bar on the active menu item.
-- **GitLab:** an app shell with a side menu and breadcrumb bar; tabs with counts; list rows with team marks and counts on the right; a full-width search and filter bar; plain empty states (one icon, one sentence, one button).
-
-Identity: a college football tool. Two accents come from the user team's colors; schools show their logos (helmets on a team's review); big stats use neon scoreboard numerals in Plex Mono; headings and breadcrumbs read like a terminal (`> DYNASTY-… › TEAMS`).
+**Identity.** A black, terminal-style college football tool: two accents from the user team's own colors, neon status colors, flat bordered cards, mono uppercase labels. Schools show their logos (helmets on a team's review); big stats use neon scoreboard numerals in Plex Mono; headings and breadcrumbs read like a terminal (`> DYNASTY-… › TEAMS`).
 
 **Tokens** (CSS custom properties on `:root`):
 ```
@@ -43,25 +36,26 @@ Identity: a college football tool. Two accents come from the user team's colors;
 --accent-2:    user team secondary, exactly as stored
 --accent-ink / --accent-2-ink: #000000 or #FFFFFF, whichever contrasts more
 ```
-Accents from the save: `Team.TEAM_BACKGROUNDCOLORR/G/B` (primary) and `TEAM_BACKGROUNDCOLORR2/G2/B2` (secondary) of the picked user team, unchanged (Kansas: navy `#0E4C90` and red `#CE202F`). Team colors can be too dark to read as text on black, so they are used as **fills, edges and underlines**, with `--accent-ink` / `--accent-2-ink` text on fills. A color under 1.6:1 against black (black, near-black) is skipped: the other color leads and `--accent-2` is `--text`; with neither, `--moved` and `--orange`. `--accent` = primary button fill, active menu item tint, save box edge, selected row tint; `--accent-2` = active menu bar, stage pill, active tab underline and count pill, active chip fill, save dialog top edge, the `>` prompt. Focus ring: 2px `--text`.
+Accents from the save: `Team.TEAM_BACKGROUNDCOLORR/G/B` (primary) and `TEAM_BACKGROUNDCOLORR2/G2/B2` (secondary) of the picked user team, unchanged (Kansas: navy `#0E4C90` and red `#CE202F`). Team colors can be too dark to read as text on black, so they are used as **fills, edges and underlines**, with `--accent-ink` / `--accent-2-ink` text on fills. A color under 1.6:1 against black (black, near-black) is skipped: the other color leads and `--accent-2` is `--text`; with neither, `--moved` and `--orange`. `--accent` = primary button fill, active menu item tint, save box edge, selected row tint; `--accent-2` = active menu bar, selected row's 4px left bar, stage pill, active tab underline and count pill, active chip fill, save dialog top edge, the `>` prompt. Focus ring: 2px `--text`.
 
-**Type.** Self-host both fonts (SIL OFL) as woff2 in `gui/fonts/`; no network at runtime.
+**Type.** Both fonts (SIL OFL) are self-hosted as woff2 in `gui/fonts/`; no network at runtime.
 
 | Use | Font | Size / weight |
 |---|---|---|
 | Body, table cells, player and team names | IBM Plex Sans | 18px / 400 (tables 17px) |
 | Page title (h1) | IBM Plex Mono | 35px / 600 (team name 38px) |
 | Section title (h2) | IBM Plex Mono | 24px / 600 |
-| Labels, menu, breadcrumbs, tabs, status tags | IBM Plex Mono, UPPERCASE, letter-spacing .08em | 15px / 600 (column headers 14px) |
+| Labels, breadcrumbs, tabs, status tags | IBM Plex Mono, UPPERCASE, letter-spacing .08em | 15px / 600 (column headers 14px) |
+| Menu | IBM Plex Mono, UPPERCASE, letter-spacing .06em | 16px / 500 |
 | Numbers in tables | IBM Plex Mono, `font-variant-numeric: tabular-nums`, left-aligned like every column | 17px / 500 |
 | Scoreboard numbers | IBM Plex Mono, in the card's status color with a soft glow | 60px / 700 |
 | Buttons | IBM Plex Sans | 17px / 600, height 46px, padding 0 20px (row buttons 38px) |
 
 Line height 1.5.
 
-**Layout.** 4/8px spacing. Cards: 1px `--border`, radius 4px, padding 20px, no shadows. Content max-width 2240px (fills a 2560 screen); min window 1600×900; under 1900px wide the review panels stack. App shell: sidebar 270px (`--surface`), top bar 58px with breadcrumbs (`> Save › Teams › Missouri`). Active menu item: 4px `--accent-2` bar on its left plus an `--accent` tint.
+**Layout.** 4/8px spacing. Cards: 1px `--border`, radius 4px, padding 22px, no shadows. Content max-width 2240px (fills a 2560 screen); min window 1600×900; under 1900px wide the review panels stack. App shell: sidebar 270px (`--surface`), top bar 58px with breadcrumbs (`> Save › Teams › Missouri`). Active menu item: 4px `--accent-2` bar on its left plus an `--accent` tint. The page always keeps room for its scroll bar (`scrollbar-gutter: stable`).
 
-**Icons.** Tabler Icons (MIT), stroke 2.25, 21px (30px in empty states); copy the SVGs used into `gui/icons/`. Always beside a text label, never alone. Used: `folder-open`, `file`, `layout-dashboard`, `users`, `arrow-down-circle` (in), `arrow-up-circle` (out), `trash` (deleted), `arrows-exchange` (moved), `arrow-back-up` (undo), `arrow-forward-up` (restore), `check` (reviewed), `alert-triangle` (re-check), `device-floppy` (save), `chevron-left`, `chevron-right`, `search`, `filter`.
+**Icons.** Tabler Icons (MIT), stroke 2.25, 21px (30px in empty states); the SVGs used are in `gui/icons/`. Always beside a text label, never alone. Used: `folder-open`, `file`, `layout-dashboard`, `users`, `arrow-down-circle` (in), `arrow-up-circle` (out), `trash` (deleted), `arrows-exchange` (moved), `arrow-back-up` (undo), `arrow-forward-up` (restore), `check` (reviewed), `alert-triangle` (re-check), `device-floppy` (save), `chevron-left`, `chevron-right`, `search`, `filter`.
 
 **Team art.** The GUI serves art at `assets/…` from `gui/art/` first, then from Tom's DynastyOS asset library (`%USERPROFILE%\Documents\DynastyOS Assets`, ~1.1 GB, only on his PC). `gui/art/` is a slim copy, committed so cloud sessions can render art, made by `tools/copy-art.mjs` on Tom's PC with the library's relative paths: `logos-flat-dark/` and `helmet/left/` unchanged, `playerportrait-files.txt` (every portrait name in the library), and the portraits of players in `test_saves/` plus all `nilpp_Generic_*` and `nilpp_Blank`, resized to 256×256 webp with alpha, so the player card shows portraits at ≤256px. Logos: `logos-flat-dark/tlow_<School>.webp`; helmets: `helmet/left/thel_lthelmets_<School>_result.webp`. Match on `Team.LongName`/`DisplayName` with letters and digits only, plus aliases (California → CAL, UConn → Connecticut, East Carolina → ECU, Middle Tennessee → MidTennState, Sam Houston → SamHoustonState, Massachusetts → UMass). No library or no match: a MonogramTile.
 
@@ -71,15 +65,11 @@ Line height 1.5.
 - **StatCard:** mono label above a scoreboard number; 4px colored left edge, number in the same color: placed `--in`, dropped `--warn`, un-signed `--orange`, deleted `--out`, moved `--moved`.
 - **Table:** header row `--surface-2` with mono labels; rows 46px (52px with buttons); 1px `--divider`; hover `--surface-2`; every column (headers, numbers, buttons) left-aligned.
 - **Tabs:** mono labels with a count pill, e.g. `CHANGED 132`; active tab underlined 3px `--accent-2`, its count pill filled `--accent-2`.
-- **TeamMark:** the school's logo, 42px; else a MonogramTile: 42px square, fill = that team's own primary color (contrast-adjusted against its text), `Team.ShortName` (e.g. `KU`, `BAMA`) in mono 15px/700.
+- **TeamMark:** the school's logo, 46px; else a MonogramTile: 42px square, fill = that team's own primary color (contrast-adjusted against its text), `Team.ShortName` (e.g. `KU`, `BAMA`) in mono 15px/700.
 - **StatusTag:** mono `[ REVIEWED ]` (`--in`), `[ CHANGED ]` (`--moved`), `[ RE-CHECK ]` (`--warn`), `[ KEPT ]` (`--text-2`), `[ SIGNED COMMIT ]` (`--orange`).
 - **Roster:** next season's roster as plain mono numbers, before → after: `91 → 85` (after in bold). No bars or marker lines.
 - **Panel:** a card with a 3px colored top edge and a header (icon, mono title, count, hint); used for IN (`--in`), OUT (`--out`), KEPT (`--text-2`).
-- **EmptyState:** a 28px icon, one sentence, one button.
-
-**Inspiration (Mobbin; links need login; with the Mobbin connector use `search_screens` with the app name, e.g. "Codecademy dashboard", "GitLab projects list"):**
-- Codecademy: [dashboard with action bar](https://mobbin.com/screens/df5c6018-fbf8-4473-88ba-4f7c02ba17ad), [dark table with mono headers](https://mobbin.com/screens/f7c1b917-38c1-4e53-96a2-110990ac8fb8), [bordered course card](https://mobbin.com/screens/fc8b8316-e615-4d16-a3ce-974c7ef1a21b).
-- GitLab: [projects list with tabs and letter tiles](https://mobbin.com/screens/e5f91dc1-be8d-469a-9fe2-2c33ecab660e), [app shell and cards](https://mobbin.com/screens/fffd9c58-b256-49f1-9519-d5ce97d4f7bf), [empty state](https://mobbin.com/screens/efa952a9-421f-4563-b850-d6d011241062).
+- **EmptyState:** a 30px icon, one sentence, one button.
 
 ## 3. Screens
 
@@ -89,7 +79,7 @@ Line height 1.5.
 - **User team:** after a save opens, a dropdown of every school in the save (sorted by name) picks the user team.
   - Default: the choice remembered for this save path, else `settings.json → userTeam` if it's in the save, else empty.
   - **Continue** is disabled until a team is picked.
-  - Remember the choice per save path in `gui-state.json` in the app folder.
+  - The choice is remembered per save path in `gui-state.json` in the app folder.
 
 **S1 Overview.**
 - **Scoreboard panel** (`--scoreboard`, dot texture) with five StatCards: `TRANSFERS PLACED`, `DROPPED`, `RECRUITS UN-SIGNED`, `PLAYERS DELETED`, `PLAYERS MOVED`.
@@ -120,28 +110,28 @@ Line height 1.5.
 
 ## 4. Tech
 
-- **Server:** `node gui.mjs` starts a local server (Node `http`, no new npm dependencies) on port 5178, or the next free one, and opens the browser (Windows `start`, mac `open`, Linux `xdg-open`; `--no-open` skips it). Windows can reserve whole port ranges (Hyper-V; on Tom's PC 5080–5279), so a blocked port counts as taken: there it starts on 5280.
-- **Front end:** static files from `gui/` (`index.html`, `app.js`, `views.js` (screens, shared with `mockup.html`), `styles.css`, `fonts/`, `icons/`). Plain JS with ES modules, no framework, no build step. One page; screens switch by hash route (`#/start`, `#/overview`, `#/teams`, `#/team/<index>`, `#/saved`).
+- **Server:** `node gui.mjs` starts a local server (Node `http`, no framework) on port 5178, or the next free one, and opens the browser (Windows `start`, mac `open`, Linux `xdg-open`; `--no-open` skips it). Windows can reserve whole port ranges (Hyper-V; on Tom's PC 5080–5279), so a blocked port counts as taken: there it starts on 5280.
+- **Front end:** static files from `gui/` (`index.html`, `app.js`, `views.js` (screens, shared with `mockup.html`), `styles.css`, `fonts/`, `icons/`). Plain JS with ES modules, no framework, no build step. One page; screens switch by hash route (`#/start`, `#/overview`, `#/teams`, `#/team/<index>`, `#/saved`). `gui/` files are served no-store, so a refresh loads the current files.
 - **Team art:** `assets/…` serves image files from `gui/art/` (slim copies made by `tools/copy-art.mjs`), else the DynastyOS asset library (§2), read-only; cached by the browser for a day.
 - **Plan building, locks file, saves list, team art:** `lib/gui-plan.mjs`.
 - **Data:** all save access goes through `lib/session.mjs`. The same backup and reopen check on Save as `ttt.mjs`. Refuse any path inside `test_saves/`.
-- **`.gitignore`:** add `gui-state.json` and `*.locks.json`.
+- **Git:** `gui-state.json` and `*.locks.json` are ignored; `gui/art/` is always committed.
 
 ## 5. API (JSON)
 
 | Method | Path | Body | Returns |
 |---|---|---|---|
 | GET | `/api/saves` | | `[{name, path, modified}]` |
-| POST | `/api/open` | `{path}` | `{fileName, stage, teams:[{index, name, short}], suggestedUserTeam}` |
+| POST | `/api/open` | `{path}` | `{path, fileName, stage:{id, label}, teams:[{index, name, short, colors, logo, helmet}], suggestedUserTeam}` |
 | POST | `/api/user-team` | `{teamIndex}` | builds the plan; returns `Plan` |
 | GET | `/api/plan` | | `Plan` |
 | POST | `/api/undo` | `{playerIndex, teamIndex, kind}` | adds a lock, rebuilds; returns `Plan` |
 | POST | `/api/restore` | `{playerIndex, teamIndex}` | removes the lock, rebuilds; returns `Plan` |
 | POST | `/api/review` | `{teamIndex, reviewed}` | `Plan` |
-| POST | `/api/save` | | `{ok, backupPath, counts}` or `{ok:false, failed:[…]}` |
+| POST | `/api/save` | | `{ok, backupPath, counts, undos}` or `{ok:false, failed:[…]}` |
 
 `Plan` = `{save:{fileName, filePath, stage}, summary:{placed, dropped, unsigned, deleted, moved, signed}, userTeam:{index, name, short, colors, logo, helmet}, teams:[{index, name, short, colors, logo, helmet, prestige, rosterBefore, rosterAfter, in:[…], out:[…], kept:[…], counts:{in, out, deleted, kept}, status}], locks:{count}}`.
-- **Build it from** `session.signingDayPlan()`:
+- **Built from** `session.signingDayPlan()`:
   - recruit cleanup: `unsign`;
   - placement: `placed`, `moved`, `cuts` (`kind`, `fate`, `reason`), `unplaced`, `committed` (entries with `sign: true` are the signed commits in that team's IN).
 - **`colors`:** `{primary:"#rrggbb", secondary:"#rrggbb"}`.
@@ -151,60 +141,51 @@ Line height 1.5.
 - **Lock types:**
   - `keep: Set<playerIndex>`: never un-sign or cut this player. Used for undo of an un-signed recruit, a cut or deleted player, or a moved player.
   - `notAt: Map<playerIndex, Set<teamIndex>>`: never place this transfer at this school. Used for undo of a transfer in; he may land elsewhere or drop.
-- **Code changes:**
+- **In the planners:**
   - `planRecruitCleanup(d, league, settings, locks)` skips `keep`.
   - `planPlacement(…, locks)` marks `keep` entries not cuttable and skips `notAt` schools for that player, both in the Top 10 pass and in best fit.
   - `session.signingDayPlan(locks)` and `session.applySigningDay(locks)` pass them through.
-  - With no locks, results are byte-identical to today's.
-- **Rebuilds:** after every rebuild, compare each team's moves (sorted player indexes in and out) with the previous plan. A `REVIEWED` team whose moves changed becomes `RE-CHECK`.
-- **Persistence:**
-  - Keep locks and review states in `<save>.locks.json` beside the save (never inside it). Reload it when the same save is opened again.
-  - Delete it after a successful Save.
+  - With no locks, the results are the same as without the locks argument.
+- **Rebuilds:** a `REVIEWED` team stores its moves (sorted player indexes in and out); after a rebuild, a reviewed team whose moves changed shows `RE-CHECK`.
+- **Persistence:** locks and review states live in `<save>.locks.json` beside the save (never inside it). It's reloaded when the same save is opened again and deleted after a successful Save.
 
-## 7. Small read changes
+## 7. Reads and the picked user team
 
-- **`lib/dynasty.mjs`:** add `TEAM_BACKGROUNDCOLORR`, `…G`, `…B`, `…R2`, `…G2`, `…B2` to the Team read list and expose them as `team.colors`; expose `ShortName` (already read) as `team.short`. (`Mascot_AssetName` is empty for 12 of 138 schools; `ShortName` is always filled and unique.) They must be in the first read; see the `CLAUDE.md` save traps.
-- **`lib/session.mjs`:** `open(path, {userTeam})` takes the picked team name or index and uses it instead of `settings.userTeam` (still refusing if it isn't found).
-  - The planners (`signing-day.mjs`, `destinations.mjs`, `weekly-commits.mjs`) look the user team up by name in `settings.userTeam` themselves. So the session keeps `this.settings = {...settings, userTeam: <picked team's name>}`, and every planner protects the picked team. In memory only; `settings.json` is not changed.
-  - The session remembers the pick, so its own reopen after a failed apply (`applySigningDay`) keeps the same team.
+- **`lib/dynasty.mjs`:** the Team table's first read includes `TEAM_BACKGROUNDCOLORR`, `…G`, `…B`, `…R2`, `…G2`, `…B2`, exposed as `team.colors`; `ShortName` is exposed as `team.short` (`Mascot_AssetName` is empty for 12 of 138 schools; `ShortName` is always filled and unique).
+- **`lib/session.mjs`:** `open(path, {userTeam})` takes the picked team (name or index) instead of `settings.userTeam`, and refuses if it isn't in the save.
+  - The planners (`signing-day.mjs`, `destinations.mjs`, `weekly-commits.mjs`) look the user team up by name in `settings.userTeam`. So the session keeps `this.settings = {...settings, userTeam: <picked team's name>}` in memory (`settings.json` is unchanged), and every planner protects the picked team.
+  - The session remembers the pick, so its own reopen after a failed `applySigningDay` keeps the same team.
 
-## 8. Build steps and acceptance
+## 8. Mockup and checks
 
-1. **Mockup:** `gui/mockup.html`, static, with real data dumped from a copy of `test_saves/DYNASTY-SIGNINGDAYCOPY`. It shows S0, S1, S2 and S3 (for Missouri), using the final CSS. Screenshot each screen at 2560×1440 (headless Edge on Tom's PC; Playwright with Chromium at `/opt/pw-browsers` in the cloud). **Stop and show Tom.**
-2. **Server, S0 and S1:** opening a copy plus picking the `settings.json` team shows correct overview counts (they match `ttt.mjs` on the same copy). Picking a different team: that team has no moves in the plan, and the `settings.json` team is planned like any CPU team.
-3. **S2:** 137 CPU teams listed; search, tabs, sort and filters work.
-4. **S3 read-only:** Missouri's IN and OUT match the plan.
-5. **Locks:**
-   - Undo one transfer-in and one un-signed recruit. The plan rebuilds, the items move to KEPT, and any affected reviewed team shows RE-CHECK.
-   - The locks file exists and survives a page refresh.
-   - With no locks, the plan equals the old output.
-6. **S4 Save:** on a copy, the save passes the reopen check, the backup exists and the locks file is deleted.
+Mock up a screen change before building it; rerun the checks after any GUI or `lib/` change.
+1. **Mockup:** `node tools/gui-mockup-data.mjs "<save copy>" [team]` writes `gui/mockup-data.js`: the real Plan for that copy, with the team shown in full (default Missouri), one undo and a few reviewed teams so every status shows. `gui/mockup.html` renders the real screens (S0–S3) from it. Screenshot at 2560×1440: headless Edge on Tom's PC; Playwright with Chromium at `/opt/pw-browsers` in the cloud. Show Tom before building the screen.
+2. **Checks** on a copy of `test_saves/DYNASTY-SIGNINGDAYCOPY`:
+   - Picking the `settings.json` team: the overview counts match `ttt.mjs` on the same copy. Picking another team: it has no moves, and the `settings.json` team is planned like any CPU team.
+   - S2 lists 137 CPU teams; search, tabs, sort and filters work. Missouri's IN and OUT match the plan.
+   - Undo one transfer-in and one un-signed recruit: the plan rebuilds, both move to KEPT, an affected reviewed team shows `RE-CHECK`, and the locks file survives a page refresh. With no locks, the plan matches the planner's output.
+   - Save: passes the reopen check, the backup exists and the locks file is deleted.
 
-## 9. Final report (to Tom)
-
-- How to start it: one line.
-- One screenshot per screen.
-- What was simplified or skipped.
-- Open decisions, for example the Signing Day defaults in `settings.json` → `signingDay` (`recruitCleanup.underOverall`; `placement.placeRoles`, `placement.cutRecruitsFrom`, `placement.deleteOnly`, `placement.moveCutFrom`); don't change them.
-- `ttt.mjs` stays as a fallback, unchanged.
-
-## 10. Player card (not built yet)
+## 9. Player card (not built yet)
 
 Click a player in a team's IN, OUT or KEPT rows (S3) and a card about him opens, with his portrait. Inspiration (Tom): The Ringer's NBA Top 100 card, as inspiration only (not its font, voting or photo breaking out of the box): a big name headline with an OVR badge, then small panels. §0–§2 apply as they are (black terminal look, tokens, type sizes, nothing under 14px).
 
-### 10.1 Portraits
+### 9.1 Portraits
 
 **What the save holds** (stock `DYNASTY-SIGNINGDAYCOPY`, fields read in the Player table's first read):
 - `Player.GenericHeadAssetName` is the player's head asset. The portrait file is that name with `nilpp_` before it and `.webp` after:
   - `Unique_LegreeJesse_204629` → `nilpp_Unique_LegreeJesse_204629.webp`
   - `Generic_4968_P_T0235_M_6_4` → `nilpp_Generic_4968_P_T0235_M_6_4.webp`
+  - A head name cut at 32 characters ends in `-`, and the file drops it: `Unique_AbdulRahimGladdin-_33048` → `nilpp_Unique_AbdulRahimGladdin_33048.webp`. So: remove a `-` just before the final `_<number>`.
 - All 16,233 players have one: 13,741 `Unique_…` (10,944 different) and 2,492 `Generic_…` (1,761 different, numbered 1–5039, which fits the library's 5,040 generic files). Only `A–Z a–z 0–9 _ -` occur, at most 32 characters.
-- The earlier finding that it "holds one value for every player" was the save trap: read again after `Dynasty.load`, these fields come back `null` for every player. Read first, they hold the head names. So the new fields go in the first read (§10.5).
-- `PortraitForceSilhouette` (false) and `PortraitSwappableLibraryPath` (`library_icons_brt`) really are the same for everyone: ignored.
+- Read a second time after `Dynasty.load`, these fields come back `null` for every player (the save trap); read first, they hold the head names. So the new fields go in the first read (§9.5).
+- `PortraitForceSilhouette` (false) and `PortraitSwappableLibraryPath` (`library_icons_brt`) are the same for everyone: ignored.
+- **Coverage** (by `gui/art/playerportrait-files.txt`, the list of every portrait in the library): 15,220 of 16,233 players (93.8%) have a file: all 2,492 generic heads, 2,826 of 2,828 recruits, 9,902 of 10,913 others. The other 1,013 heads have no matching file in the library (e.g. `Unique_WilliamsJace_206927`) and get the blank. `gui/art/playerportrait/` holds 15,107 of the 15,220: `tools/copy-art.mjs` matches the exact head name, so it misses most cut-short heads (§9.5).
+- **Files:** the `gui/art/` copies are 256×256 webp with a transparent background (about 60% of pixels clear), so the team's color shows behind the face. Library originals (lookup case 2) show in the same 256px box.
 
 **Match by head asset name, not by player name:**
 - **Recruits wear other players' faces.** HS/JUCO recruits are generated: 2,828 wear another player's unique head and none wear their own (Caden Madha, a TE recruit un-signed at Missouri, wears `Unique_HunterEverett_20148`); 1,272 wear a generic head. A name match gives them nothing, or a namesake's face.
-- **Long names are cut** at 32 characters with a trailing `-` (`Unique_AbdulRahimGladdin-_33048`); a name match misses them, the head name doesn't.
+- **Long names are cut** at 32 characters; the head name (with the `-` rule) still finds the file, a name match doesn't.
 - **No tiebreak needed:** the head name is the exact file. Heads are shared (2,378 unique heads by 2+ players, generic ones too); the game draws those players with the same face, and the card does too.
 - **Not needed:**
   - `PLYR_PORTRAIT`: equals the generic number for about half of the generic heads, nothing else.
@@ -213,30 +194,30 @@ Click a player in a team's IN, OUT or KEPT rows (S3) and a card about him opens,
   - `PLYR_GENERICHEAD`: a head enum whose first digit (1–7) looks like skin tone.
   - The generic name's parts (`T0235`, `M`, `6_4`): the whole file name is already in the save.
 
-**Lookup: one file check per card, no index.** When a card opens, the server checks `DynastyOS Assets/playerportrait/nilpp_<head>.webp` with one `fs.existsSync` and caches the answer per head. A head name that fails `^[A-Za-z0-9_-]{1,32}$` counts as missing. The server never lists the folder or reads the manifest: with the exact name known, an index isn't needed. The manifest (`.dynastyos-library/playerportrait.files.json`) is only for the one-off coverage check (§10.6 step 1). Portraits go through the existing read-only `assets/…` route (`.webp` is already allowed) and are never committed.
+**Lookup.** When a card opens, the server makes the file name (above) and takes the first case that applies, caching the answer per head:
+1. **In `gui/art/playerportrait/`** (the committed slim copy, §2 Team art): his portrait.
+2. **In `gui/art/playerportrait-files.txt`** (read once into a set) **and the DynastyOS library's `playerportrait/` folder is on this PC:** his portrait.
+3. **Neither:** `nilpp_Blank.webp` from `gui/art/playerportrait/` (committed, so always there). A monogram (his initials in Plex Mono 96px/700 on the team's primary color, kept readable the same way as team MonogramTiles) only if even that is missing.
 
-**Fallback:**
-1. **File found:** the portrait.
-2. **Library there, file missing:** the library's `nilpp_Blank.webp`, so it sits with the other portraits.
-3. **No library (or no blank):** a monogram: his initials in Plex Mono 96px/700 on the team's primary color, kept readable the same way as team MonogramTiles.
+A head name that fails `^[A-Za-z0-9_-]{1,32}$` counts as missing. Cases 1 and 2 use the URL `assets/playerportrait/<file>`, which `gui.mjs` already serves from `gui/art/` first, then the library. The server never lists the library folder; the name list replaces the library's manifest (`.dynastyos-library/playerportrait.files.json`).
 
-"The team" (portrait backdrop, monogram) = the school he ends up at after the plan, else the school of the row clicked.
+"The team" (the color behind the portrait or monogram) = the school he ends up at after the plan, else the school of the row clicked.
 
-### 10.2 Card contents
+### 9.2 Card contents
 
 | Part | Shows | Source | New read |
 |---|---|---|---|
-| Portrait | 240×240 box | `GenericHeadAssetName` (§10.1) | yes |
+| Portrait | 256×256 box (the files' own size; never larger) on the team's color | `GenericHeadAssetName` (§9.1) | yes |
 | Name | h1, Plex Mono 38px/600 | `p.name` | |
 | OVR badge | scoreboard numeral (60px/700, soft glow) in a bordered square; `MAX 94` under it | `p.overall`, `d.maxOverall(p)` | |
 | Identity line | `WR · Shifty Route Runner · FR → SO · Impact · 4-star` | `p.position`, `p.archetype`, `p.schoolYear`, `p.redshirt` (RS when he has redshirted), `nextClass(p)`, `p.dev`, `p.stars` | |
 | Body line | `#12 · 5'10" · 167 lb · Baltimore, Maryland` | `JerseyNum`, `Height` (inches), `Weight` (stored as lb − 160), `PLYR_HOME_TOWN`, `p.homeState` | 4 fields |
 | Move strip | `[logo] Oregon State → [logo] Missouri`, StatusTag, role there (`Starter · WR2`) | raw plan entry: `from`, `team`, `role`, `rank` (his place in the room) | |
-| Why | one sentence (§10.3) | raw plan entries, locks | |
+| Why | one sentence (§9.3) | raw plan entries, locks | |
 | Info | kind (Transfer, HS recruit, JUCO recruit, Returning); ranks (`#49 overall · WR #9`); NIL; his undos (`You undid: transfer in at Missouri`) | `p.recruitClass`, `p.nationalRank`, `p.positionRank`, `BaseNILValue`, the locks | NIL |
 | Pitch | his pitch's name; his dealbreaker and pitch categories, each an icon, label and the landing school's grade; dealbreaker met or not | `p.dealbreaker`, `PITCHES[p.pitch]`, `categoryGrade()`; met from the snapshot | |
 | Ratings | `OVR 87 → MAX 94`; six skill groups, each its name, `LV 15/16` and its ratings with the game's short labels (`SPD 93 ACC 95 STA 90 KR 45`) | `d.skillGroupDetail(p)` | |
-| Top 5 | his list when his turn came: rank, TeamMark, school, `HIS` (player score), `THEIRS` (team score ÷ 2, so 0–100 as in the combined score), `MATCH` (combined), role there. The landing school is tagged `[ HERE ]`, as a 6th row when it isn't in the top 5 (Best fit) | snapshot from the planner (§10.5) | |
+| Top 5 | his list when his turn came: rank, TeamMark, school, `HIS` (player score), `THEIRS` (team score ÷ 2, so 0–100 as in the combined score), `MATCH` (combined), role there. The landing school is tagged `[ HERE ]`, as a 6th row when it isn't in the top 5 (Best fit) | snapshot from the planner (§9.5) | |
 
 - **Status** (StatusTag and the card's top edge): PLACED `--in`, MOVED `--moved`, SIGNED COMMIT and UN-SIGNED `--orange`, DELETED `--out`, DROPPED `--warn`, STAYS (an undone un-sign or cut) `--text-2`.
 - **Hidden parts:** Pitch when he ends up nowhere (un-signed, deleted, dropped). Top 5 when the planner never ranked schools for him (signed commits, recruits).
@@ -244,7 +225,7 @@ Click a player in a team's IN, OUT or KEPT rows (S3) and a card about him opens,
 - **Category icons** (Tabler, always beside the label, copied into `gui/icons/`): Playing Time `clock`, Proximity to Home `home`, Championship Contender `trophy`, Brand Exposure `speakerphone`, Coach Prestige `user-star`, Coach Stability `anchor`, Conference Prestige `flag`, Program Tradition `books`, Stadium Atmosphere `building-stadium`, Academic Prestige `school`, Campus Lifestyle `confetti`, Athletic Facilities `barbell`, Playing Style `ball-american-football`, Pro Potential `briefcase`. Plus `x` for Close.
 - The Plan rows already carry `playerIndex`, so the `Plan` itself doesn't change.
 
-### 10.3 Why line
+### 9.3 Why line
 
 Built by the server from the raw plan entries (`how`, `cut`, `reason`, `forName`, `fate`) and the locks. Examples are real (stock copy, user team Kansas, no undos):
 
@@ -262,7 +243,7 @@ Built by the server from the raw plan entries (`how`, `cut`, `reason`, `forName`
 
 With no `forName` (the 85 trim, a full board), the reason stands alone: `Cut at <school> to trim the roster to 85; …`.
 
-### 10.4 Interaction and layout
+### 9.4 Interaction and layout
 
 - **Open:** click a player's row in IN, OUT or KEPT (anywhere but its Undo/Restore button), or Tab to his name (a button) and press Enter. The row gets the selected-row tint (`--accent`).
 - **Switch:** click another row; the card shows him.
@@ -282,7 +263,7 @@ With no `forName` (the 85 trim, a full board), the reason stands alone: `Cut at 
 │ ┌────────────┐  JESSE LEGREE                         ┌──────┐   [x] Close │
 │ │            │  WR · Shifty Route Runner             │  87  │             │
 │ │  portrait  │  FR → SO · Impact · 4-star            └──────┘             │
-│ │  240×240   │  #12 · 5'10" · 167 lb                  MAX 94              │
+│ │  256×256   │  #12 · 5'10" · 167 lb                  MAX 94              │
 │ │            │  Baltimore, Maryland                                       │
 │ └────────────┘                                                            │
 │ [logo] Oregon State  →  [logo] Missouri    [ PLACED ]    Starter · WR2    │
@@ -306,28 +287,28 @@ With no `forName` (the 85 trim, a full board), the reason stands alone: `Cut at 
 
 - **Type:** section labels mono 15px uppercase, as in Panel headers; body 17px; table rows 46px; ratings in Plex Mono 17px with tabular numbers, every column left-aligned (§2).
 
-### 10.5 Code changes
+### 9.5 Code changes
 
 - **`lib/dynasty.mjs`** (first read only; see the `CLAUDE.md` save traps): add `GenericHeadAssetName`, `JerseyNum`, `Height`, `Weight`, `PLYR_HOME_TOWN`, `BaseNILValue` to the Player read list. `refreshPlayer` sets `p.head`, `p.jersey`, `p.height` (inches), `p.weight` (lb: stored + 160), `p.homeTown`, `p.nil`.
 - **`lib/signing-day.mjs`** (`planPlacement`), output only:
   - Each placed, moved and unplaced entry, and each re-offered cut, keeps the list the planner already computed for him: `top5` (from `w.top10`) and `here` (the landing school's row from `w.teams`, with its list rank or null).
   - Row fields: `teamIndex, team, playerScore, baseScore, combined, role, meets, dealbreakerGrade, pitchGrades`.
-  - No rule change; the rest of the plan stays identical. This is the one `lib/` change outside §6/§7 (Tom's OK needed, §10.7).
+  - No rule change; the rest of the plan stays identical. This is the one `lib/` change outside §6/§7 (Tom's OK needed, §9.7).
   - Why it's needed: without it, the card can only show his list from before Signing Day, which disagrees with the plan. Jesse Legree's pre-Signing Day top 5 is Ole Miss, Colorado, Stanford, Texas Tech, TCU, but when his turn came Missouri was #1 and he was placed there.
-- **`lib/gui-plan.mjs`:** `playerCard(session, raw, state, playerIndex)` returns `PlayerCard`; `whyLine(…)` (§10.3); `playerPortrait(head, dir = ASSETS_DIR)` (§10.1).
+- **`lib/gui-plan.mjs`:** `playerCard(session, raw, state, playerIndex)` returns `PlayerCard`; `whyLine(…)` (§9.3); `playerPortrait(head)` (§9.1 lookup).
 - **`gui.mjs`:** `GET /api/player?index=<playerIndex>` returns `PlayerCard`, with a 409 when there's no plan and a 404 for an unknown player.
   - The request handler passes the query string to GET handlers (`Object.fromEntries(url.searchParams)`, one line), so the exact-match handler table stays. That's why it's a query and not `/api/player/<index>`.
 - **`gui/views.js`:** IN/OUT/KEPT rows get `data-action="card" data-player="…"` and names become buttons; `shell` draws `cardView(ui.card)` next to the save modal; the category icon map and rating labels live here.
 - **`gui/app.js`:** `ui.card = {playerIndex, loading, data, error}`. Open, switch, close and Esc; close on `hashchange`; reload after undo, restore and review. Card loads skip the busy label: they're read-only and don't block other buttons.
 - **`gui/styles.css`:** `.drawer`, `.portrait`, `.ovr-badge`, card sections, selected row.
-- **`gui/icons/`:** `x` and the 14 category icons (§10.2).
+- **`gui/icons/`:** `x` and the 14 category icons (§9.2).
 - **`tools/gui-mockup-data.mjs`, `gui/mockup.html`:** card data for the shown team's players; clicking a row opens the card, as in the app.
-- **`tools/portrait-check.mjs`** (new, read-only, run on Tom's PC): for a save copy, how many head names have a file in the library (split into own unique, borrowed unique and generic), plus the first 10 misses. It finds file names by matching `nilpp_[A-Za-z0-9_-]+\.webp` in the manifest's text, so the manifest's JSON layout doesn't matter.
+- **`tools/copy-art.mjs`:** use the same head-to-file rule (drop the `-`), then re-run on Tom's PC, so `gui/art/` also gets the 113 cut-short heads' portraits.
 - **This file:** once built, the API row goes in §5 and the card in §3 S3.
 
 `PlayerCard` = `{index, name, pos, archetype, year, nextYear, redshirt, dev, stars, ranks:{national, position}, kind, jersey, height, weight, homeTown, homeState, nil, ovr, max, groups:[{name, level, cap, ratings:[{label, value}]}], portrait:{src, blank}|null, initials, status, from, to, role, rank, why, pitch:{name, school, categories:[{id, label, grade, dealbreaker, met}]}|null, top5:[{…team, rank, his, theirs, match, role, here}]|null, undos:[{undone, at}]}`. `from` and `to` = `{index, name, short, colors, logo}` or null.
 
-### 10.6 Build steps and acceptance
+### 9.6 Build steps and acceptance
 
 Named players (a copy of `DYNASTY-SIGNINGDAYCOPY`, user team Kansas, no undos, Missouri's page):
 - **Jesse Legree** (WR 87, player 13851): placed `Top 10 #1` from Oregon State, Starter · WR2; own head `Unique_LegreeJesse_204629`. Missouri isn't in his pre-Signing Day top 5 (the snapshot test).
@@ -335,19 +316,17 @@ Named players (a copy of `DYNASTY-SIGNINGDAYCOPY`, user team Kansas, no undos, M
 - **Caden Madha** (TE 65 recruit, 3498): un-signed for Willie Rodriguez (TE cap); borrowed head `Unique_HunterEverett_20148`.
 - **Jackson Hancock** (FS 71, 13344): cut at Missouri for Zeraun Daniel (S cap), moved to West Virginia (Rotation).
 
-1. **Portrait check (Tom's PC):** `node tools/portrait-check.mjs "<save copy>"` prints the coverage. Tom answers §10.7.
-2. **Data:** the reads, the snapshot and `playerCard`. Proof on a fresh copy:
+1. **Data:** the reads, the snapshot and `playerCard`. Proof on a fresh copy:
    - The `ttt.mjs` counts and the GUI plan's summary are unchanged.
    - The plan JSON with `top5`/`here` removed equals today's.
    - The card JSON for the four players matches the bullets above.
-3. **Mockup:** the card in `gui/mockup.html` for Missouri's players, screenshot at 2560×1440. The mockup data keeps its one undo (Caden Madha), so his card shows the STAYS story and Mario Wofford lands elsewhere; the step 2 checks use the plan with no undos. The cloud has no library, so the screenshot shows the monogram; one more with portraits on Tom's PC. **Stop and show Tom.**
-4. **Live:** the API and the drawer. On a copy: open, switch, Esc and Close work. After an Undo of Jesse Legree's row, his card reloads with the new story and the row is in KEPT.
-5. **Tom in-game:** the four portraits match the faces in the game.
+2. **Mockup:** the card in `gui/mockup.html` for Missouri's players, screenshot at 2560×1440. The mockup data keeps its one undo (Caden Madha), so his card shows the STAYS story and Mario Wofford lands elsewhere; the step 1 checks use the plan with no undos. The four players' portraits are in `gui/art/`, so the cloud screenshot shows them. **Stop and show Tom.**
+3. **Live:** the API and the drawer. On a copy: open, switch, Esc and Close work. After an Undo of Jesse Legree's row, his card reloads with the new story and the row is in KEPT.
+4. **Tom in-game:** the four portraits match the faces in the game.
 
-### 10.7 Open questions for Tom
+### 9.7 Open questions for Tom
 
-1. **Portrait files:** what pixel size are they, and is the background transparent? The plan shows them at 240×240 on the team's color. If they have their own background, the team color only shows on the monogram.
-2. **NIL:** what is `BaseNILValue` in the game? What unit, and what do negative values mean (−25 and −255 appear)? Show it, `CurrentNILCompensation` (0–110 here), or leave NIL off?
-3. **Top 5 snapshot:** OK to make the output-only change to `lib/signing-day.mjs` (§10.5)? Without it, the Top 5 panel goes.
-4. **Extras:** keep jersey number, height, weight and hometown? They're four cheap reads, but weren't in the earlier list.
-5. **File missing, library there:** the library's blank (as planned) or the monogram?
+1. **NIL:** what is `BaseNILValue` in the game? What unit, and what do negative values mean (−25 and −255 appear)? Show it, `CurrentNILCompensation` (0–110 here), or leave NIL off?
+2. **Top 5 snapshot:** OK to make the output-only change to `lib/signing-day.mjs` (§9.5)? Without it, the Top 5 panel goes.
+3. **Extras:** keep jersey number, height, weight and hometown? They're four cheap reads, but weren't in the earlier list.
+4. **No portrait file:** the blank (as planned) or the monogram?
