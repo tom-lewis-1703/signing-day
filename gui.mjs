@@ -7,7 +7,7 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { Session } from "./lib/session.mjs";
 import { loadSettings } from "./lib/settings.mjs";
-import { ASSETS_DIR, listSaves, teamArt, emptyState, loadState, saveState, locksPath, lockCount, rawPlan, buildPlan, movesOf } from "./lib/gui-plan.mjs";
+import { ART_DIRS, listSaves, teamArt, emptyState, loadState, saveState, locksPath, lockCount, rawPlan, buildPlan, movesOf } from "./lib/gui-plan.mjs";
 
 const APP_DIR = path.dirname(fileURLToPath(import.meta.url));
 const GUI_DIR = path.join(APP_DIR, "gui");
@@ -139,13 +139,22 @@ function readJson(req) {
   });
 }
 
-// gui/ files are no-store, so a plain refresh always loads the current page, styles and modules;
-// the team art rarely changes and stays cached between renders (no-cache).
-function serveFile(res, root, rel, cache = "no-cache") {
+// gui/ files are no-store, so a plain refresh always loads the current page, styles and modules.
+// Art (assets/…) is cached for a day, then revalidated by its date, so thousands of portraits
+// aren't downloaded again on every render.
+function serveFile(res, root, rel, cache = "no-store", req = null) {
   const file = path.resolve(root, "." + path.sep + rel);
   if (!file.startsWith(root + path.sep) || !TYPES[path.extname(file).toLowerCase()] || !fs.existsSync(file) || !fs.statSync(file).isFile()) return send(res, 404, { error: "Not found." });
-  res.writeHead(200, { "content-type": TYPES[path.extname(file).toLowerCase()], "cache-control": cache });
+  const modified = fs.statSync(file).mtime.toUTCString();
+  if (req && req.headers["if-modified-since"] === modified) { res.writeHead(304, { "cache-control": cache, "last-modified": modified }); return res.end(); }
+  res.writeHead(200, { "content-type": TYPES[path.extname(file).toLowerCase()], "cache-control": cache, "last-modified": modified });
   fs.createReadStream(file).pipe(res);
+}
+
+// assets/…: gui/art/ first, then the DynastyOS library (lib/gui-plan.mjs).
+function serveArt(req, res, rel) {
+  const has = dir => { const f = path.resolve(dir, "." + path.sep + rel); return f.startsWith(dir + path.sep) && fs.existsSync(f) && fs.statSync(f).isFile(); };
+  serveFile(res, ART_DIRS.find(has) ?? ART_DIRS.at(-1), rel, "max-age=86400", req);
 }
 
 const server = http.createServer(async (req, res) => {
@@ -163,8 +172,8 @@ const server = http.createServer(async (req, res) => {
     }
     return;
   }
-  if (pathname.startsWith("/assets/")) return serveFile(res, ASSETS_DIR, pathname.slice("/assets/".length));
-  serveFile(res, GUI_DIR, pathname === "/" ? "index.html" : pathname.slice(1), "no-store");
+  if (pathname.startsWith("/assets/")) return serveArt(req, res, pathname.slice("/assets/".length));
+  serveFile(res, GUI_DIR, pathname === "/" ? "index.html" : pathname.slice(1));
 });
 
 function openBrowser(url) {
