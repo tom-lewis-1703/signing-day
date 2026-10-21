@@ -15,7 +15,7 @@ const info = await session.open(file);
 if (info.stage.id !== "signing-day") { console.log(`${info.fileName}: not a Signing Day save (${info.stage.label})`); process.exit(0); }
 const r = await session.applySigningDay();
 const pb = r.plan.placement;
-console.log(`${info.fileName}: un-sign ${r.plan.unsign.length} · transfers placed ${pb.placed.length} of ${pb.transfers} (unplaced ${pb.unplaced.length}) · cuts ${pb.cuts.length} (moved ${pb.moved.length}) · over ${pb.rosterMax}: ${pb.over.length}`);
+console.log(`${info.fileName}: un-sign ${r.plan.unsign.length} · unsigned commits signed ${pb.committed.filter(e => e.sign).length} · transfers placed ${pb.placed.length} of ${pb.transfers} (unplaced ${pb.unplaced.length}) · cuts ${pb.cuts.length} (moved ${pb.moved.length}) · over ${pb.rosterMax}: ${pb.over.length}`);
 if (!r.ok) {
   console.log(`NOT SAVED: ${r.failed.length} edits failed`);
   for (const f of r.failed) console.log(`  ${f}`);
