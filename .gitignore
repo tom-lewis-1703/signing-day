@@ -4,6 +4,7 @@ runtime/
 
 # Test outputs and backups (test saves themselves live in test_saves/ and are tracked)
 test_runs/
+copies/
 TTT Backups/
 *.bak
 *.tmp
