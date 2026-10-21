@@ -36,6 +36,8 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
+/* Always keep room for the page scroll bar, so a short page doesn't jump sideways. */
+html { scrollbar-gutter: stable; }
 body {
   background: var(--bg); color: var(--text);
   font: 400 18px/1.5 var(--sans);

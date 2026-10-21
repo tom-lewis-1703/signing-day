@@ -139,10 +139,12 @@ function readJson(req) {
   });
 }
 
-function serveFile(res, root, rel) {
+// gui/ files are no-store, so a plain refresh always loads the current page, styles and modules;
+// the team art rarely changes and stays cached between renders (no-cache).
+function serveFile(res, root, rel, cache = "no-cache") {
   const file = path.resolve(root, "." + path.sep + rel);
   if (!file.startsWith(root + path.sep) || !TYPES[path.extname(file).toLowerCase()] || !fs.existsSync(file) || !fs.statSync(file).isFile()) return send(res, 404, { error: "Not found." });
-  res.writeHead(200, { "content-type": TYPES[path.extname(file).toLowerCase()], "cache-control": "no-cache" });
+  res.writeHead(200, { "content-type": TYPES[path.extname(file).toLowerCase()], "cache-control": cache });
   fs.createReadStream(file).pipe(res);
 }
 
@@ -162,7 +164,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
   if (pathname.startsWith("/assets/")) return serveFile(res, ASSETS_DIR, pathname.slice("/assets/".length));
-  serveFile(res, GUI_DIR, pathname === "/" ? "index.html" : pathname.slice(1));
+  serveFile(res, GUI_DIR, pathname === "/" ? "index.html" : pathname.slice(1), "no-store");
 });
 
 function openBrowser(url) {
