@@ -1,4 +1,4 @@
-// Signing Day GUI (GUI-PLAN.md): a local web server for gui/, the team art and the JSON API.
+// Signing Day GUI: a local web server for gui/, the team art and the JSON API.
 //   node gui.mjs            (opens the browser; --no-open to skip)
 import http from "node:http";
 import fs from "node:fs";
@@ -67,7 +67,7 @@ const api = {
 
   "GET /api/plan": () => { requirePlan(); return plan(); },
 
-  // Player card (GUI-PLAN.md §6): read-only, from the last planner output.
+  // Player card: read-only, from the last planner output.
   "GET /api/player": ({ index }) => {
     requirePlan();
     const card = /^\d+$/.test(index ?? "") ? playerCard(session, raw, state, Number(index)) : null;

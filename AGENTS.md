@@ -6,23 +6,19 @@ Local GUI (`gui.mjs`, Node.js) that edits EA Sports College Football 27 dynasty 
 
 Personal tool: one user (Tom), run locally, private repo. Skip public-release concerns (accessibility, other browsers/screens, auth, user-proofing, backwards compatibility, polished errors). Reading Tom's PC folders is fine. Save-safety rules still apply in full.
 
-Docs: `PLAN.md` (status, task list, what's built), `GUI-PLAN.md` (GUI spec). Chats: `/hub` (design and dispatch), `/next` (start a task), `/handoff` (end a chat).
+## Code map
 
-## How we work
-
-- One step at a time. When Tom comments or asks a question, only discuss: no code, edits, scripts or commits.
-- Before acting, list exactly what you'll do and wait for Tom's "go". Do only that, then stop and show the result.
-- No extras; don't start the next step unprompted.
-- If Tom's idea, decision or code has a mistake or a better alternative, say so right away, briefly and with the reason. Don't wait to be asked.
-- Docs (`PLAN.md`, `GUI-PLAN.md`, `CLAUDE.md`) hold only what an AI needs to work: current facts, rules, open tasks and decisions. No history, proof write-ups or answered questions; git has them.
-  - Once Tom settles a question, delete it and every reference to it. Write the result as plain fact, never who chose it or when.
-  - Don't note what's left out: a spec that doesn't list something already excludes it.
-  - The commit hook `.claude/hooks/lean-docs.mjs` blocks the usual slips; reword the line it shows.
+- `gui.mjs`: local GUI server and API; frontend assets are in `gui/`.
+- `lib/session.mjs`: opens saves, plans changes, applies edits, and saves.
+- `lib/dynasty.mjs`: save reader; `lib/signing-day.mjs`: transfer placement; `lib/gui-plan.mjs`: GUI plan and player cards.
+- `lib/fit.mjs`: school interest; `lib/destinations.mjs`: player interest and combined destinations.
+- `lib/roster-edits.mjs`: field writes; `lib/safe-save.mjs`: backup, write, and reopen verification.
+- `settings.json`: tuning values; `tools/`: reports and test helpers.
 
 ## Hard rules
 
 - The user team is picked per save in the GUI (never hard-coded or defaulted). If it isn't found in a save, refuse to open it.
-- Never write to `test_saves/` or a real save. Work on copies; only an explicit Save writes, always with a backup and a reopen check.
+- Never write to `test_saves/`. Development and tests use copies. Real saves are written only through the GUI's explicit Save, with a backup and reopen verification.
 
 ## Save traps (learned the hard way)
 
@@ -30,7 +26,7 @@ Docs: `PLAN.md` (status, task list, what's built), `GUI-PLAN.md` (GUI spec). Cha
 - HS recruits and transfers point at **different** ProspectTargetSchool tables; follow the reference.
 - The user team's RecruitingBoard points at a different RecruitTarget table than the CPU boards; read every referenced table.
 - The game commits a player when an offering school's influence reaches his `CommitScore`, and only to a school on his list at that moment.
-- At Signing Day the game only signs a HardCommitted transfer whose school has him on its RecruitingBoard; the rest are deleted at the rollover.
+- The Signing Day board is `Team.CommittedPlayers`, distinct from `Team.RecruitingBoard`. `commitTransfer` sets the transfer to `Signed` and adds him to the school's Signing Day board.
 - Rollover: deletes uncommitted transfers and unsigned recruits, then trims rosters to 85 by cutting veterans, never incoming recruits.
 - `TeamIndex` 255 = no team; players who left keep their old team in `PrevTeamIndex`. The roster-list row index is not the TeamIndex. `Age` is unreliable.
 - Arrays stay packed (later slots move up; empty = 32 zero bits). The Player table is capped at 17,500 rows: delete players the tool removes for good. Cut players stay teamless (`TeamIndex` 255) and the game deletes them at the rollover.
@@ -39,7 +35,8 @@ Docs: `PLAN.md` (status, task list, what's built), `GUI-PLAN.md` (GUI spec). Cha
 ## Running and testing
 
 - `npm install` once per checkout. Run tools from the repo root.
-- Test saves in `test_saves/`: the stock dynasty at each stage (`DYNASTY-<stage>COPY` for PLAYERSLEAVING, WEEK1PORTALOPENS, WEEK2, WEEK4PORTALCLOSES, SIGNINGDAY, PRESEASON), plus saves from earlier proof runs (STEP5PROOF, STEP5PROOF-PRESEASON, WEEKLYTEST, WEEKLYTEST2, WRITERTEST). Copy to the scratchpad or `test_runs/` (git-ignored) before running anything that writes.
-- Minimum proof: one fresh copy, a few named players, league counts. Tom does the in-game check.
-- Cloud sessions: push only to the session branch; at the end, merge it into `main` (merge commit) and push both. New chats start from `main`.
-- Windows Git Bash: apostrophes break `node -e`; write scripts to a file instead.
+- `node gui.mjs` starts the local GUI server; `--no-open` suppresses opening the browser.
+- Fixtures are in `test_saves/`. Copy to `test_runs/` (git-ignored) before running anything that writes.
+- `node tools/baseline-check.mjs` creates a fresh Signing Day copy in `test_runs/baseline-check/`, compares plan counts, and prints four named players' cards. Tools read the fixture's user team from `settings.json` → `testSavesTeam`.
+- Add `--save` to apply the plan and save that copy through backup and reopen verification.
+- Changes affecting save reading, planning, or writing need proof on a fresh copy: a few named players and league counts. Tom does any required in-game check. Documentation and cosmetic changes do not need save-based proof.

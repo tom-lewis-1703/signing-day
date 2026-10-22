@@ -1,8 +1,8 @@
-// Baseline check: the minimum proof for a change (CLAUDE.md), in one command.
+// Baseline check: the minimum proof for a change, in one command.
 //   node tools/baseline-check.mjs [--save]
 // Copies test_saves/DYNASTY-SIGNINGDAYCOPY to test_runs/baseline-check/, opens it with
 // settings.json → testSavesTeam and no undos, and compares the plan's summary with the
-// baseline (PLAN.md §4.6). Prints the card's status, move and why line for four named players.
+// baseline. Prints the card's status, move and why line for four named players.
 // --save also applies the plan and saves the copy (backup, write, reopen check).
 import fs from "node:fs";
 import path from "node:path";

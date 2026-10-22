@@ -1,5 +1,5 @@
 // Usage: node tools/copy-art.mjs ["<DynastyOS Assets folder>"]
-// Fills gui/art/ with the slim copy of the DynastyOS asset library the GUI uses (GUI-PLAN.md §2.3),
+// Fills gui/art/ with the slim copy of the DynastyOS asset library the GUI uses,
 // so it can be committed and cloud sessions can render art. Paths mirror the library's, so the
 // assets/… URLs stay the same:
 //   logos-flat-dark/, helmet/left/       copied unchanged
