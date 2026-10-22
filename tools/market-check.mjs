@@ -36,7 +36,9 @@ assert(raw.placements.every(p => p.teamIndex !== user), "No user-school signings
 assert(raw.cuts.every(p => p.teamIndex !== user), "No user-school releases");
 assert(raw.withdrawals.every(p => p.teamIndex !== user), "No user-school withdrawals");
 const protectedRecruits = new Set(input.players.filter(p => p.kind === "recruit").map(p => p.id));
-assert(raw.cuts.every(p => !protectedRecruits.has(p.id)), "HS/JUCO commitments preserved");
+const releasedRecruits = raw.cuts.filter(c => c.kind === "recruit"), released = new Set(releasedRecruits.map(c => c.id));
+assert(raw.cuts.filter(c => c.kind !== "recruit").every(p => !protectedRecruits.has(p.id)), "Veteran releases never touch HS/JUCO commitments");
+assert(releasedRecruits.every(c => protectedRecruits.has(c.id) && c.stars <= 2 && !["College_Star", "College_Elite"].includes(c.dev)), "Only 1–2★ non-Star/Elite recruits are released");
 const names = ["Nate Sheppard", "Jesse Legree", "Lance Heard", "Jackson Arnold", "Trevor Bindel", "Joenel Figueroa", "Matyus McLain", "David Murphy", "Justin Lawson", "Elijah Murrell"];
 const cards = names.map(name => {
   const matches = session.d.players.filter(p => p.name === name);
@@ -69,7 +71,12 @@ if (process.argv.includes("--save")) {
   assert.deepEqual(boardRefs(reopened, user), originalUserBoard, "User commitments preserved");
   assert.deepEqual(reopened.players.filter(p => p.team === user).map(p => p.ref).sort(), originalUserRoster, "User roster preserved");
   const byRef = new Map(reopened.players.map(p => [p.ref, p]));
-  for (const [id, teamIndex] of preserved) assert.equal(reopened.boardTeamByPlayerRef.get(id), teamIndex, `Preserved recruit ${id}`);
+  for (const [id, teamIndex] of preserved) if (!released.has(id)) assert.equal(reopened.boardTeamByPlayerRef.get(id), teamIndex, `Preserved recruit ${id}`);
+  for (const c of releasedRecruits) {
+    const p = byRef.get(c.id);
+    assert.equal(p.recruitStage, "Top10"); assert.equal(Number(p.recruitRecord.TotalScholarshipOffers), 0);
+    assert(!reopened.boardTeamByPlayerRef.has(c.id), `Released recruit ${c.name} is off every board`);
+  }
   for (const p of raw.placements) {
     assert.equal(byRef.get(p.id).recruitStage, "Signed");
     assert.equal(reopened.boardTeamByPlayerRef.get(p.id), p.teamIndex);

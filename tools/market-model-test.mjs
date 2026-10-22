@@ -111,10 +111,24 @@ for (const [rosterSize, realMissRound] of [[83, 2], [84, null]]) {
   assert.equal(m.diagnostics.missedPreference.willingBetterSchool, 1); assert.equal(m.diagnostics.missedPreference.count, realMissRound ? 1 : 0);
 }
 
+// A full-board school may release one 1–2★ recruit, never Star/Elite development,
+// to sign a transfer; the board stays full and a second release is not allowed.
+const recruit = (index, stars, dev = "Normal", overall = 50) => ({ ...player(index, "WR", overall, "recruit"), stars, dev });
+const lowRecruit = recruit(900, 2), highRecruit = recruit(901, 4, "Normal", 70), wrA = player(902, "WR", 90), wrB = player(903, "WR", 88);
+const boardMarket = releasable => planTransferMarket(inputFor([school(1, [releasable, highRecruit], { boardCapacity: 2, boardUsed: 2 })],
+  [releasable, highRecruit, wrA, wrB], [wrA, wrB]), { seed: "recruit-release" });
+const freed = boardMarket(lowRecruit);
+assert.equal(freed.summary.placed, 1); assert.equal(freed.summary.recruitReleases, 1); assert.equal(freed.summary.cuts, 0);
+assert.equal(freed.cuts[0].kind, "recruit"); assert.equal(freed.cuts[0].index, lowRecruit.index);
+assert.equal(freed.teams[0].boardUsed, 2); assert.equal(freed.teams[0].recruitReleases, 1);
+assert.equal(freed.unplaced[0].vetoCounts["commitment board full"], 1);
+const starDev = boardMarket(recruit(900, 2, "College_Star"));
+assert.equal(starDev.summary.placed, 0); assert.equal(starDev.summary.recruitReleases, 0);
+
 const zeroBoard = planTransferMarket(inputFor([school(1, [], { boardCapacity: 0 })], [newQB], [newQB]), { seed: "zero" });
 assert.equal(zeroBoard.summary.placed, 0); assert.equal(zeroBoard.summary.rounds, 0);
 assert.equal(zeroBoard.diagnostics.missedPreference.share, null);
 assert.throws(() => planTransferMarket({ ...competitive, userTeamIndex: null }), /valid user team/);
 assert.throws(() => planTransferMarket({ ...competitive, seasonYear: null }), /seasonYear/);
 
-console.log("Market model checks passed: arithmetic, ties, forecasts, support rooms, traits, original promises, simultaneous offers, deterministic order, locks, full-roster replacement, per-room offers at 85, real missed preferences, protected overage, board-only veto and three-cut limit.");
+console.log("Market model checks passed: arithmetic, ties, forecasts, support rooms, traits, original promises, simultaneous offers, deterministic order, locks, full-roster replacement, per-room offers at 85, real missed preferences, recruit release, protected overage, board-only veto and three-cut limit.");
