@@ -18,6 +18,8 @@ const support = slotsFor({ offScheme: "OFF_AIR_RAID", defScheme: "DEF_BASE4_3" }
 near(roomValue([{ id: "t", q1: 75, E: 1 }], support.TE).V1 - 4, 5);
 near(opportunity({ id: "t", q1: 75, E: 1 }, [{ id: "t", q1: 75, E: 1 }], support.TE), 55);
 near(roomValue([{ id: "f", q1: 75, E: 1 }], support.FB).V1 - 4, -.4);
+assert.deepEqual(slots.HB.h, [1, .50, .30, .12, .03]); assert.deepEqual(slots.HB.opportunity, [100, 70, 55, 20]);
+assert.deepEqual(slots.WR.h, [1, 1, 1, .30, .30, .12, .12, .12, .03, .03, .03]);
 assert.equal(support.TE.S, 0); assert.equal(support.TE.support, 2); assert.equal(support.FB.support, 1);
 assert.equal(normalizedState(" New-York. "), "newyork"); assert.equal(normalizedState("TX"), null);
 assert.equal(normalizedState("International"), null); near(gradeIndex("Bminus"), 100 * 7 / 12); near(gradeIndex("COUNT"), 50);
