@@ -6,18 +6,21 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { Session } from "./lib/session.mjs";
-import { ART_DIRS, listSaves, teamArt, emptyState, loadState, saveState, locksPath, lockCount, rawPlan, buildPlan, movesOf, playerCard } from "./lib/gui-plan.mjs";
+import { dynastyView, teamPage, profile } from "./lib/gui-dynasty.mjs";
+import { artDirsFor, listSaves, teamArt, emptyState, loadState, saveState, locksPath, lockCount, rawPlan, buildPlan, movesOf } from "./lib/gui-plan.mjs";
 
 const APP_DIR = path.dirname(fileURLToPath(import.meta.url));
 const GUI_DIR = path.join(APP_DIR, "gui");
-const STATE_PATH = path.join(APP_DIR, "gui-state.json");
+const stateArgument = process.argv.indexOf("--state-file");
+if (stateArgument !== -1 && !process.argv[stateArgument + 1]) throw new Error("--state-file needs a path.");
+const STATE_PATH = stateArgument === -1 ? path.join(APP_DIR, "gui-state.json") : path.resolve(process.argv[stateArgument + 1]);
 const PORT = 5178;
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
   ".svg": "image/svg+xml", ".woff2": "font/woff2", ".webp": "image/webp", ".png": "image/png", ".txt": "text/plain; charset=utf-8" };
 
 // The save opened on the start screen (Session.peek), then the session for the picked team,
 // with its locks and review states (lib/gui-plan.mjs) and the last planner output.
-let opened = null, session = null, state = null, raw = null, changes = null;
+let opened = null, session = null, state = null, raw = null, changes = null, activeTool = null;
 
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
 const inTestSaves = p => fs.realpathSync(p).split(/[\\/]+/).some(part => part.toLowerCase() === "test_saves");
@@ -26,16 +29,17 @@ const indexOf = (value, name) => {
   return value;
 };
 
-// gui-state.json: the user team picked for each save path.
-function guiState() { try { return JSON.parse(fs.readFileSync(STATE_PATH, "utf8")); } catch { return { teams: {} }; } }
-function rememberTeam(savePath, team) {
+// gui-state.json: last successfully opened save and the explicitly picked school for each path.
+function guiState() { try { return JSON.parse(fs.readFileSync(STATE_PATH, "utf8")) ?? {}; } catch { return {}; } }
+function rememberSave(savePath, team) {
   const s = guiState();
-  s.teams = { ...s.teams, [savePath]: team };
+  s.lastSavePath = savePath;
+  if (team !== undefined) s.teams = { ...s.teams, [savePath]: team };
   fs.writeFileSync(STATE_PATH, JSON.stringify(s, null, 2) + "\n");
 }
 
-function closeSave() { opened = null; session = null; state = null; raw = null; changes = null; }
-function requirePlan() { if (!session || !raw) throw new HttpError(409, "No save is open. Open a save and pick your team first."); }
+function closeSave() { opened = null; session = null; state = null; raw = null; changes = null; activeTool = null; }
+function requirePlan() { if (!session || !raw || activeTool !== "transfers") throw new HttpError(409, "Open a save, select your team, and build a transfer plan first."); }
 function rebuild() {
   const previous = raw;
   raw = rawPlan(session, state);
@@ -43,6 +47,9 @@ function rebuild() {
   changes = previous ? comparePlans(previous, raw) : null;
 }
 const plan = () => ({ ...buildPlan(session, raw, state), changes });
+const ratingsView = () => ({ ...session.reviewedRatings,
+  save: { fileName: path.basename(session.d.filePath), stage: session.stage.label },
+  userTeam: { ...session.userTeam, ...teamArt(session.userTeam.name) } });
 function comparePlans(before, after) {
   const placement = list => new Map(list.map(p => [p.index, p.teamIndex]));
   const oldDestinations = placement(before.placements), newDestinations = placement(after.placements);
@@ -63,6 +70,7 @@ function comparePlans(before, after) {
 
 const api = {
   "GET /api/saves": () => listSaves(),
+  "GET /api/startup": () => ({ lastSavePath: guiState().lastSavePath ?? null }),
 
   "POST /api/open": async ({ path: p }) => {
     const file = path.resolve(String(p || "").trim().replace(/^"(.*)"$/, "$1"));
@@ -75,16 +83,28 @@ const api = {
     const find = name => teams.find(t => t.name.toLowerCase() === String(name || "").trim().toLowerCase());
     const suggested = find(guiState().teams?.[peek.filePath]) ?? null;
     opened = peek;
+    rememberSave(peek.filePath);
     return { path: peek.filePath, fileName: peek.fileName, stage: { id: peek.stage.id, label: peek.stage.label }, teams, suggestedUserTeam: suggested?.index ?? null };
   },
 
-  "POST /api/user-team": async ({ teamIndex, seed }) => {
+  "POST /api/user-team": async ({ teamIndex, seed, tool = "transfers" }) => {
     if (!opened) throw new HttpError(409, "Open a save first.");
-    if (opened.stage.id !== "signing-day") throw new HttpError(400, `This tool works on a Signing Day save; this one is ${opened.stage.label}.`);
+    if (!["browse", "transfers", "team-ratings"].includes(tool)) throw new HttpError(400, "Choose a valid tool.");
+    if (tool === "transfers" && opened.stage.id !== "signing-day") throw new HttpError(400, `The transfer tool works on a Signing Day save; this one is ${opened.stage.label}.`);
     const s = new Session();
     await s.open(opened.filePath, { userTeam: indexOf(teamIndex, "user team") });
     session = s;
-    rememberTeam(opened.filePath, s.userTeam.name);
+    rememberSave(opened.filePath, s.userTeam.name);
+    activeTool = tool;
+    if (tool === "browse") {
+      raw = null; state = null; changes = null;
+      return dynastyView(session);
+    }
+    if (tool === "team-ratings") {
+      raw = null; state = null; changes = null;
+      session.teamRatingsPlan();
+      return ratingsView();
+    }
     try { state = loadState(opened.filePath); }   // undos and reviews from an earlier visit
     catch (e) { console.warn(`Ignoring an unreadable ${locksPath(opened.filePath)}: ${e.message}`); state = emptyState(); }
     raw = null; changes = null;
@@ -95,6 +115,32 @@ const api = {
 
   "GET /api/plan": () => { requirePlan(); return plan(); },
 
+  "GET /api/dynasty": () => {
+    if (!session) throw new HttpError(409, "Select your school first.");
+    return dynastyView(session);
+  },
+  "GET /api/team": ({ index }) => {
+    if (!session) throw new HttpError(409, "Select your school first.");
+    const page = /^\d+$/.test(index ?? "") ? teamPage(session, Number(index), activeTool === "transfers" ? raw : null) : null;
+    if (!page) throw new HttpError(404, "Unknown school.");
+    return page;
+  },
+  "POST /api/tool": ({ tool }) => {
+    if (!session) throw new HttpError(409, "Select your school first.");
+    if (!["transfers", "team-ratings"].includes(tool)) throw new HttpError(400, "Choose a valid tool.");
+    if (tool === "team-ratings") {
+      session.teamRatingsPlan(); activeTool = tool;
+      return ratingsView();
+    }
+    session.requireStage("signing-day");
+    if (!state) {
+      try { state = loadState(session.d.filePath); }
+      catch (e) { console.warn(`Ignoring an unreadable ${locksPath(session.d.filePath)}: ${e.message}`); state = emptyState(); }
+    }
+    rebuild(); activeTool = tool;
+    return plan();
+  },
+
   "POST /api/replan": ({ seed }) => {
     requirePlan();
     if (seed !== undefined) state.seed = validSeed(seed);
@@ -103,10 +149,10 @@ const api = {
     return plan();
   },
 
-  // Player card: read-only, from the last planner output.
+  // Read-only profile for every player; include market detail when a preview is active.
   "GET /api/player": ({ index }) => {
-    requirePlan();
-    const card = /^\d+$/.test(index ?? "") ? playerCard(session, raw, state, Number(index)) : null;
+    if (!session) throw new HttpError(409, "Select your school first.");
+    const card = /^\d+$/.test(index ?? "") ? profile(session, Number(index), activeTool === "transfers" ? raw : null, state) : null;
     if (!card) throw new HttpError(404, "Unknown player.");
     return card;
   },
@@ -148,7 +194,24 @@ const api = {
   },
 
   // Writes the plan (with the undos) into the save: backup, write, reopen check (session.save).
-  "POST /api/save": async ({ planId }) => {
+  "POST /api/save": async ({ planId, tool = "transfers" }) => {
+    if (tool === "team-ratings") {
+      if (!session || activeTool !== tool || !session.reviewedRatings) throw new HttpError(409, "Preview team ratings before saving.");
+      if (typeof planId !== "string" || planId !== session.reviewedRatings.id) throw new HttpError(409, "The ratings preview changed. Review the current ratings before saving.");
+      const filePath = session.d.filePath, teamIndex = session.userTeam.teamIndex, counts = session.reviewedRatings.counts;
+      let saved;
+      try {
+        await session.applyTeamRatings({ planId });
+        saved = await session.save();
+      } catch (e) {
+        await session.open(filePath, { userTeam: teamIndex });
+        session.teamRatingsPlan();
+        return { ok: false, failed: [e.message] };
+      }
+      closeSave();
+      return { ok: true, backupPath: saved.backup.backupPath, counts, tool };
+    }
+    if (tool !== "transfers") throw new HttpError(400, "Choose a valid tool.");
     requirePlan();
     if (typeof planId !== "string" || planId !== raw.id) throw new HttpError(409, "The reviewed plan has changed. Review the current plan before saving.");
     const filePath = session.d.filePath, teamIndex = session.userTeam.teamIndex;
@@ -204,10 +267,11 @@ function serveFile(res, root, rel, cache = "no-store", req = null) {
   fs.createReadStream(file).pipe(res);
 }
 
-// assets/…: gui/art/ first, then the DynastyOS library (lib/gui-plan.mjs).
+// Portraits prefer the full-size local originals, with bundled art as the fallback.
 function serveArt(req, res, rel) {
   const has = dir => { const f = path.resolve(dir, "." + path.sep + rel); return f.startsWith(dir + path.sep) && fs.existsSync(f) && fs.statSync(f).isFile(); };
-  serveFile(res, ART_DIRS.find(has) ?? ART_DIRS.at(-1), rel, "max-age=86400", req);
+  const dirs = artDirsFor(rel);
+  serveFile(res, dirs.find(has) ?? dirs.at(-1), rel, "max-age=86400", req);
 }
 
 const server = http.createServer(async (req, res) => {
