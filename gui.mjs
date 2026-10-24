@@ -87,7 +87,7 @@ const api = {
     return { path: peek.filePath, fileName: peek.fileName, stage: { id: peek.stage.id, label: peek.stage.label }, teams, suggestedUserTeam: suggested?.index ?? null };
   },
 
-  "POST /api/user-team": async ({ teamIndex, seed, tool = "transfers" }) => {
+  "POST /api/user-team": async ({ teamIndex, seed, tool = "transfers", rosterBasis }) => {
     if (!opened) throw new HttpError(409, "Open a save first.");
     if (!["browse", "transfers", "team-ratings"].includes(tool)) throw new HttpError(400, "Choose a valid tool.");
     if (tool === "transfers" && opened.stage.id !== "signing-day") throw new HttpError(400, `The transfer tool works on a Signing Day save; this one is ${opened.stage.label}.`);
@@ -102,7 +102,7 @@ const api = {
     }
     if (tool === "team-ratings") {
       raw = null; state = null; changes = null;
-      session.teamRatingsPlan();
+      session.teamRatingsPlan({ rosterBasis });
       return ratingsView();
     }
     try { state = loadState(opened.filePath); }   // undos and reviews from an earlier visit
@@ -125,11 +125,14 @@ const api = {
     if (!page) throw new HttpError(404, "Unknown school.");
     return page;
   },
-  "POST /api/tool": ({ tool }) => {
+  "POST /api/tool": async ({ tool, rosterBasis }) => {
     if (!session) throw new HttpError(409, "Select your school first.");
     if (!["transfers", "team-ratings"].includes(tool)) throw new HttpError(400, "Choose a valid tool.");
     if (tool === "team-ratings") {
-      session.teamRatingsPlan(); activeTool = tool;
+      if (session.rosterEdits?.edits.length || session.appliedPlan || session.appliedRatings) throw new HttpError(409, "Reopen the save before calculating ratings with applied edits.");
+      // Recalculate reads the latest source/settings, including after a rejected Save.
+      await session.open(session.d.filePath, { userTeam: session.userTeam.teamIndex });
+      session.teamRatingsPlan({ rosterBasis }); activeTool = tool;
       return ratingsView();
     }
     session.requireStage("signing-day");
@@ -198,15 +201,16 @@ const api = {
     if (tool === "team-ratings") {
       if (!session || activeTool !== tool || !session.reviewedRatings) throw new HttpError(409, "Preview team ratings before saving.");
       if (typeof planId !== "string" || planId !== session.reviewedRatings.id) throw new HttpError(409, "The ratings preview changed. Review the current ratings before saving.");
-      const filePath = session.d.filePath, teamIndex = session.userTeam.teamIndex, counts = session.reviewedRatings.counts;
+      const filePath = session.d.filePath, teamIndex = session.userTeam.teamIndex, counts = session.reviewedRatings.counts,
+        rosterBasis = session.reviewedRatings.rosterBasis;
       let saved;
       try {
         await session.applyTeamRatings({ planId });
         saved = await session.save();
       } catch (e) {
         await session.open(filePath, { userTeam: teamIndex });
-        session.teamRatingsPlan();
-        return { ok: false, failed: [e.message] };
+        session.teamRatingsPlan({ rosterBasis });
+        return { ok: false, failed: [e.message], ratings: ratingsView() };
       }
       closeSave();
       return { ok: true, backupPath: saved.backup.backupPath, counts, tool };

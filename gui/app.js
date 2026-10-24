@@ -75,7 +75,7 @@ function resetReview() {
   Object.assign(ui, { dynasty: null, teamData: null, view: 'welcome',
     teamTab: 'overview', schoolSearch: '', schoolSort: 'name', rosterSearch: '', rosterBasis: 'current',
     marketTab: 'moves', marketSearch: '', marketPage: 0, playerTab: 'profile',
-    plan: null, ratings: null, ratingsTeam: null, ratingsSearch: '', selected: null });
+    plan: null, ratings: null, ratingsTeam: null, ratingsBasis: null, ratingsSearch: '', ratingsSort: 'name', selected: null });
   ui.disclosures.clear();
   app.replaceChildren();
   app.dataset.scope = '';
@@ -90,7 +90,11 @@ function closePlayer() {
 async function api(path, body, options = {}) {
   const response = await fetch(path, { ...options, ...(body === undefined ? {} : { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }) });
   const data = await response.json();
-  if (!response.ok || data.ok === false) throw new Error(data.error || data.failed?.join('\n') || 'The action could not be completed.');
+  if (!response.ok || data.ok === false) {
+    const failure = new Error(data.error || data.failed?.join('\n') || 'The action could not be completed.');
+    failure.data = data;
+    throw failure;
+  }
   return data;
 }
 
@@ -154,10 +158,14 @@ function navigate(view, record = true) {
   window.scrollTo(0, 0);
 }
 async function runTool(tool) {
-  const result = await api('/api/tool', { tool });
+  const rosterBasis = ui.ratingsBasis || (ui.dynasty.save.stage.supported ? 'upcoming' : 'current');
+  const result = await api('/api/tool', { tool, ...(tool === 'team-ratings' ? { rosterBasis } : {}) });
   closePlayer();
   if (tool === 'transfers') { ui.ratings = null; ui.plan = result; ui.view = 'transfers'; renderPlan(); }
-  else { ui.plan = null; ui.ratings = result; ui.ratingsTeam = null; renderRatings(); }
+  else {
+    ui.dynasty = await api('/api/dynasty');
+    ui.plan = null; ui.ratings = result; ui.ratingsBasis = result.rosterBasis; ui.ratingsTeam = null; renderRatings();
+  }
   ui.teamData = null; window.scrollTo(0, 0);
 }
 
@@ -193,9 +201,17 @@ function ratingChange(team, key) {
 function ratingsDetail() {
   const t = ui.ratings.teams.find(t => t.index === ui.ratingsTeam);
   if (!t) return '<div class="empty">Select a team to see the calculation.</div>';
+  const playerText = p => `${playerLink(p.index, p.name)} · ${p.overall}${p.sourceRoom ? `<small class="rating-substitution">${html(p.sourceRoom)} → ${html(p.room)} estimate: ${p.sourceOverall}${p.positionAdjustment ? ` ${signed(p.positionAdjustment)} positional` : ''} − ${p.penalty} fit${p.positionalModel ? '' : ' (OVR fallback)'}</small>` : ''}`;
   return `<div class="team-sheet-head"><div class="team-sheet-title"><div class="eyebrow">RATING BREAKDOWN</div><h2>${html(t.name)}</h2><p>${number(t.rosterCount)} eligible players · ${ui.ratings.rosterBasis === 'upcoming' ? 'Upcoming roster' : 'Current roster'}</p></div></div>
     <div class="team-metrics">${['overall', 'offense', 'defense'].map(key => `<div class="team-metric"><label>${human(key)}</label><span>${ratingChange(t, key)}</span></div>`).join('')}</div>
-    ${t.note ? `<p class="team-note">${html(t.note)} Stored ratings will be kept.</p>` : Object.entries(t.breakdown).map(([side, rooms]) => `<div class="move-section"><div class="move-title"><h3>${human(side)}</h3><p>80% starters + 20% backups</p></div><table class="rating-room-table"><thead><tr><th>Room / weight</th><th>Starters</th><th>Backups</th><th>Score</th></tr></thead><tbody>${rooms.map(room => `<tr><td><strong>${html(room.room)}</strong><span class="muted"> ×${room.weight}</span></td><td><strong class="num">${number(room.starterAverage)}</strong><span class="rating-player-list">${room.starters.map(p => `${playerLink(p.index, p.name)} · ${p.overall}`).join('<br>')}${room.missingStarters ? `<br><span class="negative">${room.missingStarters} empty × 40</span>` : ''}</span></td><td><strong class="num">${number(room.backupAverage)}</strong><span class="rating-player-list">${room.backups.map(p => `${playerLink(p.index, p.name)} · ${p.overall}`).join('<br>')}${room.missingBackups ? `<br><span class="negative">${room.missingBackups} empty × 40</span>` : ''}</span></td><td class="number-cell">${number(room.score)}</td></tr>`).join('')}</tbody></table></div>`).join('')}
+    ${(t.warnings || []).map(w => `<p class="team-note negative">${html(w)}</p>`).join('')}
+    ${t.note ? `<p class="team-note">${html(t.note)}</p>` : Object.entries(t.breakdown).map(([side, rooms]) => {
+      const s = t.summary[side];
+      return `<div class="move-section"><div class="move-title"><h3>${human(side)}</h3><p>80% starters + 20% backups</p></div>
+        <p class="rating-equation">Starter strength ${s.starterScore.toFixed(2)} ${s.depthAdjustment < 0 ? '−' : '+'}${Math.abs(s.depthAdjustment).toFixed(2)} depth = ${s.rawScore.toFixed(2)} → <strong>${t.after[side]}</strong></p>
+        <p class="muted">${s.missingStarters} empty starter slots · ${s.missingBackups} empty backup slots · 40 OVR per empty slot</p>
+        <table class="rating-room-table"><thead><tr><th>Room / side share</th><th>Starters</th><th>Backups</th><th>Room score / side contribution</th></tr></thead><tbody>${rooms.map(room => `<tr><td><strong>${html(room.room)}</strong><span class="muted"> ×${room.weight} · ${number(room.weightShare * 100)}%</span></td><td><strong class="num">${number(room.starterAverage)}</strong><span class="rating-player-list">${room.starters.map(playerText).join('<br>')}${room.missingStarters ? `<br><span class="negative">${room.missingStarters} empty × 40</span>` : ''}</span></td><td><strong class="num">${number(room.backupAverage)}</strong><span class="rating-player-list">${room.backups.map(playerText).join('<br>')}${room.missingBackups ? `<br><span class="negative">${room.missingBackups} empty × 40</span>` : ''}</span></td><td class="number-cell">${number(room.score)}<small class="rating-substitution">${room.starterContribution.toFixed(2)} starters + ${room.backupContribution.toFixed(2)} backups = ${room.contribution.toFixed(2)} points</small></td></tr>`).join('')}</tbody></table></div>`;
+    }).join('')}
     ${t.schemeFallback ? '<p class="team-note">An unknown scheme uses the standard starter counts.</p>' : ''}`;
 }
 function renderRatings() { ui.view = 'ratings'; show(views.ratings()); }
@@ -340,6 +356,10 @@ document.addEventListener('submit', event => {
 });
 document.addEventListener('change', event => {
   if (event.target.id === 'school-sort') { ui.schoolSort = event.target.value; setContent($('#dynasty-schools'), views.schoolResults()); }
+  if (event.target.id === 'ratings-basis') {
+    ui.ratingsBasis = event.target.value; ui.ratings = null; ui.ratingsTeam = null; renderRatings();
+  }
+  if (event.target.id === 'ratings-sort') { ui.ratingsSort = event.target.value; setContent($('#ratings-cards'), views.ratingCards()); }
   if (event.target.id !== 'user-team') return;
   const value = event.target.value; $('#build-button').disabled = value === '';
   const team = ui.opened.teams.find(t => t.index === Number(value));
@@ -383,7 +403,15 @@ document.addEventListener('click', event => {
   if (action === 'review') mutate('/api/review', { teamIndex: Number(button.dataset.team), reviewed: button.dataset.reviewed === 'true' }, 'Updating review…');
   if (action === 'save' || action === 'save-ratings') work('Saving, then reopening for verification…', async () => {
     const ratings = action === 'save-ratings', preview = ratings ? ui.ratings : ui.plan;
-    const result = await api('/api/save', { planId: preview.id, tool: ratings ? 'team-ratings' : 'transfers' });
+    let result;
+    try { result = await api('/api/save', { planId: preview.id, tool: ratings ? 'team-ratings' : 'transfers' }); }
+    catch (e) {
+      if (ratings) {
+        ui.ratings = e.data?.ratings ?? null; ui.ratingsTeam = null; renderRatings();
+        e.message += ui.ratings ? ' A fresh preview is shown; review it before saving again.' : ' Recalculate the preview before saving again.';
+      }
+      throw e;
+    }
     resetReview(); ui.opened = null; renderWelcome({ ...result, fileName: preview.save.fileName }); window.scrollTo(0, 0);
   });
   if (action === 'export') {

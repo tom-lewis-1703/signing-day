@@ -44,3 +44,4 @@ body{font-size:22px;line-height:1.55}body:has(dialog[open]){overflow:hidden}butt
 /* Keep room above the hairline in the source portraits. */
 .player-grid .portrait-stage{height:230px}.featured-players .portrait-stage{height:280px}.market-player>.portrait-stage{height:260px}
 @media(max-width:1400px){.featured-players{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ratings-basis{display:flex;align-items:center;gap:12px;white-space:nowrap}.rating-substitution{display:block;font-size:14px;color:var(--muted);white-space:normal;margin-top:4px}.rating-equation{font-size:20px;margin:12px 0}.rating-room-table .number-cell{min-width:165px}

@@ -1,5 +1,7 @@
 # Team ratings v1
 
+Historical v1 behavior and proof. See [Team ratings v2](team-ratings-v2.md) for the current formula, roster choices, and focused check.
+
 Open a dynasty save, explicitly select your school, choose **Recalculate team ratings**, and click **Preview ratings**. Review stored → recalculated overall/offense/defense for every school, including your own. Select any school for the named starters, backups, room averages, and room weights. **Save ratings** uses the existing backup, temporary-file write, and reopen-verification flow. This tool is separate from the transfer market; it never applies transfer moves.
 
 ## Formula

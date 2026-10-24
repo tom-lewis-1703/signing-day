@@ -13,7 +13,7 @@ The server binds to localhost at port 5178 (or the next free port). `--no-open` 
 
 On launch, the GUI reopens the last successfully opened save and returns to the dashboard using the school you previously selected for that file. A save without a remembered valid school opens the school picker. If the file is unavailable, the save chooser stays available. Use **Change save** to open another dynasty. Startup only browses the save; tool previews and saving remain separate actions.
 
-The separate **Recalculate team ratings** tool previews overall, offense, and defense for every team, including yours. Select your school and this tool after opening a save. It uses 80% starters / 20% backups, scheme-specific starter counts, and extra QB weight; **Save ratings** writes only the three team-rating fields through backup and reopen verification. See [the formula and fresh-copy proof](docs/team-ratings-v1.md). Run `node tools/team-ratings-test.mjs --save` to verify it on a disposable copy. In-game display/persistence still needs Tom's check.
+The separate **Team ratings** tool previews overall, offense, and defense for every team, including yours. Choose current or upcoming rosters. It uses 80% starters / 20% backups, eleven-player scheme counts, extra QB weight, and unused offensive linemen to cover lineup holes with explicit positional penalties. **Save ratings** writes only the three team-rating fields through backup and reopen verification. See [the formula and fresh-copy proof](docs/team-ratings-v2.md). The short check is `node tools/team-ratings-check.mjs --save`; it uses one disposable copy. In-game display/persistence still needs Tom's check.
 
 ## Current implementation
 
