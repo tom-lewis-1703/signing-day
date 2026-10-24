@@ -230,7 +230,8 @@ const api = {
       rebuild();
       return { ok: false, failed: [e.message] };
     }
-    fs.rmSync(locksPath(filePath), { force: true });
+    try { fs.rmSync(locksPath(filePath), { force: true }); }
+    catch (e) { console.warn(`Saved successfully, but could not remove ${locksPath(filePath)}: ${e.message}`); }
     closeSave();
     return { ok: true, backupPath: saved.backup.backupPath, counts, undos };
   }
