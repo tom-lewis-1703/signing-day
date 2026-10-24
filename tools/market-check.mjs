@@ -10,6 +10,7 @@ import { Dynasty, ZERO } from "../lib/dynasty.mjs";
 import { loadSettings } from "../lib/settings.mjs";
 import { buildMarketInput } from "../lib/market-input.mjs";
 import { emptyState, buildPlan, playerCard } from "../lib/gui-plan.mjs";
+import { releasableRecruit, surplusFreshman } from "../lib/market-model.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FIXTURES = path.join(ROOT, "test_saves");
@@ -38,7 +39,7 @@ assert(raw.withdrawals.every(p => p.teamIndex !== user), "No user-school withdra
 const protectedRecruits = new Set(input.players.filter(p => p.kind === "recruit").map(p => p.id));
 const releasedRecruits = raw.cuts.filter(c => c.kind === "recruit"), released = new Set(releasedRecruits.map(c => c.id));
 assert(raw.cuts.filter(c => c.kind !== "recruit").every(p => !protectedRecruits.has(p.id)), "Veteran releases never touch HS/JUCO commitments");
-assert(releasedRecruits.every(c => protectedRecruits.has(c.id) && c.stars <= 2 && !["College_Star", "College_Elite"].includes(c.dev)), "Only 1–2★ non-Star/Elite recruits are released");
+assert(releasedRecruits.every(c => protectedRecruits.has(c.id) && (c.reason === "surplus" ? surplusFreshman(input.players.find(p => p.id === c.id)) : releasableRecruit(c))), "Recruit release eligibility and development protection");
 const names = ["Nate Sheppard", "Jesse Legree", "Lance Heard", "Jackson Arnold", "Trevor Bindel", "Joenel Figueroa", "Matyus McLain", "David Murphy", "Justin Lawson", "Elijah Murrell"];
 const cards = names.map(name => {
   const matches = session.d.players.filter(p => p.name === name);

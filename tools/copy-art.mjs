@@ -9,20 +9,18 @@
 //                                        (lib/gui-plan.mjs portraitFile: a cut-short head drops its "-")
 //   playerportrait/nilpp_Generic_*.webp  all of them
 //   playerportrait/nilpp_Blank.webp      the card's "file missing" portrait
-// Portraits are resized to 256×256 webp, alpha kept. Read-only on the library and test_saves/;
+// Portraits are copied byte-for-byte at their original resolution and quality. Read-only on the library and test_saves/;
 // re-running replaces gui/art/.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import sharp from "sharp";
 import { openFranchise } from "../lib/dynasty.mjs";
 import { ART_DIR, ASSETS_DIR, portraitFile } from "../lib/gui-plan.mjs";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SAVES = path.join(ROOT, "test_saves");
 const PLAYER_UID = 1612938518;
-const SIZE = 256;
 const COPY_DIRS = ["logos-flat-dark", path.join("helmet", "left")];
 const PORTRAITS = "playerportrait";
 
@@ -87,15 +85,14 @@ const generic = portraitFiles.filter(f => /^nilpp_Generic_.*\.webp$/i.test(f));
 const blank = portraitFiles.filter(f => /^nilpp_Blank\.webp$/i.test(f));
 const jobs = [...unique, ...generic, ...blank];
 let next = 0, done = 0;
-const resize = async () => {
+const copyPortraits = async () => {
   while (next < jobs.length) {
     const f = jobs[next++];
-    await sharp(path.join(lib, PORTRAITS, f)).resize(SIZE, SIZE).webp({ quality: 80, alphaQuality: 100 })
-      .toFile(path.join(ART_DIR, PORTRAITS, f));
+    await fs.promises.copyFile(path.join(lib, PORTRAITS, f), path.join(ART_DIR, PORTRAITS, f));
     if (++done % 1000 === 0) console.log(`  ${done} / ${jobs.length} portraits`);
   }
 };
-await Promise.all(Array.from({ length: Math.max(4, os.availableParallelism?.() ?? 4) }, resize));
+await Promise.all(Array.from({ length: Math.max(4, os.availableParallelism?.() ?? 4) }, copyPortraits));
 
 const sizeOf = dir => fs.readdirSync(dir, { withFileTypes: true })
   .reduce((a, e) => a + (e.isDirectory() ? sizeOf(path.join(dir, e.name)) : fs.statSync(path.join(dir, e.name)).size), 0);
