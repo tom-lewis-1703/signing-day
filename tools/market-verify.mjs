@@ -32,6 +32,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
   const draw = drawFactory(plan.seed, input.seasonYear);
   const players = new Map(input.players.map(p => [p.id, forecast(p)]));
   const remaining = new Map(input.candidates.map(id => [id, players.get(id)]));
+  const candidateIds = new Set(input.candidates);
   const pt = new Map([...remaining.values()].map(p => [p.id, playerTraits(p, draw)]));
   const locks = plan.binding?.locks ?? { keep: [], notAt: [] };
   const keep = new Set(locks.keep), notAt = new Map(locks.notAt.map(([id, teams]) => [id, new Set(teams)]));
@@ -107,7 +108,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     const releasing = !ignoreBoard && recruitMode(s);
     if (s.excluded || notAt.get(p.index)?.has(s.team.index) || s.roster.length > 85 ||
       (!ignoreBoard && freeBoard(s) <= 0 && !releasing) ||
-      (!releasing && s.roster.length === 85 && s.replacements >= 3)) return { structural: false, variants: [] };
+      (!releasing && s.roster.length === 85 && s.replacements >= PARAMETERS.replacementLimit)) return { structural: false, variants: [] };
     const adding = [...s.rooms[p.room], p], valueAdded = roomValue(adding, s.slots[p.room]);
     const opportunityAdded = utility(p, adding, s.slots[p.room], pt.get(p.id), pair(p, s));
     const incomingPromises = [...s.promises.entries()].filter(([id]) => players.get(id).room === p.room);
@@ -117,7 +118,9 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     });
     const additionPromises = promiseOkay(adding), variants = [];
     for (const cut of releasing ? s.recruits : s.roster.length < 85 ? [null] : s.veterans) {
-      if (cut && cut.p.room !== p.room && s.rooms[cut.p.room].length - 1 < s.coverage[cut.p.room]) continue;
+      // Held transfers can still leave, so only players who are staying count toward the floor.
+      if (cut && cut.p.room !== p.room && s.rooms[cut.p.room].filter(x => !candidateIds.has(x.id)).length - 1 < s.coverage[cut.p.room]) continue;
+      if (cut && cut.p.room !== p.room && cut.p.kind === "veteran" && cut.p.overall >= PARAMETERS.crossRoomProtectedOverall) continue;
       const sameRoom = cut?.p.room === p.room;
       const room = sameRoom ? adding.filter(x => x.id !== cut.p.id) : adding;
       if (room.length < s.coverage[p.room]) continue;
@@ -133,6 +136,31 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     }
     return { structural: true, variants };
   };
+  const held = new Map(), tried = new Set(), offersByPlayer = new Map();
+  let holdSequence = 0, tradeUps = 0, restoredReleases = 0;
+  const currentU = (p, s) => utility(p, s.rooms[p.room], s.slots[p.room], pt.get(p.id), pair(p, s)).U;
+  // Independently replays a school from its holds, newest hold first for returned releases.
+  const rebuild = s => {
+    const offers = [...held.values()].filter(h => h.offer.teamIndex === s.team.index).sort((a, b) => a.sequence - b.sequence);
+    const out = new Set(offers.filter(h => h.cut).map(h => h.cut.id));
+    const rosterNow = () => s.base.filter(p => !out.has(p.id)).concat(offers.map(h => h.offer.p));
+    s.promises = new Map(offers.map(h => [h.offer.p.id, h.promise]));
+    for (let i = offers.length - 1; i >= 0; i--) {
+      const h = offers[i];
+      if (!h.cut || rosterNow().length >= 85) continue;
+      const recruits = offers.filter(x => x.cut?.kind === "recruit").length;
+      if (h.cut.kind === "recruit" && s.team.boardCapacity - s.team.boardUsed + recruits - offers.length <= 0) continue;
+      out.delete(h.cut.id);
+      if (violations(s, rosterNow()).length) { out.add(h.cut.id); continue; }
+      h.cut = null; restoredReleases++;
+    }
+    s.roster = rosterNow(); s.n = offers.length;
+    s.replacements = offers.filter(h => h.cut?.kind === "veteran").length;
+    s.recruitReleases = offers.filter(h => h.cut?.kind === "recruit").length;
+    refresh(s);
+  };
+  for (const s of states) s.base = [...s.roster];
+
   // touched: rooms the school's earlier offers this round add to or release from.
   const checkOffer = (stored, s, touched) => {
     assert.ok(s, "No user-school or unknown-school offer");
@@ -157,9 +185,14 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     assert.equal(round.round, roundIndex + 1, "Consecutive round identities");
     onProgress(`Checking round ${round.round}/${plan.rounds.length}`);
     const actual = new Map(), schoolOffers = new Map(), touchedRooms = new Map();
+    const heldU = new Map([...held].map(([id, h]) => [id, currentU(h.offer.p, byTeam.get(h.offer.teamIndex))]));
     for (const stored of [...round.offers].sort((a, b) => a.teamIndex - b.teamIndex || a.k - b.k)) {
       if (!touchedRooms.has(stored.teamIndex)) touchedRooms.set(stored.teamIndex, new Set());
       const s = byTeam.get(stored.teamIndex), touched = touchedRooms.get(stored.teamIndex), verified = checkOffer(stored, s, touched);
+      assert.ok(!tried.has(`${stored.id}|${stored.teamIndex}`), `${stored.name}/${s.team.name}: each pair is offered at most once`);
+      if (heldU.has(stored.id)) assert.ok(cmp(verified.value.U, heldU.get(stored.id)) > 0, `${stored.name}/${s.team.name}: offer beats his current hold`);
+      if (!offersByPlayer.has(stored.id)) offersByPlayer.set(stored.id, []);
+      offersByPlayer.get(stored.id).push(stored.teamIndex);
       touched.add(verified.p.room); if (verified.cut) touched.add(verified.cut.room);
       if (!actual.has(stored.id)) actual.set(stored.id, []);
       actual.get(stored.id).push(verified);
@@ -172,7 +205,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
       assert.equal(new Set(offers.map(o => o.p.room)).size, offers.length, `${s.team.name}: distinct reserved rooms`);
       assert.equal(new Set(offers.map(o => o.p.id)).size, offers.length, `${s.team.name}: distinct offers`);
       const cap = freeBoard(s) <= 0 ? recruitMode(s) ? PARAMETERS.recruitReleaseLimit - s.recruitReleases : 0
-        : Math.min(freeBoard(s), s.roster.length < 85 ? 85 - s.roster.length : 3 - s.replacements);
+        : Math.min(freeBoard(s), s.roster.length < 85 ? 85 - s.roster.length : PARAMETERS.replacementLimit - s.replacements);
       if (freeBoard(s) <= 0) assert.ok(offers.every(o => o.cut?.kind === "recruit"), `${s.team.name}: full board offers release a recruit`);
       assert.ok(offers.length <= cap, `${s.team.name}: capacity reserved for every offer`);
       offers.forEach((offer, k) => assert.equal(offer.stored.k, k, `${s.team.name}: reservation order`));
@@ -189,47 +222,44 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     const selected = [...actual.values()].map(offers => offers.sort(chosenByPlayer)[0]);
     assert.deepEqual([...round.accepted].sort(byId).map(o => [o.id, o.teamIndex]),
       selected.sort((a, b) => byId(a.p, b.p)).map(o => [o.p.id, o.teamIndex]), "Best actual offer accepted exactly once");
-    const batches = new Map();
-    for (const offer of selected) {
-      if (!batches.has(offer.teamIndex)) batches.set(offer.teamIndex, []);
-      batches.get(offer.teamIndex).push(offer);
-    }
     // All checkOffer calls above precede every mutation of this round's states.
-    for (const [teamIndex, offers] of batches) {
-      const s = byTeam.get(teamIndex), cutIds = new Set(offers.filter(o => o.cut).map(o => o.cut.id));
-      const veteranCuts = offers.filter(o => o.cut?.kind === "veteran").length, recruitCuts = cutIds.size - veteranCuts;
-      const after = [...s.roster.filter(p => !cutIds.has(p.id)), ...offers.map(o => o.p)];
-      assert.ok(after.length <= 85, `${s.team.name}: actual batch roster cap`);
-      assert.ok(offers.length - recruitCuts <= freeBoard(s), `${s.team.name}: actual batch board cap`);
-      assert.ok(s.replacements + veteranCuts <= 3, `${s.team.name}: replacement cap`);
-      assert.ok(s.recruitReleases + recruitCuts <= PARAMETERS.recruitReleaseLimit, `${s.team.name}: recruit-release cap`);
-      for (const room of ROOMS) assert.ok(after.filter(p => p.room === room).length >= s.coverage[room], `${s.team.name}: ${room} coverage`);
-      assert.deepEqual(violations(s, after), [], `${s.team.name}: original promises preserved by batch`);
-      for (const offer of offers) {
-        const p = offer.p, placement = placementById.get(p.id);
-        assert.ok(placement, `${p.name}: placement recorded`);
-        assert.equal(placement.teamIndex, teamIndex, `${p.name}: selected destination`);
-        assert.equal(placement.round, round.round, `${p.name}: signing round`);
-        sameIds(placement.promiseRoster, after.map(p => p.id), `${p.name}: actual full promise snapshot`);
-        const value = utility(p, after.filter(x => x.room === p.room), s.slots[p.room], pt.get(p.id), pair(p, s));
-        for (const key of ["O1", "F", "U", "outside", "ordinaryU"]) number(placement.original[key], value[key], `${p.name}: original ${key}`);
-        const contract = p.E >= 2 && cmp(value.O1, 35) < 0 ? "developmental reserve" : "immediate opportunity";
-        assert.equal(placement.contract, contract, `${p.name}: frozen contract`);
-        assert.deepEqual(placement.actualOffers.map(o => [o.teamIndex, o.cut?.id ?? null]).sort(),
-          actual.get(p.id).map(o => [o.teamIndex, o.cut?.id ?? null]).sort(), `${p.name}: actual alternatives`);
-        if (offer.cut) {
-          const recorded = plan.cuts.filter(c => c.kind === (offer.cut.kind === "recruit" ? "recruit" : "replacement") && c.forId === p.id);
-          assert.equal(recorded.length, 1, `${p.name}: contingent release recorded once`);
-          assert.equal(recorded[0].id, offer.cut.id, `${p.name}: accepted cut identity`);
-          assert.equal(recorded[0].round, round.round, `${p.name}: cut round`);
-        }
-        s.promises.set(p.id, { ...value, E: p.E, contract });
-        remaining.delete(p.id); stats.accepted++;
-      }
-      s.n += offers.length; s.replacements += veteranCuts; s.recruitReleases += recruitCuts; s.roster = after; refresh(s);
+    for (const offers of actual.values()) for (const o of offers) tried.add(`${o.p.id}|${o.teamIndex}`);
+    const changed = new Set();
+    for (const offer of selected) {
+      const p = offer.p, previous = held.get(p.id);
+      if (previous) { tradeUps++; changed.add(previous.offer.teamIndex); }
+      const contract = p.E >= 2 && cmp(offer.value.O1, 35) < 0 ? "developmental reserve" : "immediate opportunity";
+      held.set(p.id, { offer, cut: offer.cut, round: round.round, sequence: ++holdSequence, promise: { ...offer.value, E: p.E, contract } });
+      changed.add(offer.teamIndex); stats.accepted++;
+    }
+    for (const teamIndex of [...changed].sort((a, b) => a - b)) {
+      const s = byTeam.get(teamIndex);
+      rebuild(s);
+      assert.ok(s.roster.length <= 85, `${s.team.name}: roster cap`);
+      assert.ok(freeBoard(s) >= 0, `${s.team.name}: board cap`);
+      assert.ok(s.replacements <= PARAMETERS.replacementLimit, `${s.team.name}: replacement cap`);
+      assert.ok(s.recruitReleases <= PARAMETERS.recruitReleaseLimit, `${s.team.name}: recruit-release cap`);
+      for (const room of ROOMS) assert.ok(s.rooms[room].length >= s.coverage[room], `${s.team.name}: ${room} coverage`);
+      assert.deepEqual(violations(s, s.roster), [], `${s.team.name}: original promises preserved`);
     }
     stats.rounds++;
   }
+  // Every hold standing when the market ends is the final commitment.
+  for (const [id, h] of held) {
+    const p = h.offer.p, placement = placementById.get(id), teamIndex = h.offer.teamIndex;
+    assert.ok(placement, `${p.name}: placement recorded`);
+    assert.equal(placement.teamIndex, teamIndex, `${p.name}: final destination`);
+    assert.equal(placement.round, h.round, `${p.name}: round of his final hold`);
+    assert.equal(placement.contract, h.promise.contract, `${p.name}: frozen contract`);
+    for (const key of ["O1", "F", "U", "outside", "ordinaryU"]) number(placement.original[key], h.offer.value[key], `${p.name}: original ${key}`);
+    sameIds(placement.actualOffers.map(o => o.teamIndex), offersByPlayer.get(id), `${p.name}: every offer he received`);
+    const recorded = plan.cuts.filter(c => c.kind !== "baseline" && c.forId === id);
+    assert.deepEqual(recorded.map(c => c.id), h.cut ? [h.cut.id] : [], `${p.name}: contingent release`);
+    if (h.cut) assert.equal(recorded[0].kind, h.cut.kind === "recruit" ? "recruit" : "replacement", `${p.name}: release kind`);
+    remaining.delete(id);
+  }
+  assert.equal(plan.summary.tradeUps, tradeUps, "Trade-ups replay");
+  assert.equal(plan.summary.restoredReleases, restoredReleases, "Returned releases replay");
   sameIds(remaining.keys(), plan.unplaced.map(p => p.id), "Remaining pool after replay");
   assert.equal(stats.baselineCuts + [...states].reduce((n, s) => n + s.replacements + s.recruitReleases, 0), plan.cuts.length, "Every cut accounted for");
   for (const s of states) {
@@ -273,7 +303,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     if (++examined % 200 === 0) onProgress(`Final enumeration: ${examined}/${remaining.size} candidates`);
   }
   return { passed: residual.length === 0, stats, residual,
-    scope: "Independent baseline replay, every actual offer's full cut variants and quote, priority order among issued offers, player choice, batches, original/final promises, and complete final feasible-transaction enumeration. Shared pure formula functions; no planner evaluator or feasibility cache.",
+    scope: "Independent baseline replay, every actual offer's full cut variants and quote, one offer per pair, offers beating the current hold, priority order among issued offers, player choice, hold rebuilds with returned releases, original/final promises, and complete final feasible-transaction enumeration for unplaced players. Shared pure formula functions; no planner evaluator or feasibility cache.",
     limits: "Does not prove formulas empirically realistic or verify all unissued school-priority alternatives in every historical round. Does not write or validate in-game rollover." };
 }
 

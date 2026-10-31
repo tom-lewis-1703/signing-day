@@ -84,14 +84,21 @@ const protectedRecruits = Array.from({ length: 86 }, (_, i) => player(300 + i, "
 const overage = planTransferMarket(inputFor([school(1, protectedRecruits, { boardCapacity: 100, boardUsed: 86 })], [...protectedRecruits, newQB], [newQB]), { seed: "protected" });
 assert.equal(overage.summary.excludedSchools, 1); assert.equal(overage.summary.cuts, 0); assert.equal(overage.teams[0].rosterAfter, 86);
 
-const fourOld = ["QB", "HB", "WR", "TE"].map((r, i) => player(500 + i, r, 50, "veteran"));
-const fourNew = fourOld.map((p, i) => player(600 + i, p.position, 90));
-const limited = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 81), ...fourOld])], [...unknowns.slice(0, 81), ...fourOld, ...fourNew], fourNew), { seed: "three-cuts" });
-assert.equal(limited.summary.replacementCuts, 3); assert.equal(limited.summary.placed, 3); assert.equal(limited.summary.unplaced, 1);
+const sevenOld = ["QB", "HB", "WR", "TE", "OT", "OG", "C"].map((r, i) => player(500 + i, r, 50, "veteran"));
+const sevenNew = sevenOld.map((p, i) => player(600 + i, p.position, 90));
+const limited = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 78), ...sevenOld])], [...unknowns.slice(0, 78), ...sevenOld, ...sevenNew], sevenNew), { seed: "six-cuts" });
+assert.equal(limited.summary.replacementCuts, 6); assert.equal(limited.summary.placed, 6); assert.equal(limited.summary.unplaced, 1);
 assert.equal(limited.unplaced[0].vetoCounts["replacement allowance"], 1);
 // A full school offers once per room in the same round, up to its remaining replacements.
-assert.equal(limited.summary.rounds, 1); assert.equal(limited.rounds[0].offers.length, 3);
+assert.equal(limited.summary.rounds, 1); assert.equal(limited.rounds[0].offers.length, 6);
 limited.rounds[0].offers.forEach((o, k) => { assert.equal(o.k, k); assert.equal(o.cut.position, o.position); });
+
+// A veteran rated 78+ can be released only for a player at his own position.
+const qbRoom = third => [player(710, "QB", 90, "veteran"), player(711, "QB", 85, "veteran"), player(712, "QB", third, "veteran")];
+const guardMarket = third => planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 82), ...qbRoom(third)])],
+  [...unknowns.slice(0, 82), ...qbRoom(third), player(713, "WR", 90)], [player(713, "WR", 90)]), { seed: "guard" });
+assert.equal(guardMarket(78).summary.placed, 0); assert.equal(guardMarket(77).summary.replacementCuts, 1);
+assert.equal(guardMarket(77).cuts[0].index, 712);
 
 // Both newcomers' cheapest release is an HB. One school's offers may not share a
 // room, so the second waits a round and releases a different HB.
@@ -101,20 +108,37 @@ const shared = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 81),
 assert.equal(shared.rounds[0].offers.length, 1); assert.equal(shared.summary.rounds, 2); assert.equal(shared.summary.placed, 2);
 assert.ok(shared.cuts.every(c => c.position === "HB")); assert.equal(new Set(shared.cuts.map(c => c.id)).size, 2);
 
-// School 1 spends its one WR offer on wr1; wr2 takes School 2 instead. That is a
-// real miss only if School 1 still had room to offer wr2 the next round.
+// School 1 spends its one WR offer on wr1; wr2 holds School 2's offer. If School 1 has
+// room next round he trades up; if not, he stays and no later school can take him.
 const wr1 = player(800, "WR", 92), wr2 = player(801, "WR", 88);
-const missMarket = rosterSize => planTransferMarket(inputFor([school(1, unknowns.slice(0, rosterSize)), school(2, [], { prestige: 3, state: "Ohio" })],
+const holdMarket = (rosterSize, extra = {}) => planTransferMarket(inputFor([school(1, unknowns.slice(0, rosterSize), extra), school(2, [], { prestige: 3, state: "Ohio" })],
   [...unknowns, wr1, wr2], [wr1, wr2]), { seed: "real-miss", notAt: new Map([[wr1.index, new Set([2])]]) });
-for (const [rosterSize, realMissRound] of [[83, 2], [84, null]]) {
-  const m = missMarket(rosterSize), signed = m.placements.find(p => p.index === wr2.index);
-  assert.equal(signed.teamIndex, 2); assert.equal(signed.bestStandalone.teamIndex, 1); assert.ok(signed.missedPreferenceGap > 10);
-  assert.equal(signed.realMissRound, realMissRound);
-  assert.equal(m.diagnostics.missedPreference.willingBetterSchool, 1); assert.equal(m.diagnostics.missedPreference.count, realMissRound ? 1 : 0);
-}
+const tradedUp = holdMarket(83), signedUp = tradedUp.placements.find(p => p.index === wr2.index);
+assert.equal(signedUp.teamIndex, 1); assert.equal(signedUp.round, 2); assert.equal(tradedUp.summary.tradeUps, 1);
+assert.deepEqual(signedUp.holds.map(h => h.teamIndex), [2, 1]); assert.equal(signedUp.actualOffers.length, 2);
+assert.equal(tradedUp.teams.find(t => t.teamIndex === 2).acquired, 0);
+const stayed = holdMarket(84), signedThere = stayed.placements.find(p => p.index === wr2.index);
+assert.equal(signedThere.teamIndex, 2); assert.equal(stayed.summary.tradeUps, 0); assert.equal(signedThere.betterSchool, null);
+// The better school wanted him but its board filled: reported, and not a real miss.
+const boardFull = holdMarket(83, { boardCapacity: 1 }), blocked = boardFull.placements.find(p => p.index === wr2.index);
+assert.equal(blocked.teamIndex, 2); assert.equal(blocked.betterSchool.teamIndex, 1); assert.equal(blocked.betterSchool.openAtEnd, false); assert.ok(blocked.missedPreferenceGap > 10);
+assert.equal(boardFull.diagnostics.missedPreference.count, 0); assert.equal(boardFull.diagnostics.missedPreference.willingBetterSchool, 1);
 
-// A full-board school may release one 1–2★ recruit, never Star/Elite development,
-// to sign a transfer; the board stays full and a second release is not allowed.
+// wrB holds School 1 with a release, then trades up: the released veteran stays.
+const oldWR = player(820, "WR", 50, "veteran"), wrTop = player(821, "WR", 92), wrNext = player(822, "WR", 88), oldQB2 = player(823, "QB", 80, "veteran"), qbNew = player(824, "QB", 90);
+const weak = { prestige: 3, state: "Ohio" };
+const departed = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 84), oldWR], weak), school(2)], [...unknowns, oldWR, wrTop, wrNext], [wrTop, wrNext]),
+  { seed: "departure", notAt: new Map([[wrTop.index, new Set([1])]]) });
+assert.equal(departed.summary.tradeUps, 1); assert.equal(departed.summary.replacementCuts, 0); assert.equal(departed.summary.placed, 2);
+assert.ok(departed.teams.find(t => t.teamIndex === 1).roster.includes(oldWR.id));
+// wrNext's roster spot reopens when he leaves, so qbNew no longer needs his release.
+const returned = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 83), oldQB2], weak), school(2)], [...unknowns, oldQB2, wrTop, wrNext, qbNew], [wrTop, wrNext, qbNew]),
+  { seed: "returned", notAt: new Map([[wrTop.index, new Set([1])], [qbNew.index, new Set([2])]]) });
+assert.equal(returned.summary.restoredReleases, 1); assert.equal(returned.summary.replacementCuts, 0);
+assert.equal(returned.placements.find(p => p.index === qbNew.index).teamIndex, 1); assert.equal(returned.teams.find(t => t.teamIndex === 1).rosterAfter, 85);
+
+// A full-board school may release up to three 1–2★ recruits, never Star/Elite development,
+// to sign transfers; the board stays full.
 const recruit = (index, stars, dev = "Normal", overall = 50) => ({ ...player(index, "WR", overall, "recruit"), stars, dev });
 const lowRecruit = recruit(900, 2), highRecruit = recruit(901, 4, "Normal", 70), wrA = player(902, "WR", 90), wrB = player(903, "WR", 88);
 const boardMarket = releasable => planTransferMarket(inputFor([school(1, [releasable, highRecruit], { boardCapacity: 2, boardUsed: 2 })],
@@ -127,10 +151,15 @@ assert.equal(freed.unplaced[0].vetoCounts["commitment board full"], 1);
 const starDev = boardMarket(recruit(900, 2, "College_Star"));
 assert.equal(starDev.summary.placed, 0); assert.equal(starDev.summary.recruitReleases, 0);
 
+const fourRecruits = [0, 1, 2, 3].map(i => recruit(910 + i, 2)), fourWR = [90, 89, 88, 87].map((o, i) => player(920 + i, "WR", o));
+const threeReleases = planTransferMarket(inputFor([school(1, fourRecruits, { boardCapacity: 4, boardUsed: 4 })], [...fourRecruits, ...fourWR], fourWR), { seed: "three-releases" });
+assert.equal(threeReleases.summary.recruitReleases, 3); assert.equal(threeReleases.summary.placed, 3); assert.equal(threeReleases.teams[0].boardUsed, 4);
+assert.equal(threeReleases.unplaced[0].vetoCounts["commitment board full"], 1);
+
 const zeroBoard = planTransferMarket(inputFor([school(1, [], { boardCapacity: 0 })], [newQB], [newQB]), { seed: "zero" });
 assert.equal(zeroBoard.summary.placed, 0); assert.equal(zeroBoard.summary.rounds, 0);
 assert.equal(zeroBoard.diagnostics.missedPreference.share, null);
 assert.throws(() => planTransferMarket({ ...competitive, userTeamIndex: null }), /valid user team/);
 assert.throws(() => planTransferMarket({ ...competitive, seasonYear: null }), /seasonYear/);
 
-console.log("Market model checks passed: arithmetic, ties, forecasts, support rooms, traits, original promises, simultaneous offers, deterministic order, locks, full-roster replacement, per-room offers at 85, real missed preferences, recruit release, protected overage, board-only veto and three-cut limit.");
+console.log("Market model checks passed: arithmetic, ties, forecasts, support rooms, traits, original promises, simultaneous offers, deterministic order, locks, full-roster replacement, per-room offers at 85, held offers and trade-ups, returned releases, the 78+ release guard, recruit releases, protected overage, board-only veto and six-cut limit.");
