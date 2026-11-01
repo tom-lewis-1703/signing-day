@@ -1,113 +1,140 @@
 # Algorithm handoff
 
-Updated November 1, 2026. Current implementation: **v1.8** on branch `claude/signing-day-work-ff8e49` (v1.7 on main). Read `AGENTS.md` for save-safety requirements.
+Updated November 1, 2026. Read `AGENTS.md` for save-safety rules.
 
-## Current behavior
+## Status
 
-This is a standalone Signing Day CPU transfer market. An explicit user-school selection is required. That school's roster and commitments are protected; Kansas was selected for the recorded runs.
+- **Code:** market **v1.8** and the sophomore draft lock are on branch `claude/signing-day-work-ff8e49`. Main is still v1.7, and nothing has been pushed.
+- **Team:** Tom's team in these dynasty saves is Kansas. Still pass it explicitly. Season 2 stage saves are in Tom's saves folder.
+- **Proven in-game:** v1.7 reached Preseason with all 1,115 signers at their planned schools.
+- **Not yet checked in-game:** v1.8 and the draft lock. Both are waiting on Tom:
+  1. **Market:** run the transfer tool on a copy of `DYNASTY-SIGNINGDAYS2`, save, advance to Preseason, then compare with `test_runs/s2-comparison/scripts/preseason-compare-v17.mjs` (change its save names).
+  2. **Draft lock:** use the dashboard button on a copy of `DYNASTY-PLYRSLEAVING` and advance to Week 4. Malachi Toney (Miami), Dakorien Moore (Texas Tech) and Nate Sheppard (LSU) should still be on their teams. If they leave, try a copy of `DYNASTY-WEEK1`.
 
-1. **Normalize the market.** Reopen all eligible CPU transfer commitments and combine those players with initially uncommitted transfers. Original CPU destinations and recruiting influences are audit data, not preference inputs. Incoming recruits and returning players form projected school rosters after known departures are excluded.
-2. **Clear surplus freshmen.** CPU teamless incoming freshmen with observed OVR <=62 and known Normal development may be un-signed only when their room exceeds all modeled depth slots, removal loses zero current and future roster value, and a frozen future-coverage floor survives. Protect Impact/Star/Elite, unknown development and Keep selections. Run cleanup before veteran overage cuts and again whenever holds change a school; an earlier release stays out if returning him would overflow the roster or board. Each release frees a roster place and commitment-board entry.
-3. **Resolve inherited overages.** Trim returning veterans toward 85 by lowest marginal roster-value loss while preserving coverage and locks. If a school cannot reach 85 under the protections, roll back its provisional veteran trims and exclude it; valid surplus cleanup remains.
-4. **Score both sides separately.** Schools value current and discounted future roster improvement, less acquisition and displacement costs. Players value immediate opportunity, future opportunity, prestige, home-state affinity and their game motivation. Both sides must prefer the transaction to their alternative.
-5. **Issue competing offers in rounds.** Schools can offer across multiple position groups, with capacity reserved and no overlapping rooms within a school's batch. A player holds his best offer and may trade up; each player-school pair is offered once, and holds become final when the market ends. A school cannot drop a player it holds. Later transactions must preserve the opportunity and willingness promised to current holders within defined tolerances.
-6. **Stop when no permitted mutually acceptable transaction remains.** There is no forced placement or automatic roster filling.
+**Working with Tom:** this is a personal tool, so keep testing light (see "Testing"). The GUI is a future item: don't change or check it unless Tom asks.
 
-## Model and restrictions
+## Next task: the school model
 
-- Position groups and school schemes set starter, rotation, backup and developmental slots. Some left/right positions are pooled. The second HB has extra roster-value weight (0.50) and opportunity score 70.
-- Forecasts cover two seasons. Returning players/transfers receive a modeled +2 first-season rating estimate; future growth depends on development. Forecasts never change saved ratings or class.
-- School development philosophies and player culture/social preferences are seeded simulation inputs, not observed facts. Players retain 82–92% football-feature weight; the rare lifestyle trait was removed in v1.8. Actual NIL offers, production history and coach relationships are not modeled.
-- The seed fixes traits across replans. Changing constraints can change allocations without redrawing personalities. An original CPU commitment gets no continuity preference; returning to the actual previous school carries a preference penalty.
-- Roster maximum: **85**, plus the actual physical capacity of each commitment board. Veteran cuts do not free commitment-board entries.
-- At most **six discretionary veteran replacements per school**, separate from initial overage cuts. A veteran rated 78+ can be released only for a player at his own position.
-- A full-board school can additionally release up to **three normal-development 1–2★ recruits** as part of transfer offers. This allowance is separate from surplus-freshman cleanup.
-- **Four-QB minimum.** Releases and cleanup cannot take a QB room below four, counting only players who are staying. A school under four pays a 25-point premium for a QB, and a QB takes that place even below his outside option (contract `depth floor`), since his alternative is deletion. He can still trade up while the market is open. There is no automatic backup transfer after a manual move. Elsewhere the veteran coverage floor is usually starters plus one.
-- **Signing caps: WR 14, HB 8.** A room at its cap signs a player only by releasing someone from that room. The cap does not cut rooms already above it, so a few stay over from veterans and held recruits.
-- Keep controls protect releases; exclude controls prohibit player-school pairings. Replanning uses the original opened snapshot and retained seed.
+Analyze and improve how schools decide who to sign. Measure first, recommend one design, and get Tom's OK before changing market code.
 
-## Recorded results
+A school's value for a transfer looks only at the player's position room: the slot-weighted rating gain now, plus discounted future gain. Its cost is 4 + 0.5 per signing, plus a surcharge if someone is released. Roster size plays no part, so a school at 72 and one at 84 value a player the same.
 
-v1.8, Kansas protected: seed `sd-v1.2-001` on the fixture places **1,228 of 1,882** (889 surplus freshmen, 379 veteran releases). The default seed on `DYNASTY-SIGNINGDAYS2` places **1,224 of 1,559**: all 254 rated 85+, 548 of 583 rated 80-84, with 1,023 surplus freshmen and 525 veteran releases. All 137 CPU teams have 4+ QBs (77 signed on depth-floor offers, 28 of them finishing below their outside option). Largest rooms are WR 16 and HB 9. Rosters leave 129 places for the game to fill, and four schools are under 75. Not yet checked in-game.
+- **Example:** UL Monroe has 72 players and 13 signings. Rodney Fields Jr. (HB84) adds 5.6 against a cost of 10.5, so the school passes. Signing him would also break the playing-time promise made to King Davis, so fixing the valuation alone would not place him.
+- **Season 2 v1.8 plan:** 29 schools have 129 open spots while 335 transfers go unplaced. Four of those schools have full boards (13 spots). Across the other 25, 5,169 player-school pairings fail on both sides, 2,863 only on the school's side and 18 only on the player's.
+- **Tradeoff:** the rising cost stops low-prestige schools collecting huge hauls just because they have room. Removing it would work against item 4.
 
-v1.7, Kansas protected: seed `sd-v1.2-001` on the fixture places **1,133 of 1,882** (one 85+ unplaced, 605 surplus freshmen, 522 veteran releases). The default seed on Tom's Season 2 `DYNASTY-SIGNINGDAYS2` places **1,115 of 1,559** (253 of 254 rated 85+, 709 surplus freshmen, 701 veteran releases). An earlier hold-offers build without surplus cleanup reached Preseason in-game with all 752 signers at their planned schools; the combined v1.7 plan then reached Preseason with all 1,115 signers at their planned schools (see "Next work").
+**Decided by Tom:** no fill step. The game fills open spots at rollover, and did so at v1.7: it added 95 unplaced transfers (mean 74.9) and 18 recruits (mean 60.1), spread almost evenly across positions. Even a full fill could not hold every unplaced transfer: 335 players, 129 spots.
 
-Earlier results:
-
-Same fixture, Kansas protected, seed `sd-v1.2-001`:
-
-| Measure | v1.5 | v1.6 |
-|---|---:|---:|
-| Transfers placed / 1,882 | 697 | 1,042 |
-| Transfers rated 85+ unplaced | 7 | 0 |
-| Veteran cuts | 603 | 402 |
-| Surplus freshmen released | 0 | 622 |
-| Other recruit releases | 30 | 6 |
-
-All 140 fixture freshmen rated <=58 with Impact/Star/Elite development remained. Useful low-rated Normal prospects also remained; the cutoff alone never authorizes cleanup.
-
-The later run on the real `DYNASTY-SIGNINGDAY` used a different source snapshot: **1,145 placed, 737 unplaced, 573 surplus freshmen released, four other recruit releases and eight veteran cuts**. All 704 original CPU transfer commitments were reopened. Kansas's full checked snapshot remained unchanged. Do not compare this run's counts to the fixture as if only an algorithm parameter changed.
-
-Tom subsequently advanced into the season and manually changed destinations. Those manual changes do not update the algorithm or teach its preferences. The recorded run reports describe the saved algorithm output, not the current manually edited dynasty. The interrupted manual-edit attempt wrote only a disposable copy; its temporary GUI and executable plan were removed.
-
-## Unresolved behavior
-
-- **Offer timing is reduced, not removed.** Holding offers lets a player reach a better school later, but a school cannot drop a hold for someone better, and capacity still blocks many preferred schools. On the fixture, 259 of 1,133 signers finish over 10 utility points below a school that wanted them but had no capacity left.
-- **Crowded rooms remain.** Cleanup only removes qualifying low-rated freshmen with zero marginal value. Higher-rated recruits, protected development and retained veterans can preserve large rooms. The real-run review recorded HB rooms of nine and WR rooms up to 17.
-- **Roster quality is not established by mechanical checks.** Coverage, growth, opportunity and future value are approximations. Small schools can gain elite players when both valuations agree; there is no hard prestige gate. No policy guarantees equal talent distribution or full rosters.
-- The separate experimental roster-clearing worktree is **not** the active implementation.
-
-## Next work
-
-Tom's team in these dynasty saves is Kansas (he confirmed it in-game on November 1, 2026). Season 2 stage saves are in his saves folder.
-
-**v1.7 rollover result (November 1, 2026):** `DYNASTY-S2V17TEST` advanced in-game to Preseason (`DYNASTY-S2V17TEST-AUTOSAVE`). All 1,115 signers reached their planned schools, including Kade Phillips (USC). The game removed no returning players. Of 736 released recruits, 723 were deleted and 13 were placed by the game. Kansas kept its 57 returners and 24 signees. Every CPU school ended at 85: the plan left a shortfall of 112, and one committed recruit (Kyle Cruz WR54) was also deleted, so the game added 113 players (95 unplaced transfers, mean 74.9; 18 recruits, mean 60.1), mostly at the schools the plan left shortest. This comes from reading the saves; Tom has not reported a review of the result in-game beyond advancing it.
-
-On that Preseason save, 76 of 137 CPU teams have under 4 QBs, and the largest rooms are WR 19 (TCU) and HB 9 (Wake Forest). CPU freshmen rated <=62 number 1,816, including 316 WRs and 160 HBs. Starting QBs average 80.4 at prestige 0-1, 82.1 at 2-3, 81.2 at 4-6 and 86.5 at 7-10.
-
-Earlier comparison, before surplus cleanup was combined: the All In One mod (`DYNASTY-SIGNINGDAYS2-COPY`, then `DYNASTY-CUSTOMCONF-AUTOSAVE`) landed 942 transfers with 556 rated 80+, and removed 459 recruits. The hold-offers build (`DYNASTY-S2V16TESTPRESEASON`) landed 794 with 618 rated 80+, all 752 signers at their planned schools. The mod keeps CPU commitments, forces new ones with Commit Score 100 and influence 999, places some transfers straight on rosters, and revived nine finished seniors. All of those rostered transfers but four survived the rollover.
-
-Tom's list, in his order:
+## Tom's list
 
 1. Done: board-less hard commitments join the market.
-2. Done in v1.8 (November 1, 2026): four-QB minimum, WR/HB signing caps. **Waiting on Tom's in-game check.**
+2. Built in v1.8, in-game check pending: four-QB minimum, WR and HB signing caps.
 3. Done in v1.8: rare lifestyle trait removed, as Tom decided. Ordinary social and culture preferences remain.
-4. Low-tier teams look too close to top teams, including many premier QBs at 0-1 star schools. On the v1.7 Preseason, starting QBs averaged 80.4 at prestige 0-1, 82.1 at 2-3, 81.2 at 4-6 and 86.5 at 7-10. Tom expected this may need its own branch. Check `lib/team-ratings.mjs` and `docs/team-ratings-v2.md` first. Tom noted the mod's team overalls range 74 to 87, with many 0-1 star teams at 76-79.
-5. Partly done in v1.8: the cleanup ceiling rose from 58 to 62, so kept recruits fell from 3,253 to about 2,950 of 3,999 on Season 2. Cleanup still requires a room over its depth slots and zero value loss. Item 8 is the remaining route for weak recruits.
-6. Built: sophomore draft lock. Tom defined it as keeping sophomores from leaving for the NFL draft. See below. **Waiting on Tom's in-game check.**
-7. GUI: a future item, set aside by Tom on November 1, 2026. The draft lock has only a plain dashboard button, because real saves are written through the GUI.
-8. A tool to run after Fang's recruiting mod each preseason that removes weak recruits and trims the class before they take board spots. Needs a Fang-modded preseason save. Deleting records must follow the save traps in `AGENTS.md`.
+4. Open: low-tier teams look too close to top teams, including many premier QBs at 0-1 star schools. On the v1.7 Preseason, starting QBs averaged 80.4 at prestige 0-1, 82.1 at 2-3, 81.2 at 4-6 and 86.5 at 7-10. Tom expected this may need its own branch. Check `lib/team-ratings.mjs` and `docs/team-ratings-v2.md` first. The mod's team overalls range 74 to 87, with many 0-1 star teams at 76-79.
+5. Partly done in v1.8: the cleanup ceiling rose from 58 to 62, so kept CPU recruits fell from 3,253 to about 2,950 on Season 2. Item 8 is the remaining route.
+6. Built, in-game check pending: sophomore draft lock (see below).
+7. GUI: a future item, set aside by Tom.
+8. Open: a tool to run after Fang's recruiting mod each preseason that removes weak recruits and trims the class before they take board spots. Needs a Fang-modded preseason save. Deleting records must follow the save traps in `AGENTS.md`.
 
-**Sophomore draft lock.** The market cannot do this: early-draft rows are gone by Week 4, so it runs earlier. Open a Players Leaving or Week 1 save in the GUI and use the dashboard's Sophomore draft lock button. It sets every CPU sophomore's `EarlyNFL_*` rows to `LeaveStatus` Staying and `PersuadeAttempts` at least 1, the values the game writes for a persuasion, with backup and reopen verification. Kansas is left out, as are juniors and seniors. `DYNASTY-PLYRSLEAVING` has 33 such sophomores; without the lock 16 left for the draft, 11 stayed and six entered the portal (a sophomore also entering the portal stays in it). At Week 1 only the 16 real leavers still have rows. Fixtures hold no sophomore rows, so `node tools/draft-lock-test.mjs` defaults to `DYNASTY-PLYRSLEAVING` and writes only a copy. **No in-game result yet**, including whether the game honors the edit from Players Leaving; Week 1 is the fallback if it does not.
+Order: Tom's in-game checks, the school model, then 8 and 4. The school model may change item 4, so measure item 4 again after it.
 
-Recommended order: Tom's in-game checks of v1.8 and the draft lock, then 8, then 4.
+## How the market works
 
-Repo note: `origin` moved from `toms-transfer-tools` to `signing-day`, and the desktop app refuses its sync tool until Tom re-pins it under Help, Troubleshooting, Review Pinned Git Origins. Local main is ahead of `origin`; nothing has been pushed.
+A standalone Signing Day CPU transfer market. An explicit user school is required, and that school's roster and commitments are protected.
 
-Evidence: `test_runs/s2-comparison/` in the main checkout (Git-ignored) holds the comparison scripts and reports. The scripts take the repo path as their first argument and read saves from temporary copies.
+1. **Normalize.** Reopen all eligible CPU transfer commitments and pool them with uncommitted transfers. Original destinations and influences are audit data, not preferences. Incoming recruits and returning players form each school's projected roster.
+2. **Clear surplus freshmen.** Un-sign CPU incoming freshmen rated <=62 with Normal development only when the room exceeds its modeled depth slots, removal loses no current or future roster value, and a future-coverage floor survives. Protect Impact/Star/Elite, unknown development and Keep selections. This reruns whenever holds change a school. Each release frees a roster place and a board entry.
+3. **Resolve overages.** Trim veterans toward 85 by lowest value loss, preserving coverage and locks. A school that cannot reach 85 is excluded.
+4. **Score both sides.** Schools value roster improvement less costs. Players value immediate and future opportunity, prestige, home state and their game motivation. Both sides must prefer the deal, except on QB depth-floor offers.
+5. **Offer in rounds.** Schools offer across position rooms, one offer per room per round. A player holds the best offer and may trade up, and each pair is offered once. A school cannot drop a hold. Later moves must keep the opportunity promised to current holders, within a tolerance.
+6. **Stop** when no permitted deal remains, and holds become final. Only QB depth-floor offers override a player's preference; nothing fills rosters.
 
-## Verification and entry points
+## Rules and limits
 
-Model scenarios, cleanup tests, safety checks, independent market replay and backup/write/reopen verification passed for the recorded v1.6 proof. The independent verifier reconstructed cleanup and enumerated final legal transactions with no residual feasible pair. It shares some model formulas and the reader; this establishes implementation consistency, not empirical realism. Tom reported the isolated CPU withdrawal game check passed. A comprehensive behavioral review across seeds and after game rollover is not recorded as complete.
+- **Roster and boards:** 85 maximum, plus each commitment board's real capacity. Veteran cuts do not free board entries.
+- **Four-QB minimum:** releases and cleanup cannot take a QB room below four, counting only players who are staying. A school under four pays a 25-point premium for a QB, who takes the place even below his outside option (contract `depth floor`), since the alternative is deletion. He can still trade up while the market is open.
+- **Signing caps, WR 14 and HB 8:** a room at its cap signs only by releasing someone from that room. Rooms already above a cap are not cut.
+- **Veteran releases:** at most six discretionary replacements per school, separate from overage cuts. A veteran rated 78+ can be released only for a player at his own position. Outside QB, the coverage floor is usually starters plus one.
+- **Recruit releases:** a full-board school can also release up to three Normal-development 1-2★ recruits for transfer offers, separate from cleanup.
+- **Forecasts:** two seasons. Returning players and transfers get a modeled +2 first-season estimate, and later growth depends on development. Forecasts never change saved ratings or class.
+- **Simulated inputs:** school development philosophies and player culture and social preferences are seeded, not observed. Football features keep 82-92% of a player's weight. NIL, production history and coach relationships are not modeled.
+- **Seeds and locks:** the seed fixes traits across replans. Keep controls protect releases, and exclude controls prohibit player-school pairings. An original CPU commitment gets no continuity preference, and returning to the previous school carries a penalty.
 
-Core files:
+## Sophomore draft lock
 
-- `lib/market-input.mjs`: normalization, ownership and mutable-reference validation.
-- `lib/market-model.mjs`: forecasts, depth slots, school/player values and seeded preferences.
-- `lib/recruit-cleanup.mjs`: surplus-freshman eligibility, depth and succession checks.
+Early-draft rows are gone by Week 4, so this runs separately from the market. On a Players Leaving or Week 1 save, the dashboard's button sets each CPU sophomore's `EarlyNFL_*` rows to `LeaveStatus` Staying and `PersuadeAttempts` at least 1, the values the game writes for a persuasion, with backup and reopen verification.
+
+Kansas, juniors and seniors are left out, and portal decisions are not changed. `DYNASTY-PLYRSLEAVING` has 33 such sophomores: without the lock 16 left for the draft, 11 stayed and six entered the portal. At Week 1 only those 16 still have rows. It is unknown whether the game honors the edit from Players Leaving.
+
+## Results
+
+Season 2 `DYNASTY-SIGNINGDAYS2`, Kansas protected, default seed:
+
+| Plan | v1.7 | v1.8 |
+|---|---:|---:|
+| Transfers placed, of 1,559 | 1,115 | 1,224 |
+| Rated 85+ | 253/254 | 254/254 |
+| Rated 80-84 | 530/583 | 548/583 |
+| Surplus freshmen released | 709 | 1,023 |
+| Veteran releases | 701 | 525 |
+| Teams under 4 QBs | 80 | 0 |
+| Largest WR / HB room | 19 / 9 | 16 / 9 |
+| Open roster spots | 112 | 129 |
+
+In v1.8, 77 QBs signed on depth-floor offers, and 28 finish below their outside option. Six teams stay over a cap because of players already on the roster, and four schools are under 75 before the game fills them. Fixture with seed `sd-v1.2-001` places 1,228 of 1,882 (v1.7: 1,133).
+
+v1.7 at Preseason, from reading `DYNASTY-S2V17TEST-AUTOSAVE`: the game removed no returning players, and Kansas kept its 57 returners and 24 signees. Of 736 released recruits, 723 were deleted and 13 placed. The game deleted one committed recruit, Kyle Cruz WR54.
+
+Landed at Preseason, same save:
+
+| | All In One mod | Hold-offers (v1.6) | v1.7 |
+|---|---:|---:|---:|
+| Transfers landed | 942 | 794 | 1,210 |
+| Rated 85+ | 234/254 | 232/254 | 253/254 |
+| Rated 80-84 | 322/583 | 386/583 | 534/583 |
+| Teams under 4 QBs | 14 | 67 | 76 |
+
+The mod keeps CPU commitments, forces new ones with Commit Score 100 and influence 999, places some transfers straight on rosters, and revived nine finished seniors.
+
+## Known limits
+
+- **Offer timing:** holds let a player reach a better school later, but a school cannot drop a hold, and capacity blocks many preferred schools. On the Season 2 v1.8 plan, 142 of 1,224 signers finish over 10 utility points below a school that wanted them but had no capacity left.
+- **Crowded rooms:** caps only limit signings, and cleanup only removes low-rated freshmen with zero value. About 1,100 Normal-development recruits rated <=62 stay.
+- **Roster quality:** coverage, growth and opportunity are approximations, and passing checks does not show rosters are realistic. There is no hard prestige gate, and no policy guarantees talent spread or full rosters.
+- **Manual edits:** Tom's in-game destination changes do not teach the algorithm.
+
+## Files
+
+- `lib/market-input.mjs`: normalization, ownership and reference validation.
+- `lib/market-model.mjs`: forecasts, depth slots, values, seeded preferences and `PARAMETERS`.
+- `lib/recruit-cleanup.mjs`: surplus-freshman checks.
 - `lib/transfer-market.mjs`: offers, acceptance, releases, promises and diagnostics.
-- `lib/gui-plan.mjs`, `gui/app.js`, `gui.mjs`: review, explanations and constraints.
-- `lib/session.mjs`, `lib/roster-edits.mjs`, `lib/safe-save.mjs`: exact-plan apply, established field writes, backup and reopen verification.
+- `lib/session.mjs`, `lib/roster-edits.mjs`, `lib/safe-save.mjs`: plan apply, draft lock, field writes, backup and reopen verification.
+- `lib/gui-plan.mjs`, `gui/`, `gui.mjs`: review and explanations.
 
-Reference documents: `docs/replacement-transfer-spec-v1.md` (currently v1.6 despite its filename), `docs/replacement-transfer-acceptance-v1.md`, `docs/recruit-cleanup-v1.6.md`, and `docs/manual-roster-move-check.md`. The historical first-market review describes v1.2, not current results.
+This file and the code are the current reference. The older market spec, which explains why many v1.7 rules exist, is in commit `cf0e5d97` as `docs/replacement-transfer-spec-v1.md`.
 
-Verification commands: `node tools/market-model-test.mjs`, `node tools/recruit-cleanup-test.mjs`, `node tools/market-safety-test.mjs`, `node tools/draft-lock-test.mjs`, and `node tools/market-check.mjs --save`. The last command writes only a fresh disposable copy. Do not rerun tools against a real save as a resumption step.
+## Testing
 
-Local evidence (Git-ignored; may not exist in another checkout):
+Default for a market change:
 
-- `test_runs/market-v1.2-hWymkF/`: v1.6 fixture plan, comparison, saved-copy proof and final checks. The directory's v1.2 prefix is historical; read the report's model field.
-- `test_runs/market-verify-FLe9RV/report.json`: independent fixture verification.
-- `test_runs/market-safety-2inRHs/result.json`: safety checks.
-- `test_runs/live-signingday-7EmjiN/review.json` and `saved.json`: real-run output and verification.
+```bash
+node tools/market-model-test.mjs
+node tools/recruit-cleanup-test.mjs
+node tools/market-check.mjs --save
+```
 
-Real saves require the GUI's explicit Save, a verified backup and reopen verification. Never write to `test_saves/`. Changes to established writing formulas need fresh-copy proof and Tom's in-game retest.
+The last writes only a fresh copy under `test_runs/`. Add one Season 2 plan and save on a copy, with a few named players and league counts.
+
+Only if Tom asks or a result looks wrong: `tools/market-verify.mjs`, `tools/market-safety-test.mjs`, `tools/draft-lock-test.mjs` (defaults to a copy of `DYNASTY-PLYRSLEAVING`, as the fixtures hold no sophomore rows), extra seeds and new test tools. The verifier checks that the code matches its rules, not that results are realistic.
+
+Real saves are written only through the GUI's explicit Save, with a verified backup and reopen verification. Never write to `test_saves/`. Changes to established write formulas need fresh-copy proof and Tom's in-game retest.
+
+## Evidence and repo notes
+
+Git-ignored, so these may not exist in another checkout:
+
+- `test_runs/s2-comparison/` in the main checkout: comparison scripts and reports, including `reports/v1.7-preseason.json` and `reports/v1.8-signingdays2.json`. Scripts take the repo path as their first argument and read saves from temporary copies.
+- `test_runs/s2-v18-ltIVPa/` in this worktree: v1.8 Season 2 plan and saved copy.
+
+`origin` moved from `toms-transfer-tools` to `signing-day`, and the desktop app refuses its sync tool until Tom re-pins it under Help, Troubleshooting, Review Pinned Git Origins. Local main is ahead of `origin`.

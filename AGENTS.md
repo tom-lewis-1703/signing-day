@@ -29,6 +29,8 @@ Personal tool: one user (Tom), run locally, private repo. Skip public-release co
 - The game commits a player when an offering school's influence reaches his `CommitScore`, and only to a school on his list at that moment.
 - The Signing Day board is `Team.CommittedPlayers`, distinct from `Team.RecruitingBoard`. `commitTransfer` sets the transfer to `Signed` and adds him to the school's Signing Day board.
 - Rollover: deletes uncommitted transfers and unsigned recruits, then trims rosters to 85 by cutting veterans, never incoming recruits.
+- A save's filename does not establish its stage: `DYNASTY-SIGNINGDAY-AUTOSAVE` was already at Preseason. Read SeasonInfo and actual ownership before choosing an edit.
+- `outOfEligibility` describes the next rollover. Current seniors still play this season and can be moved at Preseason with `RosterEdits.movePlayer`.
 - `TeamIndex` 255 = no team; players who left keep their old team in `PrevTeamIndex`. The roster-list row index is not the TeamIndex. `Age` is unreliable.
 - Arrays stay packed (later slots move up; empty = 32 zero bits). The Player table is capped at 17,500 rows. Follow the established removal paths in `lib/roster-edits.mjs`: permanent record deletion and cutting a player are distinct operations. Validate affected references when deleting records. Cut players stay teamless (`TeamIndex` 255) and the game deletes them at the rollover.
 - Proven edit formulas live in `lib/roster-edits.mjs`. Changes to those formulas require verification on a fresh copy and an in-game re-test by Tom before being considered validated.
@@ -38,7 +40,7 @@ Personal tool: one user (Tom), run locally, private repo. Skip public-release co
 - `npm install` once per checkout. Run tools from the repo root.
 - `node gui.mjs` starts the local GUI server; `--no-open` suppresses opening the browser.
 - Fixtures are in `test_saves/`. Copy to `test_runs/` (git-ignored) before running anything that writes.
-- `node tools/baseline-check.mjs` creates a fresh Signing Day copy in `test_runs/baseline-check/`, compares plan counts, and prints four named players' cards. Tools read the fixture's user team from `settings.json` → `testSavesTeam`.
-- Existing baselines record current behavior; matching them does not establish that interest scores or placements are sensible. Intentional algorithm changes may change those results and should explain why.
+- `node tools/market-check.mjs` creates a fresh Signing Day copy in a new `test_runs/market-v1.2-*` folder, reports league counts and prints named players' cards. Tools read the fixture's user team from `settings.json` → `testSavesTeam`. `tools/baseline-check.mjs` just runs this check.
 - Add `--save` to apply the plan and save that copy through backup and reopen verification.
-- Changes affecting save reading, planning, or writing need proof on a fresh copy: a few named players and league counts. Tom does any required in-game check. Documentation and cosmetic changes do not need save-based proof.
+- Passing these checks does not establish that interest scores or placements are sensible. Intentional algorithm changes may change results and should explain why.
+- Keep testing light. Changes affecting save reading, planning, or writing need one proof on a fresh copy: a few named players and league counts. Run the verifier, extra seeds, new test tools or GUI checks only if Tom asks or a result looks wrong. Tom does any required in-game check. Documentation and cosmetic changes do not need save-based proof.
