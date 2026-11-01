@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { Dynasty } from "../lib/dynasty.mjs";
 import { buildMarketInput } from "../lib/market-input.mjs";
 import { ROOMS, forecast, slotsFor, drawFactory, schoolTraits, playerTraits,
-  pairTraits, roomValue, utility, promiseFailures, cmp, byId, releasableRecruit, PARAMETERS } from "../lib/market-model.mjs";
+  pairTraits, roomValue, utility, promiseFailures, cmp, byId, releasableRecruit, coverageFloor, talentPremium, replacementLimitFor, recruitReleaseLimitFor, PARAMETERS } from "../lib/market-model.mjs";
 
 const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === "object"
   ? Object.fromEntries(Object.keys(value).sort().map(k => [k, canonical(value[k])])) : value;
@@ -44,6 +44,8 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
   assert.equal(new Set(plan.unplaced.map(p => p.id)).size, plan.unplaced.length, "No repeated unplaced candidate");
   sameIds([...plan.placements, ...plan.unplaced].map(p => p.id), input.candidates, "Complete candidate partition");
   assert.deepEqual(plan.withdrawals, input.withdrawals, "Complete original CPU withdrawal list");
+  const blockPairs = plan.diagnostics.promiseBlocks.map(b => `${b.id}|${b.teamIndex}`);
+  assert.equal(new Set(blockPairs).size, blockPairs.length, "Each blocked pair is logged once");
 
   // No feasibility cache: this derives only roster rooms, additive values and
   // each individual veteran's removal loss for the independently replayed state.
@@ -60,12 +62,13 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
   };
   const freeBoard = s => s.team.boardCapacity - s.team.boardUsed + s.recruitReleases - s.n;
   const contingentReleases = s => s.recruitReleases - s.surplusReleases;
-  const recruitMode = s => freeBoard(s) <= 0 && contingentReleases(s) < PARAMETERS.recruitReleaseLimit && s.recruits.length > 0;
+  const recruitMode = s => freeBoard(s) <= 0 && contingentReleases(s) < recruitReleaseLimitFor(s.team) && s.recruits.length > 0;
+  const surplusDepth = (s, room) => Math.max(s.slots[room].h.length, PARAMETERS.roomFloors[room] ?? 0);
   // Reconstruct surplus decisions without importing the planner's cleanup helper.
   const cleanup = (s, round) => {
     const expected = [];
     for (const room of ROOMS) {
-      while (s.rooms[room].length > s.slots[room].h.length) {
+      while (s.rooms[room].length > surplusDepth(s, room)) {
         const before = s.values[room];
         const eligible = s.roster.filter(p => p.room === room && p.kind === "recruit" && p.teamIndex === 255
           && p.schoolYear === "Freshman" && p.overall <= PARAMETERS.surplusFreshmanMaxOverall && ["Normal", "College_Normal"].includes(p.dev) && !keep.has(p.index))
@@ -85,7 +88,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     expected.forEach((e, i) => {
       const c = recorded[i]; assert.equal(c.kind, "recruit"); assert.equal(c.index, e.p.index);
       number(c.loss1, 0, "Surplus current value loss"); number(c.loss2, 0, "Surplus future value loss"); number(c.marginalLoss, 0, "Surplus total loss");
-      assert.equal(c.coverageFloor, s.slots[e.p.room].h.length); assert.equal(c.roomCountBefore, e.roomCountBefore);
+      assert.equal(c.coverageFloor, surplusDepth(s, e.p.room)); assert.equal(c.roomCountBefore, e.roomCountBefore);
       assert.equal(c.futureFloor, s.futureCoverage[e.p.room]); assert.equal(c.futureCountAfter, e.futureCountAfter);
     });
     stats.surplusReleases += expected.length;
@@ -97,8 +100,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     assert.ok(s.roster.every(Boolean), `${team.name}: known roster identities`);
     assert.ok(s.roster.every(p => !remaining.has(p.id)), `${team.name}: CPU withdrawals normalized`);
     refresh(s);
-    for (const room of ROOMS) s.coverage[room] = Math.min(s.rooms[room].length,
-      room === "QB" ? PARAMETERS.qbMinimum : s.slots[room].S ? s.slots[room].S + 1 : s.slots[room].support);
+    for (const room of ROOMS) s.coverage[room] = Math.min(s.rooms[room].length, coverageFloor(room, s.slots[room]));
     for (const room of ROOMS) s.futureCoverage[room] = Math.min(s.rooms[room].filter(p => p.E >= 2).length,
       s.slots[room].S ? s.slots[room].S + 1 : s.slots[room].support);
     cleanup(s, 0);
@@ -117,6 +119,11 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     return s;
   });
   const byTeam = new Map(states.map(s => [s.team.index, s]));
+  // The lowest-rated QBs the league is short of sign only below the minimum until the market first settles.
+  let reserveLifted = false;
+  const qbNeed = states.reduce((n, s) => n + (s.excluded ? 0 : Math.max(0, PARAMETERS.qbMinimum - s.rooms.QB.length)), 0);
+  const reservedQBs = new Set([...remaining.values()].filter(p => p.room === "QB").sort((a, b) => a.overall - b.overall || byId(a, b)).slice(0, qbNeed).map(p => p.id));
+  sameIds(plan.diagnostics.qbFloor.reserved, [...reservedQBs].map(id => players.get(id).index), "Reserved QBs");
   const pair = (p, s) => {
     // Only fixed hash-derived traits are cached, never pair feasibility.
     if (!s.pairs.has(p.id)) s.pairs.set(p.id, pairTraits(p, s.team, pt.get(p.id), s.traits, draw));
@@ -141,7 +148,8 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     const releasing = !ignoreBoard && recruitMode(s);
     if (s.excluded || notAt.get(p.index)?.has(s.team.index) || s.roster.length > 85 ||
       (!ignoreBoard && freeBoard(s) <= 0 && !releasing) ||
-      (!releasing && s.roster.length === 85 && s.replacements >= PARAMETERS.replacementLimit)) return { structural: false, variants: [] };
+      (!reserveLifted && reservedQBs.has(p.id) && s.rooms.QB.length >= PARAMETERS.qbMinimum) ||
+      (!releasing && s.roster.length === 85 && s.replacements >= replacementLimitFor(s.team))) return { structural: false, variants: [] };
     const adding = [...s.rooms[p.room], p], valueAdded = roomValue(adding, s.slots[p.room]);
     const opportunityAdded = utility(p, adding, s.slots[p.room], pt.get(p.id), pair(p, s));
     const incomingPromises = [...s.promises.entries()].filter(([id]) => players.get(id).room === p.room);
@@ -161,12 +169,13 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
       const roomAfter = sameRoom ? roomValue(room, s.slots[p.room]) : valueAdded;
       const gain1 = roomAfter.V1 - s.values[p.room].V1 - (cut && !sameRoom ? cut.loss1 : 0);
       const gain2 = roomAfter.V2 - s.values[p.room].V2 - (cut && !sameRoom ? cut.loss2 : 0);
-      const gain = gain1 + s.traits.delta * gain2, cost = 4 + .5 * s.n + (cut ? s.traits.cutSurcharge : 0);
+      const newStarter = p.room === "QB" && s.rooms.QB.every(x => x.overall < p.overall);
+      const gain = gain1 + s.traits.delta * gain2, cost = 4 + (newStarter ? 0 : .5 * s.n) + (cut ? s.traits.cutSurcharge : 0);
       const value = sameRoom ? utility(p, room, s.slots[p.room], pt.get(p.id), pair(p, s)) : opportunityAdded;
       const promisesOkay = sameRoom ? promiseOkay(room) : additionPromises;
       const depthFloor = p.room === "QB" && s.rooms.QB.length < PARAMETERS.qbMinimum && !sameRoom;
-      const net = gain - cost + (depthFloor ? PARAMETERS.depthFloorBonus : 0);
-      variants.push({ p, teamIndex: s.team.index, cut: cut?.p ?? null, cutLoss: cut?.loss ?? 0,
+      const net = gain - cost + talentPremium(s.team, p) + (depthFloor ? PARAMETERS.depthFloorBonus : 0);
+      variants.push({ p, teamIndex: s.team.index, cut: cut?.p ?? null, cutLoss: cut?.loss ?? 0, cutRoomCount: cut ? s.rooms[cut.p.room].length : null,
         gain1, gain2, gain, cost, net, value, depthFloor,
         feasible: cmp(net, 0) > 0 && (depthFloor || cmp(value.U, pt.get(p.id).outside) > 0) && promisesOkay });
     }
@@ -182,7 +191,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     for (const room of ROOMS) {
       for (;;) {
         const members = roster.filter(p => p.room === room);
-        if (members.length <= s.slots[room].h.length) break;
+        if (members.length <= surplusDepth(s, room)) break;
         const before = roomValue(members, s.slots[room]);
         const p = members.filter(x => x.kind === "recruit" && x.teamIndex === 255 && x.schoolYear === "Freshman" && x.overall <= PARAMETERS.surplusFreshmanMaxOverall && ["Normal", "College_Normal"].includes(x.dev) && !keep.has(x.index))
           .sort((a, b) => a.overall - b.overall || (a.q2 ?? 0) - (b.q2 ?? 0) || byId(a, b)).find(x => {
@@ -214,6 +223,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
       const h = offers[i];
       if (!h.cut || settled().roster.length >= 85) continue;
       if (h.cut.kind === "recruit" && boardWith(settled().removed.length) <= 0) continue;
+      if (settled().roster.filter(x => x.room === h.cut.room).length >= (PARAMETERS.roomCaps[h.cut.room] ?? Infinity)) continue;
       out.delete(h.cut.id);
       if (violations(s, settled().roster).length) { out.add(h.cut.id); continue; }
       h.cut = null; restoredReleases++;
@@ -248,7 +258,12 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
   };
 
   for (const [roundIndex, round] of plan.rounds.entries()) {
-    assert.equal(round.round, roundIndex + 1, "Consecutive round identities");
+    // The empty round that lifts the QB reserve uses up one round number and records nothing.
+    const expectedRound = roundIndex + 1 + (reserveLifted ? 1 : 0);
+    if (round.round !== expectedRound) {
+      assert.ok(!reserveLifted && reservedQBs.size && round.round === expectedRound + 1, "Consecutive round identities");
+      reserveLifted = true;
+    }
     onProgress(`Checking round ${round.round}/${plan.rounds.length}`);
     const actual = new Map(), schoolOffers = new Map(), touchedRooms = new Map();
     const heldU = new Map([...held].map(([id, h]) => [id, currentU(h.offer.p, byTeam.get(h.offer.teamIndex))]));
@@ -270,8 +285,8 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
       const s = byTeam.get(teamIndex);
       assert.equal(new Set(offers.map(o => o.p.room)).size, offers.length, `${s.team.name}: distinct reserved rooms`);
       assert.equal(new Set(offers.map(o => o.p.id)).size, offers.length, `${s.team.name}: distinct offers`);
-      const cap = freeBoard(s) <= 0 ? recruitMode(s) ? PARAMETERS.recruitReleaseLimit - contingentReleases(s) : 0
-        : Math.min(freeBoard(s), s.roster.length < 85 ? 85 - s.roster.length : PARAMETERS.replacementLimit - s.replacements);
+      const cap = freeBoard(s) <= 0 ? recruitMode(s) ? recruitReleaseLimitFor(s.team) - contingentReleases(s) : 0
+        : Math.min(freeBoard(s), s.roster.length < 85 ? 85 - s.roster.length : replacementLimitFor(s.team) - s.replacements);
       if (freeBoard(s) <= 0) assert.ok(offers.every(o => o.cut?.kind === "recruit"), `${s.team.name}: full board offers release a recruit`);
       assert.ok(offers.length <= cap, `${s.team.name}: capacity reserved for every offer`);
       offers.forEach((offer, k) => assert.equal(offer.stored.k, k, `${s.team.name}: reservation order`));
@@ -303,13 +318,14 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
       rebuild(s);
       assert.ok(s.roster.length <= 85, `${s.team.name}: roster cap`);
       assert.ok(freeBoard(s) >= 0, `${s.team.name}: board cap`);
-      assert.ok(s.replacements <= PARAMETERS.replacementLimit, `${s.team.name}: replacement cap`);
-      assert.ok(contingentReleases(s) <= PARAMETERS.recruitReleaseLimit, `${s.team.name}: recruit-release cap`);
+      assert.ok(s.replacements <= replacementLimitFor(s.team), `${s.team.name}: replacement cap`);
+      assert.ok(contingentReleases(s) <= recruitReleaseLimitFor(s.team), `${s.team.name}: recruit-release cap`);
       for (const room of ROOMS) assert.ok(s.rooms[room].length >= s.coverage[room], `${s.team.name}: ${room} coverage`);
       assert.deepEqual(violations(s, s.roster), [], `${s.team.name}: original promises preserved`);
     }
     stats.rounds++;
   }
+  reserveLifted = true;
   // Every hold standing when the market ends is the final commitment.
   for (const [id, h] of held) {
     const p = h.offer.p, placement = placementById.get(id), teamIndex = h.offer.teamIndex;
@@ -321,7 +337,10 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     sameIds(placement.actualOffers.map(o => o.teamIndex), offersByPlayer.get(id), `${p.name}: every offer he received`);
     const recorded = plan.cuts.filter(c => c.kind !== "baseline" && c.forId === id);
     assert.deepEqual(recorded.map(c => c.id), h.cut ? [h.cut.id] : [], `${p.name}: contingent release`);
-    if (h.cut) assert.equal(recorded[0].kind, h.cut.kind === "recruit" ? "recruit" : "replacement", `${p.name}: release kind`);
+    if (h.cut) {
+      assert.equal(recorded[0].kind, h.cut.kind === "recruit" ? "recruit" : "replacement", `${p.name}: release kind`);
+      assert.equal(recorded[0].roomCountBefore, h.offer.cutRoomCount, `${p.name}: release room count`);
+    }
     remaining.delete(id);
   }
   assert.equal(plan.summary.tradeUps, tradeUps, "Trade-ups replay");
