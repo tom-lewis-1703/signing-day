@@ -182,6 +182,7 @@ Real saves are written only through the GUI's explicit Save, with a verified bac
 Git-ignored, so these may not exist in another checkout:
 
 - `test_runs/s2-comparison/` in the main checkout: comparison scripts and reports, including `reports/v1.7-preseason.json` and `reports/v1.8-signingdays2.json`. Scripts take the repo path as their first argument and read saves from temporary copies.
-- In the `.claude/worktrees/signing-day-school-strategy-10d0b1` worktree: `test_runs/s2-v18-ltIVPa/` (v1.8 Season 2 plan and saved copy), `test_runs/s2-v19-uxpyOe/` (v1.9), `test_runs/s2-v19-F34c3m/` (v1.9 with a four-QB minimum), `test_runs/s2-v110-eMMUzB/` (v1.10), `test_runs/s2-v111-5Elsnl/` (v1.11) and `test_runs/s2-v111-bT3ZTg/` (the rejected full stop).
+- In the `.claude/worktrees/signing-day-work-ff8e49` worktree: `test_runs/s2-v18-ltIVPa/` (v1.8 Season 2 plan and saved copy).
+- In the `.claude/worktrees/signing-day-school-strategy-10d0b1` worktree: `test_runs/s2-v19-uxpyOe/` (v1.9 Season 2 plan and saved copy), `test_runs/s2-v19-F34c3m/` (v1.9 with a four-QB minimum), `test_runs/s2-v110-eMMUzB/` (v1.10), `test_runs/s2-v111-5Elsnl/` (v1.11) and `test_runs/s2-v111-bT3ZTg/` (the rejected full stop).
 
 `origin` moved from `toms-transfer-tools` to `signing-day`, and the desktop app refuses its sync tool until Tom re-pins it under Help, Troubleshooting, Review Pinned Git Origins.
