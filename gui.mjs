@@ -47,6 +47,16 @@ function rebuild() {
   changes = previous ? comparePlans(previous, raw) : null;
 }
 const plan = () => ({ ...buildPlan(session, raw, state), changes });
+const copyState = s => ({ keep: new Set(s.keep), notAt: new Map([...s.notAt].map(([i, teams]) => [i, new Set(teams)])), reviewed: new Map(s.reviewed), seed: s.seed });
+// Changes go on a copy, so a plan that fails to build leaves the last good plan and its constraints in place.
+function replan(change) {
+  const previous = state, next = copyState(state);
+  change(next);
+  state = next;
+  try { rebuild(); } catch (e) { state = previous; throw e; }
+  saveState(session.d.filePath, state);
+  return plan();
+}
 const ratingsView = () => ({ ...session.reviewedRatings,
   save: { fileName: path.basename(session.d.filePath), stage: session.stage.label },
   userTeam: { ...session.userTeam, ...teamArt(session.userTeam.name) } });
@@ -146,10 +156,7 @@ const api = {
 
   "POST /api/replan": ({ seed }) => {
     requirePlan();
-    if (seed !== undefined) state.seed = validSeed(seed);
-    rebuild();
-    saveState(session.d.filePath, state);
-    return plan();
+    return replan(next => { if (seed !== undefined) next.seed = validSeed(seed); });
   },
 
   // Read-only profile for every player; include market detail when a preview is active.
@@ -166,25 +173,24 @@ const api = {
     const p = indexOf(playerIndex, "player"), t = indexOf(teamIndex, "team");
     if (!session.d.playerByIndex.has(p)) throw new HttpError(400, "Unknown player.");
     if (kind === "in" && !session.d.teams.has(t)) throw new HttpError(400, "Unknown team.");
-    if (kind === "in") { if (!state.notAt.has(p)) state.notAt.set(p, new Set()); state.notAt.get(p).add(t); }
-    else if (kind === "out") {
-      if (!raw.cuts.some(e => e.index === p && e.teamIndex === t)) throw new HttpError(400, "Only a planned veteran release can be kept. CPU withdrawals remain part of the market.");
-      state.keep.add(p);
-    }
-    else throw new HttpError(400, 'kind must be "in" or "out".');
-    rebuild();
-    saveState(session.d.filePath, state);
-    return plan();
+    return replan(next => {
+      if (kind === "in") { if (!next.notAt.has(p)) next.notAt.set(p, new Set()); next.notAt.get(p).add(t); }
+      else if (kind === "out") {
+        if (!raw.cuts.some(e => e.index === p && e.teamIndex === t)) throw new HttpError(400, "Only a planned veteran release can be kept. CPU withdrawals remain part of the market.");
+        next.keep.add(p);
+      }
+      else throw new HttpError(400, 'kind must be "in" or "out".');
+    });
   },
 
   "POST /api/restore": ({ playerIndex, teamIndex }) => {
     requirePlan();
-    const p = indexOf(playerIndex, "player"), t = indexOf(teamIndex, "team"), schools = state.notAt.get(p);
-    if (schools?.has(t)) { schools.delete(t); if (!schools.size) state.notAt.delete(p); }
-    else state.keep.delete(p);
-    rebuild();
-    saveState(session.d.filePath, state);
-    return plan();
+    const p = indexOf(playerIndex, "player"), t = indexOf(teamIndex, "team");
+    return replan(next => {
+      const schools = next.notAt.get(p);
+      if (schools?.has(t)) { schools.delete(t); if (!schools.size) next.notAt.delete(p); }
+      else next.keep.delete(p);
+    });
   },
 
   "POST /api/review": ({ teamIndex, reviewed }) => {
@@ -280,8 +286,11 @@ function serveArt(req, res, rel) {
 }
 
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, "http://localhost");
-  const pathname = decodeURIComponent(url.pathname);
+  let url, pathname;
+  try {
+    url = new URL(req.url, "http://localhost");
+    pathname = decodeURIComponent(url.pathname);
+  } catch { return send(res, 400, { error: "Bad URL." }); }
   if (pathname.startsWith("/api/")) {
     const handler = api[`${req.method} ${pathname}`];
     if (!handler) return send(res, 404, { error: "Unknown API call." });
