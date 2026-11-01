@@ -54,6 +54,31 @@ Tom subsequently advanced into the season and manually changed destinations. Tho
 - **Roster quality is not established by mechanical checks.** Coverage, growth, opportunity and future value are approximations. Small schools can gain elite players when both valuations agree; there is no hard prestige gate. No policy guarantees equal talent distribution or full rosters.
 - The separate experimental roster-clearing worktree is **not** the active implementation.
 
+## Next work
+
+Tom's team in these dynasty saves is Kansas (he confirmed it in-game on November 1, 2026). Season 2 stage saves are in his saves folder.
+
+**Waiting on Tom:** advance `DYNASTY-S2V17TEST` (the saved v1.7 plan on `DYNASTY-SIGNINGDAYS2`) through Training Results to Preseason. Check that signers reach their planned schools, that Kade Phillips arrives, and how 736 released recruits affect rosters. No combined v1.7 plan has been checked in-game. Then compare with `test_runs/s2-comparison/scripts/preseason-compare.mjs` (change its save names).
+
+Earlier comparison, before surplus cleanup was combined: the All In One mod (`DYNASTY-SIGNINGDAYS2-COPY`, then `DYNASTY-CUSTOMCONF-AUTOSAVE`) landed 942 transfers with 556 rated 80+, and removed 459 recruits. The hold-offers build (`DYNASTY-S2V16TESTPRESEASON`-style save `DYNASTY-S2V16TESTPRESEASON`) landed 794 with 618 rated 80+, all 752 signers at their planned schools. The mod keeps CPU commitments, forces new ones with Commit Score 100 and influence 999, places some transfers straight on rosters, and revived nine finished seniors. All of those rostered transfers but four survived the rollover.
+
+Tom's list, in his order:
+
+1. Done: board-less hard commitments join the market.
+2. QB, HB and WR rooms. Tom wants at least 4 QBs per team. Before cleanup, 67 of 137 CPU teams had under 4 and WR rooms reached 18. HB and WR rooms hold very low freshmen. Not started; re-measure on v1.7 first.
+3. Personal factors. In the hold-offers Season 2 plan, the rare lifestyle trait decided 3 of 752 signers (Caleb Hawkins HB94 to Bowling Green), and ignoring all non-football preferences would change 168 choices among the offers received. Recommendation: remove the rare trait. **Tom has not decided.**
+4. Low-tier teams look too close to top teams, including many premier QBs at 0-1 star schools. Hold-offers starters averaged 80.3 at prestige 0-1 and 84.5 at 7-10. Tom expected this may need its own branch. Check `lib/team-ratings.mjs` and `docs/team-ratings-v2.md` first. Tom noted the mod's team overalls range 74 to 87, with many 0-1 star teams at 76-79.
+5. More recruits should go. The game generates about 4,100 and weak ones take board and roster spots. Surplus cleanup is only partial: it removes OVR <=58 Normal freshmen with no roster value.
+6. Sophomore draft lock. **Tom has not defined it.** An older draft lock was removed in commit `103823ef`.
+7. GUI. Tom asked for one; the dynasty workspace is on main (`node gui.mjs`). **Ask what is missing.**
+8. A tool to run after Fang's recruiting mod each preseason that removes weak recruits and trims the class before they take board spots. Needs a Fang-modded preseason save. Deleting records must follow the save traps in `AGENTS.md`.
+
+Recommended order: Tom's in-game result, then 5 and 8, since full boards are the main limit on placements, then 2, 3 and 4.
+
+Repo note: `origin` moved from `toms-transfer-tools` to `signing-day`, and the desktop app refuses its sync tool until Tom re-pins it under Help, Troubleshooting, Review Pinned Git Origins. Local main is ahead of `origin`; nothing has been pushed.
+
+Evidence: `test_runs/s2-comparison/` in the main checkout (Git-ignored) holds the comparison scripts and reports. The scripts take the repo path as their first argument and read saves from temporary copies.
+
 ## Verification and entry points
 
 Model scenarios, cleanup tests, safety checks, independent market replay and backup/write/reopen verification passed for the recorded v1.6 proof. The independent verifier reconstructed cleanup and enumerated final legal transactions with no residual feasible pair. It shares some model formulas and the reader; this establishes implementation consistency, not empirical realism. Tom reported the isolated CPU withdrawal game check passed. A comprehensive behavioral review across seeds and after game rollover is not recorded as complete.

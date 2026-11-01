@@ -8,10 +8,11 @@ Personal tool: one user (Tom), run locally, private repo. Skip public-release co
 
 ## Code map
 
-- `gui.mjs`: local server and API; `gui/` contains supporting art and fonts. Check the frontend implementation before assuming a usable GUI is available.
+- `gui.mjs`: local server and API; `gui/`: the frontend, art and fonts.
 - `lib/session.mjs`: opens saves, plans changes, applies edits, and saves.
-- `lib/dynasty.mjs`: save reader; `lib/signing-day.mjs`: transfer placement; `lib/gui-plan.mjs`: GUI plan and player cards.
-- `lib/fit.mjs`: school interest; `lib/destinations.mjs`: player interest and combined destinations.
+- `lib/dynasty.mjs`: save reader; `lib/gui-plan.mjs`: GUI plan and player cards.
+- Current market: `lib/market-input.mjs`, `lib/market-model.mjs`, `lib/transfer-market.mjs`, `lib/recruit-cleanup.mjs`; `lib/team-ratings.mjs`: team overalls. `docs/algorithm-handoff.md` has the current state and next work.
+- Older placement code still used by some previews: `lib/signing-day.mjs`, `lib/fit.mjs`, `lib/destinations.mjs`.
 - `lib/roster-edits.mjs`: field writes; `lib/safe-save.mjs`: backup, write, and reopen verification.
 - `settings.json`: tuning values; `tools/`: reports and test helpers.
 
