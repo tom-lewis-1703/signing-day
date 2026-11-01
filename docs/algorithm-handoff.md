@@ -60,7 +60,7 @@ Tom's team in these dynasty saves is Kansas (he confirmed it in-game on November
 
 **Waiting on Tom:** advance `DYNASTY-S2V17TEST` (the saved v1.7 plan on `DYNASTY-SIGNINGDAYS2`) through Training Results to Preseason. Check that signers reach their planned schools, that Kade Phillips arrives, and how 736 released recruits affect rosters. No combined v1.7 plan has been checked in-game. Then compare with `test_runs/s2-comparison/scripts/preseason-compare.mjs` (change its save names).
 
-Earlier comparison, before surplus cleanup was combined: the All In One mod (`DYNASTY-SIGNINGDAYS2-COPY`, then `DYNASTY-CUSTOMCONF-AUTOSAVE`) landed 942 transfers with 556 rated 80+, and removed 459 recruits. The hold-offers build (`DYNASTY-S2V16TESTPRESEASON`-style save `DYNASTY-S2V16TESTPRESEASON`) landed 794 with 618 rated 80+, all 752 signers at their planned schools. The mod keeps CPU commitments, forces new ones with Commit Score 100 and influence 999, places some transfers straight on rosters, and revived nine finished seniors. All of those rostered transfers but four survived the rollover.
+Earlier comparison, before surplus cleanup was combined: the All In One mod (`DYNASTY-SIGNINGDAYS2-COPY`, then `DYNASTY-CUSTOMCONF-AUTOSAVE`) landed 942 transfers with 556 rated 80+, and removed 459 recruits. The hold-offers build (`DYNASTY-S2V16TESTPRESEASON`) landed 794 with 618 rated 80+, all 752 signers at their planned schools. The mod keeps CPU commitments, forces new ones with Commit Score 100 and influence 999, places some transfers straight on rosters, and revived nine finished seniors. All of those rostered transfers but four survived the rollover.
 
 Tom's list, in his order:
 
