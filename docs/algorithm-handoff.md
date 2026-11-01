@@ -4,9 +4,10 @@ Updated November 1, 2026. Read `AGENTS.md` for save-safety rules.
 
 ## Status
 
-- **Code:** market **v1.11** (not yet checked in-game) is on branch `code/signing-day-school-strategy-10d0b1`, built on v1.8 and the sophomore draft lock from `claude/signing-day-work-ff8e49`. Main is still v1.7, and nothing has been pushed.
+- **Code:** market **v1.11** with the sophomore draft lock is on `main` and pushed. All branches are merged, so start new work from `main`.
 - **Team:** Tom's team in these dynasty saves is Kansas. Still pass it explicitly. Season 2 stage saves are in Tom's saves folder.
-- **Proven in-game:** v1.10 reached Preseason with all 1,361 signers at their planned schools (see "Results"). v1.9 did the same with 1,354 and v1.7 with 1,115.
+- **Test saves:** `DYNASTY-S2V111TEST` is the current plan on `DYNASTY-SIGNINGDAYS2` (default seed), and `DYNASTY-S2MAINTEST` is a byte-identical copy. Ignore `DYNASTY-S2V17FIXTEST` (v1.7) and `DYNASTY-S2V111RERUN` (two passes, not a normal run).
+- **Proven in-game:** v1.11 reached Preseason with all 1,350 signers at their planned schools (see "Results"). v1.10 did the same with 1,361, v1.9 with 1,354 and v1.7 with 1,115.
 - **Not yet checked in-game:** the draft lock. It is waiting on Tom:
   1. **Draft lock:** use the dashboard button on a copy of `DYNASTY-PLYRSLEAVING` and advance to Week 4. Malachi Toney (Miami), Dakorien Moore (Texas Tech) and Nate Sheppard (LSU) should still be on their teams. If they leave, try a copy of `DYNASTY-WEEK1`.
 
@@ -109,6 +110,8 @@ In v1.9, 19 QBs signed on depth-floor offers (6 rated 80+), and 27 QBs go unplac
 
 v1.10 against v1.9, same seed: 1,361 placed (1,354), 1,095 recruits released (1,092), 640 veteran releases (640), 19 QBs unplaced (27), no team short. Starting QB 78.2 / 80.1 / 83.2 / 86.9 (77.3 / 80.3 / 83.5 / 86.5). Starters are unchanged at 75.2 / 76.6 / 79.4 / 83.4, a slightly different measure from the table above. Of the 19 unplaced QBs, only Dylan Messerly 77 would start anywhere (Kent State, over a 76). The other 18 are rated 64-76 and would be backups, though rooms like Arkansas State's 78/59/59 remain. 293 signers land at a different school, 34 of them QBs. Eight non-QBs rated 73-79 drop out and seven rated 74-79 come in.
 
+v1.11 at Preseason, from reading `DYNASTY-S2V111TEST-AUTOSAVE` (2028): all 1,350 signers and all 254 85+ signers are at their planned schools. The game removed no returning players and deleted none of 2,961 committed recruits, and Kansas kept its 57 returners and 24 signees. Of 209 unplaced transfers it placed 109, including 7 of 19 QBs, and deleted 100. Every CPU school is at 85, none under three QBs. Starters 76.9 / 78.1 / 81.0 / 85.1, starting QB 78.9 / 80.6 / 83.5 / 87.9. Per team: TE 4.3 (v1.10: 3.9), C 2.5 (2.5). Top-tier starting C 79.1.
+
 v1.10 at Preseason, from reading `DYNASTY-S2V110TEST-AUTOSAVE` (2028): all 1,361 signers and all 254 85+ signers are at their planned schools. The game removed no returning players, and Kansas kept its 57 returners and 24 signees. Of 2,918 committed recruits it deleted three, the highest Jordan Shaw WR67. Of 198 unplaced transfers it placed 111, including 7 of 19 QBs, and deleted 87. Every CPU school is at 85, none under three QBs. Starters 76.8 / 78.0 / 81.1 / 85.2, starting QB 79.1 / 80.5 / 83.5 / 87.4.
 
 Tom edited the XP sliders before advancing this run to training results. Signing Day to Preseason, the same 7,019 players grew +2.11 in v1.7, +2.12 in v1.9 and +2.11 in v1.10, and no position moved beyond replay noise, so the edit had no detectable effect on offseason growth. In-season XP is untested.
@@ -142,6 +145,10 @@ The mod keeps CPU commitments, forces new ones with Commit Score 100 and influen
 - **Crowded rooms:** caps only limit signings, and cleanup only removes low-rated freshmen with zero value. About 1,100 Normal-development recruits rated <=62 stay.
 - **Roster quality:** coverage, growth and opportunity are approximations, and passing checks does not show rosters are realistic. There is no hard prestige gate, and the premium does not guarantee talent spread or full rosters. Prestige 0-1 and 2-3 stay close (1.3 apart), and HBs stay strong everywhere because the pool holds 136 of 180 rated 80+.
 - **Manual edits:** Tom's in-game destination changes do not teach the algorithm.
+- **QB reserve:** on the v1.11 Season 2 plan the lift produces no further offers. No round follows it, 18 of the 19 reserved QBs stay unplaced, and the other signed on a depth-floor offer. The same held on two fixture seeds for rounds after the lift. Why is unexplained.
+- **Tuning values:** `lib/market-model.mjs` and `lib/transfer-market.mjs` do not read `settings.json`, so its values do not tune the market. Starter counts are hard-coded in the model, and some `PARAMETERS` values are ignored in favor of literals, so check the code before changing one.
+- **Plan size:** per-school diagnostics make a plan about 220 MB when pretty-printed.
+- **Old tools:** `tools/step3-report.mjs`, `step4-report.mjs`, `step4b-report.mjs`, `step5-report.mjs`, `offers-report.mjs`, `capacity-check.mjs` and `step1-test.mjs` open a save with no team and do not run. `lib/signing-day.mjs`, `lib/fit.mjs` and `lib/destinations.mjs` are not part of the market.
 
 ## Files
 
@@ -166,7 +173,7 @@ node tools/market-check.mjs --save
 
 The last writes only a fresh copy under `test_runs/`. Add one Season 2 plan and save on a copy, with a few named players and league counts.
 
-Only if Tom asks or a result looks wrong: `tools/market-verify.mjs`, `tools/market-safety-test.mjs`, `tools/draft-lock-test.mjs` (defaults to a copy of `DYNASTY-PLYRSLEAVING`, as the fixtures hold no sophomore rows), extra seeds and new test tools. The verifier checks that the code matches its rules, not that results are realistic. It has not been updated for v1.9 or v1.10: it still expects flat release limits and has no talent premium, QB reserve or new-starter cost.
+Only if Tom asks or a result looks wrong: `tools/market-verify.mjs`, `tools/market-safety-test.mjs`, `tools/draft-lock-test.mjs` (defaults to a copy of `DYNASTY-PLYRSLEAVING`, as the fixtures hold no sophomore rows), extra seeds and new test tools. The verifier checks that the code matches its rules, not that results are realistic. It matches v1.11 and must be updated with each market rule change. It replays rules separately, so its round-number handling after a QB reserve lift has not run on a real plan.
 
 Real saves are written only through the GUI's explicit Save, with a verified backup and reopen verification. Never write to `test_saves/`. Changes to established write formulas need fresh-copy proof and Tom's in-game retest.
 
@@ -175,8 +182,6 @@ Real saves are written only through the GUI's explicit Save, with a verified bac
 Git-ignored, so these may not exist in another checkout:
 
 - `test_runs/s2-comparison/` in the main checkout: comparison scripts and reports, including `reports/v1.7-preseason.json` and `reports/v1.8-signingdays2.json`. Scripts take the repo path as their first argument and read saves from temporary copies.
-- `test_runs/s2-v18-ltIVPa/` in this worktree: v1.8 Season 2 plan and saved copy.
-- `test_runs/s2-v19-uxpyOe/` in this worktree: v1.9 Season 2 plan and saved copy. `test_runs/s2-v19-F34c3m/` is the same build with a four-QB minimum.
-- `test_runs/s2-v110-eMMUzB/` in this worktree: v1.10 Season 2 plan and saved copy. `test_runs/s2-v111-5Elsnl/` is the same for v1.11, and `test_runs/s2-v111-bT3ZTg/` for the rejected full stop.
+- In the `.claude/worktrees/signing-day-school-strategy-10d0b1` worktree: `test_runs/s2-v18-ltIVPa/` (v1.8 Season 2 plan and saved copy), `test_runs/s2-v19-uxpyOe/` (v1.9), `test_runs/s2-v19-F34c3m/` (v1.9 with a four-QB minimum), `test_runs/s2-v110-eMMUzB/` (v1.10), `test_runs/s2-v111-5Elsnl/` (v1.11) and `test_runs/s2-v111-bT3ZTg/` (the rejected full stop).
 
-`origin` moved from `toms-transfer-tools` to `signing-day`, and the desktop app refuses its sync tool until Tom re-pins it under Help, Troubleshooting, Review Pinned Git Origins. Local main is ahead of `origin`.
+`origin` moved from `toms-transfer-tools` to `signing-day`, and the desktop app refuses its sync tool until Tom re-pins it under Help, Troubleshooting, Review Pinned Git Origins.
