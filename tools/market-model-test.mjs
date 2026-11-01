@@ -94,7 +94,7 @@ assert.equal(limited.summary.rounds, 1); assert.equal(limited.rounds[0].offers.l
 limited.rounds[0].offers.forEach((o, k) => { assert.equal(o.k, k); assert.equal(o.cut.position, o.position); });
 
 // A veteran rated 78+ can be released only for a player at his own position.
-const qbRoom = third => [player(710, "QB", 90, "veteran"), player(711, "QB", 85, "veteran"), player(712, "QB", third, "veteran")];
+const qbRoom = third => [player(710, "HB", 90, "veteran"), player(711, "HB", 85, "veteran"), player(712, "HB", third, "veteran")];
 const guardMarket = third => planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 82), ...qbRoom(third)])],
   [...unknowns.slice(0, 82), ...qbRoom(third), player(713, "WR", 90)], [player(713, "WR", 90)]), { seed: "guard" });
 assert.equal(guardMarket(78).summary.placed, 0); assert.equal(guardMarket(77).summary.replacementCuts, 1);
@@ -161,5 +161,28 @@ assert.equal(zeroBoard.summary.placed, 0); assert.equal(zeroBoard.summary.rounds
 assert.equal(zeroBoard.diagnostics.missedPreference.share, null);
 assert.throws(() => planTransferMarket({ ...competitive, userTeamIndex: null }), /valid user team/);
 assert.throws(() => planTransferMarket({ ...competitive, seasonYear: null }), /seasonYear/);
+
+// The rare lifestyle trait is gone: everyone keeps the ordinary social weight.
+for (const i of Array.from({ length: 400 }, (_, n) => n)) assert.ok(playerTraits({ ...p, id: `t${i}` }, draw).a <= .10);
+
+// QB floor: releases cannot take a room below four, and a short school signs a QB as depth.
+const fourQBs = Array.from({ length: 4 }, (_, i) => player(1000 + i, "QB", 70, "veteran"));
+const qbGuard = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 81), ...fourQBs])], [...unknowns.slice(0, 81), ...fourQBs, player(1010, "WR", 90)], [player(1010, "WR", 90)]), { seed: "qb-guard" });
+assert.ok(!qbGuard.cuts.some(c => c.position === "QB"), "A fourth QB is not released for another room");
+const threeStars = Array.from({ length: 3 }, (_, i) => player(1020 + i, "QB", 88, "veteran")), depthQB = player(1030, "QB", 66);
+const depthFill = planTransferMarket(inputFor([school(1, threeStars)], [...threeStars, depthQB], [depthQB]), { seed: "qb-fill" });
+assert.equal(depthFill.summary.placed, 1); assert.equal(depthFill.placements[0].contract, "depth floor");
+assert.deepEqual(depthFill.diagnostics.qbFloor.short, []);
+const fourStars = [...threeStars, player(1023, "QB", 88, "veteran")];
+const noFill = planTransferMarket(inputFor([school(1, fourStars)], [...fourStars, depthQB], [depthQB]), { seed: "qb-full" });
+assert.equal(noFill.summary.placed, 0, "No depth signing once the room has four");
+assert.deepEqual(promiseFailures({ ...promise, contract: "depth floor" }, { O1: 0, F: 0, U: 0 }), []);
+
+// Room caps: a capped room signs only by releasing someone from it.
+const eightHB = Array.from({ length: 8 }, (_, i) => player(1040 + i, "HB", 60, "veteran")), capHB = player(1050, "HB", 92);
+const capped = planTransferMarket(inputFor([school(1, eightHB)], [...eightHB, capHB], [capHB]), { seed: "cap" });
+assert.equal(capped.summary.placed, 0, "Below 85 with a full room there is nothing to swap");
+const fullCapped = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 77), ...eightHB])], [...unknowns.slice(0, 77), ...eightHB, capHB], [capHB]), { seed: "cap-swap" });
+assert.equal(fullCapped.summary.placed, 1); assert.equal(fullCapped.cuts[0].position, "HB");
 
 console.log("Market model checks passed: arithmetic, ties, forecasts, support rooms, traits, original promises, simultaneous offers, deterministic order, locks, full-roster replacement, per-room offers at 85, held offers and trade-ups, returned releases, the 78+ release guard, recruit releases, protected overage, board-only veto and six-cut limit.");
