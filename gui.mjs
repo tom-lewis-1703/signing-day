@@ -154,6 +154,25 @@ const api = {
     return plan();
   },
 
+  "GET /api/draft-lock": () => {
+    if (!session) throw new HttpError(409, "Select your school first.");
+    return session.draftLockPlan();
+  },
+
+  // Backup, write and reopen verification, like every other save.
+  "POST /api/draft-lock": async ({ planId }) => {
+    if (!session) throw new HttpError(409, "Select your school first.");
+    const filePath = session.d.filePath, teamIndex = session.userTeam.teamIndex, locked = session.reviewedDraftLock?.players.length ?? 0;
+    let saved;
+    try { saved = await session.saveDraftLock({ planId }); }
+    catch (e) {
+      await session.open(filePath, { userTeam: teamIndex });
+      return { ok: false, failed: [e.message] };
+    }
+    closeSave();
+    return { ok: true, backupPath: saved.backup.backupPath, locked, tool: "draft-lock" };
+  },
+
   "POST /api/replan": ({ seed }) => {
     requirePlan();
     return replan(next => { if (seed !== undefined) next.seed = validSeed(seed); });

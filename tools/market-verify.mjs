@@ -68,10 +68,11 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
       while (s.rooms[room].length > s.slots[room].h.length) {
         const before = s.values[room];
         const eligible = s.roster.filter(p => p.room === room && p.kind === "recruit" && p.teamIndex === 255
-          && p.schoolYear === "Freshman" && p.overall <= 58 && ["Normal", "College_Normal"].includes(p.dev) && !keep.has(p.index))
+          && p.schoolYear === "Freshman" && p.overall <= PARAMETERS.surplusFreshmanMaxOverall && ["Normal", "College_Normal"].includes(p.dev) && !keep.has(p.index))
           .sort((a, b) => a.overall - b.overall || (a.q2 ?? 0) - (b.q2 ?? 0) || byId(a, b));
         const p = eligible.find(p => {
           const after = s.rooms[room].filter(x => x.id !== p.id), value = roomValue(after, s.slots[room]);
+          if (room === "QB" && after.filter(x => x.kind !== "transfer").length < PARAMETERS.qbMinimum) return false;
           return after.filter(x => x.E >= 2).length >= s.futureCoverage[room] && !cmp(before.V1, value.V1) && !cmp(before.V2, value.V2);
         });
         if (!p) break;
@@ -97,7 +98,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     assert.ok(s.roster.every(p => !remaining.has(p.id)), `${team.name}: CPU withdrawals normalized`);
     refresh(s);
     for (const room of ROOMS) s.coverage[room] = Math.min(s.rooms[room].length,
-      s.slots[room].S ? s.slots[room].S + 1 : s.slots[room].support);
+      room === "QB" ? PARAMETERS.qbMinimum : s.slots[room].S ? s.slots[room].S + 1 : s.slots[room].support);
     for (const room of ROOMS) s.futureCoverage[room] = Math.min(s.rooms[room].filter(p => p.E >= 2).length,
       s.slots[room].S ? s.slots[room].S + 1 : s.slots[room].support);
     cleanup(s, 0);
@@ -154,6 +155,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
       if (cut && cut.p.room !== p.room && s.rooms[cut.p.room].filter(x => !candidateIds.has(x.id)).length - 1 < s.coverage[cut.p.room]) continue;
       if (cut && cut.p.room !== p.room && cut.p.kind === "veteran" && cut.p.overall >= PARAMETERS.crossRoomProtectedOverall) continue;
       const sameRoom = cut?.p.room === p.room;
+      if (!sameRoom && s.rooms[p.room].length >= (PARAMETERS.roomCaps[p.room] ?? Infinity)) continue;
       const room = sameRoom ? adding.filter(x => x.id !== cut.p.id) : adding;
       if (room.length < s.coverage[p.room]) continue;
       const roomAfter = sameRoom ? roomValue(room, s.slots[p.room]) : valueAdded;
@@ -162,9 +164,11 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
       const gain = gain1 + s.traits.delta * gain2, cost = 4 + .5 * s.n + (cut ? s.traits.cutSurcharge : 0);
       const value = sameRoom ? utility(p, room, s.slots[p.room], pt.get(p.id), pair(p, s)) : opportunityAdded;
       const promisesOkay = sameRoom ? promiseOkay(room) : additionPromises;
+      const depthFloor = p.room === "QB" && s.rooms.QB.length < PARAMETERS.qbMinimum && !sameRoom;
+      const net = gain - cost + (depthFloor ? PARAMETERS.depthFloorBonus : 0);
       variants.push({ p, teamIndex: s.team.index, cut: cut?.p ?? null, cutLoss: cut?.loss ?? 0,
-        gain1, gain2, gain, cost, net: gain - cost, value,
-        feasible: cmp(gain - cost, 0) > 0 && cmp(value.U, pt.get(p.id).outside) > 0 && promisesOkay });
+        gain1, gain2, gain, cost, net, value, depthFloor,
+        feasible: cmp(net, 0) > 0 && (depthFloor || cmp(value.U, pt.get(p.id).outside) > 0) && promisesOkay });
     }
     return { structural: true, variants };
   };
@@ -180,9 +184,10 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
         const members = roster.filter(p => p.room === room);
         if (members.length <= s.slots[room].h.length) break;
         const before = roomValue(members, s.slots[room]);
-        const p = members.filter(x => x.kind === "recruit" && x.teamIndex === 255 && x.schoolYear === "Freshman" && x.overall <= 58 && ["Normal", "College_Normal"].includes(x.dev) && !keep.has(x.index))
+        const p = members.filter(x => x.kind === "recruit" && x.teamIndex === 255 && x.schoolYear === "Freshman" && x.overall <= PARAMETERS.surplusFreshmanMaxOverall && ["Normal", "College_Normal"].includes(x.dev) && !keep.has(x.index))
           .sort((a, b) => a.overall - b.overall || (a.q2 ?? 0) - (b.q2 ?? 0) || byId(a, b)).find(x => {
             const after = members.filter(y => y.id !== x.id), value = roomValue(after, s.slots[room]);
+            if (room === "QB" && after.filter(y => y.kind !== "transfer").length < PARAMETERS.qbMinimum) return false;
             return after.filter(y => y.E >= 2).length >= s.futureCoverage[room] && !cmp(before.V1, value.V1) && !cmp(before.V2, value.V2);
           });
         if (!p) break;
@@ -232,12 +237,12 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     assert.ok(selected, `${p.name}/${s.team.name}: offer is mutually feasible`);
     assert.equal(stored.cut?.id ?? null, selected.cut?.id ?? null, `${p.name}/${s.team.name}: highest-net feasible cut`);
     assert.equal(stored.n, s.n, `${p.name}: quoted acquisition count`);
-    const cost = selected.cost + .5 * stored.k, net = selected.gain - cost;
+    const cost = selected.cost + .5 * stored.k, net = selected.net - .5 * stored.k;
     const priority = net + pair(p, s).schoolTaste;
     for (const [key, value] of Object.entries({ gain1: selected.gain1, gain2: selected.gain2, gain: selected.gain,
       cost, net, priority, cutLoss: selected.cutLoss })) number(stored[key], value, `${p.name}: ${key}`);
     assert.ok(cmp(net, 0) > 0, `${p.name}: reserved quote remains worthwhile`);
-    for (const key of ["O1", "F", "U", "outside", "ordinaryU"]) number(stored.value[key], selected.value[key], `${p.name}: ${key}`);
+    for (const key of ["O1", "F", "U", "outside"]) number(stored.value[key], selected.value[key], `${p.name}: ${key}`);
     assert.equal(stored.value.O2, selected.value.O2, `${p.name}: O2`);
     return { ...selected, cost, net, priority, stored };
   };
@@ -289,7 +294,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     for (const offer of selected) {
       const p = offer.p, previous = held.get(p.id);
       if (previous) { tradeUps++; changed.add(previous.offer.teamIndex); }
-      const contract = p.E >= 2 && cmp(offer.value.O1, 35) < 0 ? "developmental reserve" : "immediate opportunity";
+      const contract = offer.depthFloor ? "depth floor" : p.E >= 2 && cmp(offer.value.O1, 35) < 0 ? "developmental reserve" : "immediate opportunity";
       held.set(p.id, { offer, cut: offer.cut, round: round.round, sequence: ++holdSequence, promise: { ...offer.value, E: p.E, contract } });
       changed.add(offer.teamIndex); stats.accepted++;
     }
@@ -312,7 +317,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     assert.equal(placement.teamIndex, teamIndex, `${p.name}: final destination`);
     assert.equal(placement.round, h.round, `${p.name}: round of his final hold`);
     assert.equal(placement.contract, h.promise.contract, `${p.name}: frozen contract`);
-    for (const key of ["O1", "F", "U", "outside", "ordinaryU"]) number(placement.original[key], h.offer.value[key], `${p.name}: original ${key}`);
+    for (const key of ["O1", "F", "U", "outside"]) number(placement.original[key], h.offer.value[key], `${p.name}: original ${key}`);
     sameIds(placement.actualOffers.map(o => o.teamIndex), offersByPlayer.get(id), `${p.name}: every offer he received`);
     const recorded = plan.cuts.filter(c => c.kind !== "baseline" && c.forId === id);
     assert.deepEqual(recorded.map(c => c.id), h.cut ? [h.cut.id] : [], `${p.name}: contingent release`);

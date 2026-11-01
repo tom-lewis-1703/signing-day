@@ -25,7 +25,12 @@ for (const dev of ["College_Impact", "College_Star", "College_Elite", "Unknown"]
   assert.equal(run(crowd.map(x => ({ ...x, dev }))).removed.length, 0, `${dev} protected`);
   assert.equal(releasableRecruit({ ...crowd[0], dev }), false, `${dev} also protected from contingent release`);
 }
-assert.equal(run(crowd.map(x => ({ ...x, overall: 59 }))).removed.length, 0, "58 is an inclusive ceiling");
+assert.equal(run(crowd.map(x => ({ ...x, overall: 62 }))).removed.length, 3, "62 is an inclusive ceiling");
+assert.equal(run(crowd.map(x => ({ ...x, overall: 63 }))).removed.length, 0, "63 is above the ceiling");
+assert.equal(run(crowd.map(x => ({ ...x, position: "C" }))).roster.length, 3, "Cleanup keeps three centers");
+assert.equal(run(crowd.map(x => ({ ...x, position: "TE" }))).roster.length, 5, "Cleanup keeps five tight ends");
+const qbs = Array.from({ length: 6 }, (_, i) => p(60 + i, 50 + i, { position: "QB" }));
+assert.equal(run(qbs).roster.filter(x => x.position === "QB").length, 3, "Cleanup keeps three QBs");
 assert.equal(run(crowd.map(x => ({ ...x, schoolYear: "Sophomore" }))).removed.length, 0, "No JUCO sophomore cleanup");
 assert.equal(run(crowd.map(x => ({ ...x, kind: "veteran", teamIndex: 1 }))).removed.length, 0, "No rostered freshman cleanup");
 const graduating = Array.from({ length: 5 }, (_, i) => p(20 + i, 85, { kind: "veteran", teamIndex: 1, schoolYear: "Junior" }));

@@ -1,6 +1,6 @@
 // Small independent arithmetic vectors and constructed market states. No save writes.
 import assert from "node:assert/strict";
-import { forecast, slotsFor, roomValue, opportunity, utility, playerTraits, schoolTraits, pairTraits,
+import { forecast, slotsFor, roomValue, opportunity, utility, playerTraits, schoolTraits, pairTraits, talentPremium, replacementLimitFor, recruitReleaseLimitFor,
   drawFactory, promiseFailures, normalizedState, gradeIndex, cmp } from "../lib/market-model.mjs";
 import { planTransferMarket } from "../lib/transfer-market.mjs";
 
@@ -86,15 +86,26 @@ assert.equal(overage.summary.excludedSchools, 1); assert.equal(overage.summary.c
 
 const sevenOld = ["QB", "HB", "WR", "TE", "OT", "OG", "C"].map((r, i) => player(500 + i, r, 50, "veteran"));
 const sevenNew = sevenOld.map((p, i) => player(600 + i, p.position, 90));
-const limited = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 78), ...sevenOld])], [...unknowns.slice(0, 78), ...sevenOld, ...sevenNew], sevenNew), { seed: "six-cuts" });
+const sevenCuts = prestige => planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 78), ...sevenOld], { prestige })], [...unknowns.slice(0, 78), ...sevenOld, ...sevenNew], sevenNew), { seed: "six-cuts" });
+const limited = sevenCuts(0);
 assert.equal(limited.summary.replacementCuts, 6); assert.equal(limited.summary.placed, 6); assert.equal(limited.summary.unplaced, 1);
 assert.equal(limited.unplaced[0].vetoCounts["replacement allowance"], 1);
 // A full school offers once per room in the same round, up to its remaining replacements.
 assert.equal(limited.summary.rounds, 1); assert.equal(limited.rounds[0].offers.length, 6);
 limited.rounds[0].offers.forEach((o, k) => { assert.equal(o.k, k); assert.equal(o.cut.position, o.position); });
+assert.equal(sevenCuts(10).summary.replacementCuts, 7, "A top program has more release room");
+
+// Another room can't take a center room below three or a tight end room below five; a swap at his own position can.
+for (const [position, floor] of [["C", 3], ["TE", 5]]) {
+  const hands = Array.from({ length: floor + 1 }, (_, i) => player(720 + i, position, 50, "veteran")), wide = player(730, "WR", 90), upgrade = player(731, position, 90);
+  const market = (room, signer) => { const others = unknowns.slice(0, 85 - room.length); return planTransferMarket(inputFor([school(1, [...others, ...room])], [...others, ...room, signer], [signer]), { seed: "room-floor" }); };
+  assert.equal(market(hands.slice(0, floor), wide).summary.placed, 0, `${position} at its floor is safe`);
+  assert.equal(market(hands, wide).summary.placed, 1, `${position} above its floor can give up one`);
+  assert.equal(market(hands.slice(0, floor), upgrade).cuts[0].position, position, `${position} swap`);
+}
 
 // A veteran rated 78+ can be released only for a player at his own position.
-const qbRoom = third => [player(710, "QB", 90, "veteran"), player(711, "QB", 85, "veteran"), player(712, "QB", third, "veteran")];
+const qbRoom = third => [player(710, "HB", 90, "veteran"), player(711, "HB", 85, "veteran"), player(712, "HB", third, "veteran")];
 const guardMarket = third => planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 82), ...qbRoom(third)])],
   [...unknowns.slice(0, 82), ...qbRoom(third), player(713, "WR", 90)], [player(713, "WR", 90)]), { seed: "guard" });
 assert.equal(guardMarket(78).summary.placed, 0); assert.equal(guardMarket(77).summary.replacementCuts, 1);
@@ -137,7 +148,7 @@ const returned = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 83
 assert.equal(returned.summary.restoredReleases, 1); assert.equal(returned.summary.replacementCuts, 0);
 assert.equal(returned.placements.find(p => p.index === qbNew.index).teamIndex, 1); assert.equal(returned.teams.find(t => t.teamIndex === 1).rosterAfter, 85);
 
-// A full-board school may release up to three 1–2★ recruits, never Star/Elite development,
+// A full-board school may release up to three 1–2★ recruits, more at a bigger program, never Star/Elite development,
 // to sign transfers; the board stays full.
 const recruit = (index, stars, dev = "Normal", overall = 50) => ({ ...player(index, "WR", overall, "recruit"), stars, dev });
 const lowRecruit = recruit(900, 2), highRecruit = recruit(901, 4, "Normal", 70), wrA = player(902, "WR", 90), wrB = player(903, "WR", 88);
@@ -152,9 +163,11 @@ const starDev = boardMarket(recruit(900, 2, "College_Star"));
 assert.equal(starDev.summary.placed, 0); assert.equal(starDev.summary.recruitReleases, 0);
 
 const fourRecruits = [0, 1, 2, 3].map(i => recruit(910 + i, 2)), fourWR = [90, 89, 88, 87].map((o, i) => player(920 + i, "WR", o));
-const threeReleases = planTransferMarket(inputFor([school(1, fourRecruits, { boardCapacity: 4, boardUsed: 4 })], [...fourRecruits, ...fourWR], fourWR), { seed: "three-releases" });
+const recruitReleases = prestige => planTransferMarket(inputFor([school(1, fourRecruits, { prestige, boardCapacity: 4, boardUsed: 4 })], [...fourRecruits, ...fourWR], fourWR), { seed: "three-releases" });
+const threeReleases = recruitReleases(0);
 assert.equal(threeReleases.summary.recruitReleases, 3); assert.equal(threeReleases.summary.placed, 3); assert.equal(threeReleases.teams[0].boardUsed, 4);
 assert.equal(threeReleases.unplaced[0].vetoCounts["commitment board full"], 1);
+assert.equal(recruitReleases(10).unplaced[0].vetoCounts["commitment board full"], undefined, "A top program still has release room");
 
 const zeroBoard = planTransferMarket(inputFor([school(1, [], { boardCapacity: 0 })], [newQB], [newQB]), { seed: "zero" });
 assert.equal(zeroBoard.summary.placed, 0); assert.equal(zeroBoard.summary.rounds, 0);
@@ -162,4 +175,40 @@ assert.equal(zeroBoard.diagnostics.missedPreference.share, null);
 assert.throws(() => planTransferMarket({ ...competitive, userTeamIndex: null }), /valid user team/);
 assert.throws(() => planTransferMarket({ ...competitive, seasonYear: null }), /seasonYear/);
 
-console.log("Market model checks passed: arithmetic, ties, forecasts, support rooms, traits, original promises, simultaneous offers, deterministic order, locks, full-roster replacement, per-room offers at 85, held offers and trade-ups, returned releases, the 78+ release guard, recruit releases, protected overage, board-only veto and six-cut limit.");
+// The rare lifestyle trait is gone: everyone keeps the ordinary social weight.
+for (const i of Array.from({ length: 400 }, (_, n) => n)) assert.ok(playerTraits({ ...p, id: `t${i}` }, draw).a <= .10);
+
+// QB floor: releases cannot take a room below three, and a short school signs a QB as depth.
+const threeQBs = Array.from({ length: 3 }, (_, i) => player(1000 + i, "QB", 70, "veteran"));
+const qbGuard = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 82), ...threeQBs])], [...unknowns.slice(0, 82), ...threeQBs, player(1010, "WR", 90)], [player(1010, "WR", 90)]), { seed: "qb-guard" });
+assert.ok(!qbGuard.cuts.some(c => c.position === "QB"), "A third QB is not released for another room");
+const threeStars = Array.from({ length: 3 }, (_, i) => player(1020 + i, "QB", 88, "veteran")), depthQB = player(1030, "QB", 66);
+const twoStars = threeStars.slice(0, 2);
+const depthFill = planTransferMarket(inputFor([school(1, twoStars)], [...twoStars, depthQB], [depthQB]), { seed: "qb-fill" });
+assert.equal(depthFill.summary.placed, 1); assert.equal(depthFill.placements[0].contract, "depth floor");
+assert.deepEqual(depthFill.diagnostics.qbFloor.short, []);
+const noFill = planTransferMarket(inputFor([school(1, threeStars)], [...threeStars, depthQB], [depthQB]), { seed: "qb-full" });
+assert.equal(noFill.summary.placed, 0, "No depth signing once the room has three");
+// The league is one QB short, so the lowest-rated QB waits for the short school; once the market settles he is free.
+const reserved = planTransferMarket(inputFor([school(1, threeStars), school(2, twoStars, { boardCapacity: 0 })], [...threeStars, depthQB], [depthQB]), { seed: "qb-reserve" });
+assert.equal(reserved.summary.placed, 0); assert.equal(reserved.unplaced[0].vetoCounts["QB reserved"], undefined); assert.deepEqual(reserved.diagnostics.qbFloor.reserved, [depthQB.index]);
+// A lifted reservee who would start signs, and a new starting QB skips the per-signing cost.
+const weakQBs = Array.from({ length: 3 }, (_, i) => player(1060 + i, "QB", 70, "veteran")), lateQB = player(1063, "QB", 80), earlyWR = player(1064, "WR", 90);
+const lifted = planTransferMarket(inputFor([school(1, weakQBs), school(2, twoStars, { boardCapacity: 0 })], [...weakQBs, ...twoStars, lateQB, earlyWR], [lateQB, earlyWR]), { seed: "qb-lift" });
+const liftedQB = lifted.placements.find(p => p.index === lateQB.index);
+assert.ok(liftedQB, "A reserved QB signs once the reserve lifts"); assert.ok(liftedQB.n >= 1); near(liftedQB.cost, 4);
+
+// A bigger program pays for talent past its immediate need; small schools barely do.
+near(talentPremium({ prestige: 10 }, { overall: 85 }), 20); near(talentPremium({ prestige: 1 }, { overall: 85 }), 2); near(talentPremium({ prestige: 10 }, { overall: 70 }), 0);
+assert.equal(replacementLimitFor({ prestige: 10 }), 12); assert.equal(replacementLimitFor({ prestige: 0 }), 6);
+assert.equal(recruitReleaseLimitFor({ prestige: 10 }), 8); assert.equal(recruitReleaseLimitFor({ prestige: 0 }), 3);
+assert.deepEqual(promiseFailures({ ...promise, contract: "depth floor" }, { O1: 0, F: 0, U: 0 }), []);
+
+// Room caps: a capped room signs only by releasing someone from it.
+const eightHB = Array.from({ length: 8 }, (_, i) => player(1040 + i, "HB", 60, "veteran")), capHB = player(1050, "HB", 92);
+const capped = planTransferMarket(inputFor([school(1, eightHB)], [...eightHB, capHB], [capHB]), { seed: "cap" });
+assert.equal(capped.summary.placed, 0, "Below 85 with a full room there is nothing to swap");
+const fullCapped = planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 77), ...eightHB])], [...unknowns.slice(0, 77), ...eightHB, capHB], [capHB]), { seed: "cap-swap" });
+assert.equal(fullCapped.summary.placed, 1); assert.equal(fullCapped.cuts[0].position, "HB");
+
+console.log("Market model checks passed: arithmetic, ties, forecasts, support rooms, traits, original promises, simultaneous offers, deterministic order, locks, full-roster replacement, per-room offers at 85, held offers and trade-ups, returned releases, the 78+ release guard, recruit releases, protected overage, board-only veto, prestige release limits, talent premium and the QB reserve.");
