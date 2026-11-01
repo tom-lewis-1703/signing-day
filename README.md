@@ -2,6 +2,8 @@
 
 Personal local CFB 27 dynasty tool. Open a Signing Day save, explicitly select your school, review the CPU transfer market, optionally add constraints/replan, then save the exact reviewed plan. Your roster and commitments remain protected.
 
+The GUI opens to a dark dynasty dashboard with Transfer Market and Team Ratings tools. Browse every school’s roster, position rooms, recruiting class, and transfers; click players to inspect their profiles and all 54 loaded attributes. Team pages distinguish the current save from upcoming or proposed rosters. [Design and browser verification](docs/gui-redesign.md).
+
 ```sh
 npm install
 node gui.mjs
@@ -9,20 +11,29 @@ node gui.mjs
 
 The server binds to localhost at port 5178 (or the next free port). `--no-open` suppresses opening the browser.
 
+On launch, the GUI reopens the last successfully opened save and returns to the dashboard using the school you previously selected for that file. A save without a remembered valid school opens the school picker. If the file is unavailable, the save chooser stays available. Use **Change save** to open another dynasty. Startup only browses the save; tool previews and saving remain separate actions.
+
+The separate **Team ratings** tool previews overall, offense, and defense for every team, including yours. Choose current or upcoming rosters. It uses 80% starters / 20% backups, eleven-player scheme counts, extra QB weight, and unused offensive linemen to cover lineup holes with explicit positional penalties. **Save ratings** writes only the three team-rating fields through backup and reopen verification. See [the formula and fresh-copy proof](docs/team-ratings-v2.md). The short check is `node tools/team-ratings-check.mjs --save`; it uses one disposable copy. In-game display/persistence still needs Tom's check.
+
 ## Current implementation
 
-V1.6 reopens all CPU transfer commitments and runs competing offers with separate player and school valuations. Players hold their best offer and may trade up until the market ends. Schools may make up to six veteran replacements, and a veteran rated 78+ can be released only for a player at his own position. HS/JUCO commitments are preserved, except that a school with a full commitment board may un-sign up to three 1–2★ recruits (never Star/Elite development) for transfers it wants more; the game deletes those recruits at the Preseason rollover. Player preferences and school philosophies are explicitly simulated, fixed by seed, and never written into save ratings. Native CPU destinations are audit data, not preferences.
+For AI resumption, read [the algorithm handoff](docs/algorithm-handoff.md).
+
+V1.7 reopens all CPU transfer commitments and runs competing offers with separate player and school valuations. Players hold their best offer and may trade up until the market ends. Schools may make up to six veteran replacements, and a veteran rated 78+ can be released only for a player at his own position. A transfer the game hard-committed with no board slot joins the market instead of being lost at the rollover. Surplus CPU incoming freshmen rated 58 or lower are cleared before veteran cuts and as arrivals change the rooms: a release must be beyond all modeled depth slots, lose no current or future value, and preserve a frozen succession floor. Impact/Star/Elite prospects, unknown development and Keep selections are protected. Each release frees both roster and commitment-board space. A full-board school may also un-sign up to three normal-development 1–2★ recruits for transfers it wants more. The game deletes unsigned recruits at the Preseason rollover. Player preferences and school philosophies are explicitly simulated, fixed by seed, and never written into save ratings. Native CPU destinations are audit data, not preferences.
 
 The interface includes explicit team selection, school and player review, three roster projections, unplaced-player diagnostics, keep/exclude constraints, seed-preserving replans, named change comparisons, and an explicit Save. Save is bound to source bytes, team, seed, constraints, settings, and the reviewed plan. Writes use a verified backup and temporary-file reopen verification before replacing the original. Fixture paths are refused at the write boundary, including alternate Windows casing.
 
-The implementation is technically verified, **not behaviorally accepted**. Tom chose revision 1.6 after in-memory what-ifs: held offers, six replacements, the 78+ release guard and three recruit releases. Seed `sd-v1.2-001` now places 857 of 1,882 candidates in 34 rounds, with 1,604 trade-ups, and releases 696 veterans (377 inherited-overage trims, 319 replacements) and 111 recruits (OVR 45–63). Three players rated 85+ remain unplaced, all HBs. No signer is a real miss; 474 (55.3%) finish more than 10 utility points below a school that wanted them but had no capacity left. Planning takes about 40 seconds.
+The implementation is technically verified, **not behaviorally accepted**. On a fresh copy with Kansas explicitly protected, seed `sd-v1.2-001` places 1,133 of 1,882 candidates in 36 rounds, releases 522 veterans (213 overage trims, 309 replacements) and un-signs 605 surplus freshmen plus 20 contingent recruits. One 85+ candidate and 25 rated 80+ remain unplaced. On a fresh copy of Tom's Season 2 Signing Day save, the default seed places 1,115 of 1,559, including 253 of 254 rated 85+. Planning takes about a minute. An earlier hold-offers plan without surplus cleanup reached Preseason in-game with every signer at his planned school; this combined plan has not been checked in-game. [V1.6 cleanup rules and verification](docs/recruit-cleanup-v1.6.md) cover the surplus-freshman rule.
 
-Tom reported the isolated withdrawal in-game check passed. The final integrated market game check and eight-seed behavioral acceptance are separate and remain outstanding, including for v1.6. Use a disposable copy while reviewing this implementation.
+Tom reported the isolated withdrawal in-game check passed. The final integrated market game check and eight-seed behavioral acceptance are separate and remain outstanding, including for v1.7. Use a disposable copy while reviewing this implementation.
+
+The v1.6 competition diagnostic is unresolved: 143 of 1,042 signers (13.7%) accept before a more appealing school would have offered later, above the 10% review threshold and v1.5's 5.6%. The cleanup is verified; it does not establish full market acceptance.
 
 ## Verification
 
 ```sh
 node tools/market-model-test.mjs
+node tools/recruit-cleanup-test.mjs
 node tools/market-safety-test.mjs
 node tools/market-check.mjs --save
 ```
@@ -30,5 +41,7 @@ node tools/market-check.mjs --save
 `market-check` creates a unique fresh copy in `test_runs`, uses the explicit fixture team from settings, reports named cases and league counts, and confirms all source fixtures remain unchanged. `--save` exercises backup/write/reopen and verifies protected commitments and transfer outcomes. `baseline-check.mjs` now forwards to this current proof; the old forced-placement counts are not v1.2 acceptance targets.
 
 `tools/market-verify.mjs` independently replays the stored market and enumerates every legal final cut/add transaction. See its command usage for a saved plan and original copy/backup. It checks implementation fidelity, not whether the resulting roster experience is desirable.
+
+[GUI regression checks](tools/gui-regression.md) use recorded plan/card responses for browser layout and interaction checks. [GUI repair evidence](docs/gui-repair-plan.md) also records the fresh-copy backup/save/reopen proof.
 
 The design and acceptance contract are in [docs/replacement-transfer-spec-v1.md](docs/replacement-transfer-spec-v1.md) and [docs/replacement-transfer-acceptance-v1.md](docs/replacement-transfer-acceptance-v1.md). [First implementation review](docs/first-market-review.md) records the v1.2 evidence and the decision that led to v1.3.

@@ -36,7 +36,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
   const pt = new Map([...remaining.values()].map(p => [p.id, playerTraits(p, draw)]));
   const locks = plan.binding?.locks ?? { keep: [], notAt: [] };
   const keep = new Set(locks.keep), notAt = new Map(locks.notAt.map(([id, teams]) => [id, new Set(teams)]));
-  const stats = { baselineCuts: 0, offers: 0, accepted: 0, rounds: 0, verifiedOfferCutVariants: 0,
+  const stats = { baselineCuts: 0, surplusReleases: 0, offers: 0, accepted: 0, rounds: 0, verifiedOfferCutVariants: 0,
     finalPairs: 0, finalStructurallyEligiblePairs: 0, finalTransactions: 0, finalCutVariants: 0,
     finalFeasiblePairs: 0, finalFeasibleTransactions: 0, promiseChecks: 0, boardOnlyPairs: 0 };
   const residual = [], placementById = new Map(plan.placements.map(p => [p.id, p]));
@@ -59,16 +59,48 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
     s.recruits = s.roster.filter(p => releasableRecruit(p) && p.room && !keep.has(p.index)).map(removal);
   };
   const freeBoard = s => s.team.boardCapacity - s.team.boardUsed + s.recruitReleases - s.n;
-  const recruitMode = s => freeBoard(s) <= 0 && s.recruitReleases < PARAMETERS.recruitReleaseLimit && s.recruits.length > 0;
+  const contingentReleases = s => s.recruitReleases - s.surplusReleases;
+  const recruitMode = s => freeBoard(s) <= 0 && contingentReleases(s) < PARAMETERS.recruitReleaseLimit && s.recruits.length > 0;
+  // Reconstruct surplus decisions without importing the planner's cleanup helper.
+  const cleanup = (s, round) => {
+    const expected = [];
+    for (const room of ROOMS) {
+      while (s.rooms[room].length > s.slots[room].h.length) {
+        const before = s.values[room];
+        const eligible = s.roster.filter(p => p.room === room && p.kind === "recruit" && p.teamIndex === 255
+          && p.schoolYear === "Freshman" && p.overall <= 58 && ["Normal", "College_Normal"].includes(p.dev) && !keep.has(p.index))
+          .sort((a, b) => a.overall - b.overall || (a.q2 ?? 0) - (b.q2 ?? 0) || byId(a, b));
+        const p = eligible.find(p => {
+          const after = s.rooms[room].filter(x => x.id !== p.id), value = roomValue(after, s.slots[room]);
+          return after.filter(x => x.E >= 2).length >= s.futureCoverage[room] && !cmp(before.V1, value.V1) && !cmp(before.V2, value.V2);
+        });
+        if (!p) break;
+        expected.push({ p, roomCountBefore: s.rooms[room].length, futureCountAfter: s.rooms[room].filter(x => x.id !== p.id && x.E >= 2).length });
+        s.roster = s.roster.filter(x => x.id !== p.id); s.recruitReleases++; s.surplusReleases++; refresh(s);
+      }
+    }
+    const recorded = plan.cuts.filter(c => c.teamIndex === s.team.index && c.reason === "surplus" && c.round === round);
+    assert.deepEqual(recorded.map(c => c.id), expected.map(c => c.p.id), `${s.team.name}: round ${round} surplus releases`);
+    expected.forEach((e, i) => {
+      const c = recorded[i]; assert.equal(c.kind, "recruit"); assert.equal(c.index, e.p.index);
+      number(c.loss1, 0, "Surplus current value loss"); number(c.loss2, 0, "Surplus future value loss"); number(c.marginalLoss, 0, "Surplus total loss");
+      assert.equal(c.coverageFloor, s.slots[e.p.room].h.length); assert.equal(c.roomCountBefore, e.roomCountBefore);
+      assert.equal(c.futureFloor, s.futureCoverage[e.p.room]); assert.equal(c.futureCountAfter, e.futureCountAfter);
+    });
+    stats.surplusReleases += expected.length;
+  };
   const states = input.teams.filter(t => t.index !== input.userTeamIndex).map(team => {
     const s = { team, slots: slotsFor(team).rooms, traits: schoolTraits(team, draw),
-      roster: team.roster.map(id => players.get(id)), n: 0, replacements: 0, recruitReleases: 0,
-      promises: new Map(), pairs: new Map(), coverage: {}, excluded: false };
+      roster: team.roster.map(id => players.get(id)), n: 0, replacements: 0, recruitReleases: 0, surplusReleases: 0,
+      promises: new Map(), pairs: new Map(), coverage: {}, futureCoverage: {}, excluded: false };
     assert.ok(s.roster.every(Boolean), `${team.name}: known roster identities`);
     assert.ok(s.roster.every(p => !remaining.has(p.id)), `${team.name}: CPU withdrawals normalized`);
     refresh(s);
     for (const room of ROOMS) s.coverage[room] = Math.min(s.rooms[room].length,
       s.slots[room].S ? s.slots[room].S + 1 : s.slots[room].support);
+    for (const room of ROOMS) s.futureCoverage[room] = Math.min(s.rooms[room].filter(p => p.E >= 2).length,
+      s.slots[room].S ? s.slots[room].S + 1 : s.slots[room].support);
+    cleanup(s, 0);
     const original = [...s.roster], expectedCuts = [];
     while (s.roster.length > 85) {
       const cuts = s.veterans.filter(c => s.rooms[c.p.room].length - 1 >= s.coverage[c.p.room])
@@ -139,27 +171,56 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
   const held = new Map(), tried = new Set(), offersByPlayer = new Map();
   let holdSequence = 0, tradeUps = 0, restoredReleases = 0;
   const currentU = (p, s) => utility(p, s.rooms[p.room], s.slots[p.room], pt.get(p.id), pair(p, s)).U;
+  // Surplus decisions for a roster, written without the planner's cleanup helper.
+  const surplusOf = (s, start, boardWith) => {
+    let roster = [...start];
+    const removed = [];
+    for (const room of ROOMS) {
+      for (;;) {
+        const members = roster.filter(p => p.room === room);
+        if (members.length <= s.slots[room].h.length) break;
+        const before = roomValue(members, s.slots[room]);
+        const p = members.filter(x => x.kind === "recruit" && x.teamIndex === 255 && x.schoolYear === "Freshman" && x.overall <= 58 && ["Normal", "College_Normal"].includes(x.dev) && !keep.has(x.index))
+          .sort((a, b) => a.overall - b.overall || (a.q2 ?? 0) - (b.q2 ?? 0) || byId(a, b)).find(x => {
+            const after = members.filter(y => y.id !== x.id), value = roomValue(after, s.slots[room]);
+            return after.filter(y => y.E >= 2).length >= s.futureCoverage[room] && !cmp(before.V1, value.V1) && !cmp(before.V2, value.V2);
+          });
+        if (!p) break;
+        removed.push(p.id); roster = roster.filter(x => x.id !== p.id);
+      }
+    }
+    // An earlier surplus release stays out if bringing him back would overflow.
+    for (const id of s.heldSurplus) {
+      if (roster.length <= 85 && boardWith(removed.length) >= 0) break;
+      if (!roster.some(x => x.id === id)) continue;
+      roster = roster.filter(x => x.id !== id); removed.push(id);
+    }
+    return { roster, removed };
+  };
   // Independently replays a school from its holds, newest hold first for returned releases.
   const rebuild = s => {
     const offers = [...held.values()].filter(h => h.offer.teamIndex === s.team.index).sort((a, b) => a.sequence - b.sequence);
     const out = new Set(offers.filter(h => h.cut).map(h => h.cut.id));
     const rosterNow = () => s.base.filter(p => !out.has(p.id)).concat(offers.map(h => h.offer.p));
+    const boardWith = surplus => s.team.boardCapacity - s.team.boardUsed + s.baseSurplus + surplus + offers.filter(x => x.cut?.kind === "recruit").length - offers.length;
+    const settled = () => surplusOf(s, rosterNow(), boardWith);
     s.promises = new Map(offers.map(h => [h.offer.p.id, h.promise]));
     for (let i = offers.length - 1; i >= 0; i--) {
       const h = offers[i];
-      if (!h.cut || rosterNow().length >= 85) continue;
-      const recruits = offers.filter(x => x.cut?.kind === "recruit").length;
-      if (h.cut.kind === "recruit" && s.team.boardCapacity - s.team.boardUsed + recruits - offers.length <= 0) continue;
+      if (!h.cut || settled().roster.length >= 85) continue;
+      if (h.cut.kind === "recruit" && boardWith(settled().removed.length) <= 0) continue;
       out.delete(h.cut.id);
-      if (violations(s, rosterNow()).length) { out.add(h.cut.id); continue; }
+      if (violations(s, settled().roster).length) { out.add(h.cut.id); continue; }
       h.cut = null; restoredReleases++;
     }
-    s.roster = rosterNow(); s.n = offers.length;
+    const result = settled();
+    s.roster = result.roster; s.heldSurplus = result.removed; s.n = offers.length;
     s.replacements = offers.filter(h => h.cut?.kind === "veteran").length;
-    s.recruitReleases = offers.filter(h => h.cut?.kind === "recruit").length;
+    s.surplusReleases = s.baseSurplus + result.removed.length;
+    s.recruitReleases = offers.filter(h => h.cut?.kind === "recruit").length + s.surplusReleases;
     refresh(s);
   };
-  for (const s of states) s.base = [...s.roster];
+  for (const s of states) { s.base = [...s.roster]; s.baseSurplus = s.surplusReleases; s.heldSurplus = []; }
 
   // touched: rooms the school's earlier offers this round add to or release from.
   const checkOffer = (stored, s, touched) => {
@@ -204,7 +265,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
       const s = byTeam.get(teamIndex);
       assert.equal(new Set(offers.map(o => o.p.room)).size, offers.length, `${s.team.name}: distinct reserved rooms`);
       assert.equal(new Set(offers.map(o => o.p.id)).size, offers.length, `${s.team.name}: distinct offers`);
-      const cap = freeBoard(s) <= 0 ? recruitMode(s) ? PARAMETERS.recruitReleaseLimit - s.recruitReleases : 0
+      const cap = freeBoard(s) <= 0 ? recruitMode(s) ? PARAMETERS.recruitReleaseLimit - contingentReleases(s) : 0
         : Math.min(freeBoard(s), s.roster.length < 85 ? 85 - s.roster.length : PARAMETERS.replacementLimit - s.replacements);
       if (freeBoard(s) <= 0) assert.ok(offers.every(o => o.cut?.kind === "recruit"), `${s.team.name}: full board offers release a recruit`);
       assert.ok(offers.length <= cap, `${s.team.name}: capacity reserved for every offer`);
@@ -238,7 +299,7 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
       assert.ok(s.roster.length <= 85, `${s.team.name}: roster cap`);
       assert.ok(freeBoard(s) >= 0, `${s.team.name}: board cap`);
       assert.ok(s.replacements <= PARAMETERS.replacementLimit, `${s.team.name}: replacement cap`);
-      assert.ok(s.recruitReleases <= PARAMETERS.recruitReleaseLimit, `${s.team.name}: recruit-release cap`);
+      assert.ok(contingentReleases(s) <= PARAMETERS.recruitReleaseLimit, `${s.team.name}: recruit-release cap`);
       for (const room of ROOMS) assert.ok(s.rooms[room].length >= s.coverage[room], `${s.team.name}: ${room} coverage`);
       assert.deepEqual(violations(s, s.roster), [], `${s.team.name}: original promises preserved`);
     }
@@ -261,11 +322,17 @@ export function verifyMarket(input, plan, { onProgress = () => {} } = {}) {
   assert.equal(plan.summary.tradeUps, tradeUps, "Trade-ups replay");
   assert.equal(plan.summary.restoredReleases, restoredReleases, "Returned releases replay");
   sameIds(remaining.keys(), plan.unplaced.map(p => p.id), "Remaining pool after replay");
+  for (const s of states) {
+    sameIds(plan.cuts.filter(c => c.teamIndex === s.team.index && c.reason === "surplus" && c.round !== 0).map(c => c.id), s.heldSurplus, `${s.team.name}: surplus releases at the final holds`);
+    stats.surplusReleases += s.heldSurplus.length;
+  }
+  assert.equal(stats.surplusReleases, plan.summary.surplusReleases, "Surplus summary");
   assert.equal(stats.baselineCuts + [...states].reduce((n, s) => n + s.replacements + s.recruitReleases, 0), plan.cuts.length, "Every cut accounted for");
   for (const s of states) {
     const t = plan.teams.find(t => t.teamIndex === s.team.index); assert.ok(t, "Every CPU school reported");
     sameIds(t.roster, s.roster.map(p => p.id), `${s.team.name}: final roster replay`);
     assert.equal(t.acquired, s.n); assert.equal(t.replacements, s.replacements); assert.equal(t.recruitReleases, s.recruitReleases);
+    assert.equal(t.surplusReleases, s.surplusReleases);
     assert.equal(t.boardUsed, s.team.boardCapacity - freeBoard(s)); assert.equal(!!t.excluded, s.excluded);
     assert.deepEqual(t.coverage, s.coverage); assert.deepEqual(violations(s, s.roster), []);
     for (const [id] of s.promises) {
