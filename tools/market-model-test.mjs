@@ -95,6 +95,15 @@ assert.equal(limited.summary.rounds, 1); assert.equal(limited.rounds[0].offers.l
 limited.rounds[0].offers.forEach((o, k) => { assert.equal(o.k, k); assert.equal(o.cut.position, o.position); });
 assert.equal(sevenCuts(10).summary.replacementCuts, 7, "A top program has more release room");
 
+// Another room can't take a center room below three or a tight end room below five; a swap at his own position can.
+for (const [position, floor] of [["C", 3], ["TE", 5]]) {
+  const hands = Array.from({ length: floor + 1 }, (_, i) => player(720 + i, position, 50, "veteran")), wide = player(730, "WR", 90), upgrade = player(731, position, 90);
+  const market = (room, signer) => { const others = unknowns.slice(0, 85 - room.length); return planTransferMarket(inputFor([school(1, [...others, ...room])], [...others, ...room, signer], [signer]), { seed: "room-floor" }); };
+  assert.equal(market(hands.slice(0, floor), wide).summary.placed, 0, `${position} at its floor is safe`);
+  assert.equal(market(hands, wide).summary.placed, 1, `${position} above its floor can give up one`);
+  assert.equal(market(hands.slice(0, floor), upgrade).cuts[0].position, position, `${position} swap`);
+}
+
 // A veteran rated 78+ can be released only for a player at his own position.
 const qbRoom = third => [player(710, "HB", 90, "veteran"), player(711, "HB", 85, "veteran"), player(712, "HB", third, "veteran")];
 const guardMarket = third => planTransferMarket(inputFor([school(1, [...unknowns.slice(0, 82), ...qbRoom(third)])],

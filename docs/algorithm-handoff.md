@@ -4,12 +4,11 @@ Updated November 1, 2026. Read `AGENTS.md` for save-safety rules.
 
 ## Status
 
-- **Code:** market **v1.10** is on branch `code/signing-day-school-strategy-10d0b1`, built on v1.8 and the sophomore draft lock from `claude/signing-day-work-ff8e49`. Main is still v1.7, and nothing has been pushed.
+- **Code:** market **v1.11** (not yet checked in-game) is on branch `code/signing-day-school-strategy-10d0b1`, built on v1.8 and the sophomore draft lock from `claude/signing-day-work-ff8e49`. Main is still v1.7, and nothing has been pushed.
 - **Team:** Tom's team in these dynasty saves is Kansas. Still pass it explicitly. Season 2 stage saves are in Tom's saves folder.
-- **Proven in-game:** v1.9 reached Preseason with all 1,354 signers at their planned schools (see "Results"). v1.7 did the same with 1,115.
-- **Not yet checked in-game:** v1.10 and the draft lock. Both are waiting on Tom:
-  1. **Market (v1.10):** run the transfer tool on a copy of `DYNASTY-SIGNINGDAYS2`, save, advance to Preseason, then compare with `test_runs/s2-comparison/scripts/preseason-compare-v17.mjs` (change its save names).
-  2. **Draft lock:** use the dashboard button on a copy of `DYNASTY-PLYRSLEAVING` and advance to Week 4. Malachi Toney (Miami), Dakorien Moore (Texas Tech) and Nate Sheppard (LSU) should still be on their teams. If they leave, try a copy of `DYNASTY-WEEK1`.
+- **Proven in-game:** v1.10 reached Preseason with all 1,361 signers at their planned schools (see "Results"). v1.9 did the same with 1,354 and v1.7 with 1,115.
+- **Not yet checked in-game:** the draft lock. It is waiting on Tom:
+  1. **Draft lock:** use the dashboard button on a copy of `DYNASTY-PLYRSLEAVING` and advance to Week 4. Malachi Toney (Miami), Dakorien Moore (Texas Tech) and Nate Sheppard (LSU) should still be on their teams. If they leave, try a copy of `DYNASTY-WEEK1`.
 
 **Working with Tom:** this is a personal tool, so keep testing light (see "Testing"). The GUI is a future item: don't change or check it unless Tom asks.
 
@@ -110,6 +109,14 @@ In v1.9, 19 QBs signed on depth-floor offers (6 rated 80+), and 27 QBs go unplac
 
 v1.10 against v1.9, same seed: 1,361 placed (1,354), 1,095 recruits released (1,092), 640 veteran releases (640), 19 QBs unplaced (27), no team short. Starting QB 78.2 / 80.1 / 83.2 / 86.9 (77.3 / 80.3 / 83.5 / 86.5). Starters are unchanged at 75.2 / 76.6 / 79.4 / 83.4, a slightly different measure from the table above. Of the 19 unplaced QBs, only Dylan Messerly 77 would start anywhere (Kent State, over a 76). The other 18 are rated 64-76 and would be backups, though rooms like Arkansas State's 78/59/59 remain. 293 signers land at a different school, 34 of them QBs. Eight non-QBs rated 73-79 drop out and seven rated 74-79 come in.
 
+v1.10 at Preseason, from reading `DYNASTY-S2V110TEST-AUTOSAVE` (2028): all 1,361 signers and all 254 85+ signers are at their planned schools. The game removed no returning players, and Kansas kept its 57 returners and 24 signees. Of 2,918 committed recruits it deleted three, the highest Jordan Shaw WR67. Of 198 unplaced transfers it placed 111, including 7 of 19 QBs, and deleted 87. Every CPU school is at 85, none under three QBs. Starters 76.8 / 78.0 / 81.1 / 85.2, starting QB 79.1 / 80.5 / 83.5 / 87.4.
+
+Tom edited the XP sliders before advancing this run to training results. Signing Day to Preseason, the same 7,019 players grew +2.11 in v1.7, +2.12 in v1.9 and +2.11 in v1.10, and no position moved beyond replay noise, so the edit had no detectable effect on offseason growth. In-season XP is untested.
+
+Thin C and TE rooms come mostly from class supply, not the market. Per team before the market / after it / base 2026: C 2.6 / 2.4 / 3.0, TE 4.4 / 3.9 / 6.1. The mod's Preseason, without this market, has C 2.6 and TE 4.5. The 2027 class of 4,100 has 79 C (1.9%), 184 TE, 185 DT and 777 WR, and its best 30 C average 67.8 against 77.5 at OT. Only 9 C transfers exist, and 8 sign. The market removes 25 C (mean about 60) and 103 TE, 62 of those surplus freshmen. Eight schools have one C at Preseason (base: none); the coverage floor can't cause that, so they had one before the market.
+
+v1.11, Tom's call: cleanup and releases for other rooms can't take a center room below three or a tight end room below five. Swaps at the same position are still allowed. Against v1.10: TE 3.9 to 4.3, C 2.4 to 2.5, 2-TE schools 12 to 7, 1-C schools still 11. Costs: 1,350 placed (1,361), 660 veteran releases (640), 22 veterans rated 75+ released for a transfer (19), top-tier starters 83.3 (83.4). A full stop on C and TE releases was also built and rejected: TE 4.6, C 2.6, but 1,340 placed, 685 veteran releases and rooms up to 8 TE.
+
 v1.9 at Preseason, from reading `DYNASTY-S2V19TEST-AUTOSAVE` (2028): all 1,354 signers and all 254 85+ signers are at their planned schools. The game removed no returning players, and Kansas kept its 57 returners and 24 signees. Of 2,921 committed recruits it deleted one, Dominique Ruth CB48. Of 205 unplaced transfers it placed 110 (mean 74), including 8 of 27 QBs, and deleted 94. Of 1,092 released recruits, 1,042 were deleted and 49 placed. Every CPU school is at 85, none under three QBs, 48 at exactly three. Starters 76.9 / 78.1 / 81.1 / 85.2 and starting QB 78.0 / 80.8 / 84.0 / 87.7, against 74.1 / 75.9 / 79.4 / 83.2 and 74.4 / 76.6 / 81.8 / 85.3 in `DYNASTY-KANSASPRE` (2026).
 
 Position quality from 2026 to 2028 (best N in the league, N = starter slots): C -1.5, TE +0.4, EDGE +1.1, CB +1.5, OT +1.7, OG and HB +2.0, DT +2.1, S +2.3, LB +2.5, QB +3.1, WR +3.2. Same players rated 65-79 grew over the two years: TE 5.1, EDGE 5.2, C 5.8, HB and OT 6.5, CB 6.8, OG 7.1, DT 7.2, S 7.5, LB 7.7, QB 8.4, WR 8.7 (survivors only). OL rated 90+ fell from 25 to 9, and none of the 25 is still rostered. Centers rated 85+ fell from 18 to 1. The market changes no ratings.
@@ -170,6 +177,6 @@ Git-ignored, so these may not exist in another checkout:
 - `test_runs/s2-comparison/` in the main checkout: comparison scripts and reports, including `reports/v1.7-preseason.json` and `reports/v1.8-signingdays2.json`. Scripts take the repo path as their first argument and read saves from temporary copies.
 - `test_runs/s2-v18-ltIVPa/` in this worktree: v1.8 Season 2 plan and saved copy.
 - `test_runs/s2-v19-uxpyOe/` in this worktree: v1.9 Season 2 plan and saved copy. `test_runs/s2-v19-F34c3m/` is the same build with a four-QB minimum.
-- `test_runs/s2-v110-eMMUzB/` in this worktree: v1.10 Season 2 plan and saved copy.
+- `test_runs/s2-v110-eMMUzB/` in this worktree: v1.10 Season 2 plan and saved copy. `test_runs/s2-v111-5Elsnl/` is the same for v1.11, and `test_runs/s2-v111-bT3ZTg/` for the rejected full stop.
 
 `origin` moved from `toms-transfer-tools` to `signing-day`, and the desktop app refuses its sync tool until Tom re-pins it under Help, Troubleshooting, Review Pinned Git Origins. Local main is ahead of `origin`.
