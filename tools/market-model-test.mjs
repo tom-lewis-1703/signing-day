@@ -180,9 +180,14 @@ assert.equal(depthFill.summary.placed, 1); assert.equal(depthFill.placements[0].
 assert.deepEqual(depthFill.diagnostics.qbFloor.short, []);
 const noFill = planTransferMarket(inputFor([school(1, threeStars)], [...threeStars, depthQB], [depthQB]), { seed: "qb-full" });
 assert.equal(noFill.summary.placed, 0, "No depth signing once the room has three");
-// The league is one QB short, so the lowest-rated QB can only sign with the short school.
+// The league is one QB short, so the lowest-rated QB waits for the short school; once the market settles he is free.
 const reserved = planTransferMarket(inputFor([school(1, threeStars), school(2, twoStars, { boardCapacity: 0 })], [...threeStars, depthQB], [depthQB]), { seed: "qb-reserve" });
-assert.equal(reserved.summary.placed, 0); assert.equal(reserved.unplaced[0].vetoCounts["QB reserved"], 1); assert.deepEqual(reserved.diagnostics.qbFloor.reserved, [depthQB.index]);
+assert.equal(reserved.summary.placed, 0); assert.equal(reserved.unplaced[0].vetoCounts["QB reserved"], undefined); assert.deepEqual(reserved.diagnostics.qbFloor.reserved, [depthQB.index]);
+// A lifted reservee who would start signs, and a new starting QB skips the per-signing cost.
+const weakQBs = Array.from({ length: 3 }, (_, i) => player(1060 + i, "QB", 70, "veteran")), lateQB = player(1063, "QB", 80), earlyWR = player(1064, "WR", 90);
+const lifted = planTransferMarket(inputFor([school(1, weakQBs), school(2, twoStars, { boardCapacity: 0 })], [...weakQBs, ...twoStars, lateQB, earlyWR], [lateQB, earlyWR]), { seed: "qb-lift" });
+const liftedQB = lifted.placements.find(p => p.index === lateQB.index);
+assert.ok(liftedQB, "A reserved QB signs once the reserve lifts"); assert.ok(liftedQB.n >= 1); near(liftedQB.cost, 4);
 
 // A bigger program pays for talent past its immediate need; small schools barely do.
 near(talentPremium({ prestige: 10 }, { overall: 85 }), 20); near(talentPremium({ prestige: 1 }, { overall: 85 }), 2); near(talentPremium({ prestige: 10 }, { overall: 70 }), 0);
